@@ -109,6 +109,7 @@ header:
 
   license-location-threshold: 130
 
+# 对于dependency的头检查，ci里边声明了
 dependency:
   files:
     - pom.xml

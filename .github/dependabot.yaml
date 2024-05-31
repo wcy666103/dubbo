@@ -1,6 +1,8 @@
+# dependabot.yaml 是一个固定位置，必须是该目录下，固定名字的文件
+
 version: 2
 updates:
-
+# 有 npm maven
   - package-ecosystem: "maven"
     directory: "/"
     open-pull-requests-limit: 20

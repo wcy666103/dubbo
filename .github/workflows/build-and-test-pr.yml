@@ -30,7 +30,9 @@ jobs:
           java-version: 21
           distribution: zulu
       - name: Check if code aligns with code style
+#        下边会根据这个输出判断检查是否成功
         id: check
+#        调用这个maven 插件来检查
         run: mvn --log-file mvn.log spotless:check
         continue-on-error: true
       - name: Upload checkstyle result
@@ -47,6 +49,7 @@ jobs:
         run: |
           echo "## :negative_squared_cross_mark: Formatting issues found!" >> $GITHUB_STEP_SUMMARY
           echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+#          通过这样的方式来查找到错误的代码
           cat mvn.log | grep "ERROR" | sed 's/Check if code needs formatting    Check if code aligns with code style   [0-9A-Z:.-]\+//' | sed 's/\[ERROR] //' | head -n -11 >> $GITHUB_STEP_SUMMARY
           echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
           echo "Please run \`mvn spotless:apply\` to fix the formatting issues." >> $GITHUB_STEP_SUMMARY
@@ -117,6 +120,8 @@ jobs:
           ./mvnw --batch-mode --no-snapshot-updates -e --no-transfer-progress --fail-fast clean source:jar install -Pjacoco,checkstyle -Dmaven.wagon.httpconnectionManager.ttlSeconds=120 -Dmaven.wagon.http.retryHandler.count=5 -Dmaven.test.skip=true -Dmaven.test.skip.exec=true -DembeddedZookeeperPath=${{ github.workspace }}/.tmp/zookeeper
       - name: "Pack class result"
         run: |
+#          Bash shell 命令，用于启用 ** 的递归匹配功能。在 Bash 中，** 用于匹配任意数量的目录和子目录。
+#               这个sh运行之后才可以使用 ** 通配符，可以将这个加入到.bashrc中
           shopt -s globstar
           zip ${{ github.workspace }}/class.zip **/target/classes/* -r
       - name: "Upload class result"
@@ -125,6 +130,7 @@ jobs:
           name: "class-file"
           path: ${{ github.workspace }}/class.zip
       - name: "Pack checkstyle file if failure"
+#        只有当工作流中的前一个步骤失败时，才执行此步骤。 就是 check-format 工作流
         if: failure()
         run: zip ${{ github.workspace }}/checkstyle.zip *checkstyle* -r
       - name: "Upload checkstyle file if failure"
@@ -236,6 +242,7 @@ jobs:
         run: |
           curl "http://dubbo-vm.apache.org:8000/token?workflow_id=${{ github.run_id }}" -o ${{ github.workspace }}/.tmp/encrypted-sonarcloud-token
           openssl rsautl -decrypt -in ${{ github.workspace }}/.tmp/encrypted-sonarcloud-token -out ${{ github.workspace }}/.tmp/decrypted-sonarcloud-token -inkey ${{ github.workspace }}/.tmp/rsa/rsa_private.pem
+#          Sonar  n.声呐
       - name: "Test with Maven with SonarCloud Scan"
         if: ${{ github.repository == 'apache/dubbo' }}
         timeout-minutes: 90
@@ -256,10 +263,12 @@ jobs:
           name: coverage-result
           path: "**/target/site/**/jacoco.xml"
 
+# 准备 samples库的测试
   samples-test-prepare:
     needs: check-format
     runs-on: ubuntu-latest
     env:
+#      设置了新的 job数量
       JOB_COUNT: 3
     steps:
       - uses: actions/checkout@v3

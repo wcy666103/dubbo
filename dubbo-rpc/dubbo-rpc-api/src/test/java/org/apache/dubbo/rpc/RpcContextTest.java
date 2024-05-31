@@ -33,7 +33,12 @@ class RpcContextTest {
     @Test
     void testGetContext() {
 
+        RpcContext.getContext().setAttachment("demo", "demo002");
+        RpcContext.getContext().setAttachment("demo", "demo001");
+
         RpcContext rpcContext = RpcContext.getClientAttachment();
+        System.out.println("rpcContext.getAttachment(\"demo\") = " + rpcContext.getAttachment("demo"));
+
         Assertions.assertNotNull(rpcContext);
 
         RpcContext.removeClientAttachment();
