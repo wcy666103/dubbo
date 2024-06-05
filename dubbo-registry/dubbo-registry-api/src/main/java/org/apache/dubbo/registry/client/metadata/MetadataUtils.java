@@ -166,6 +166,13 @@ public class MetadataUtils {
         return new ProxyHolder(consumerModel, metadataService, internalModel);
     }
 
+    /**
+     * 从给定实例中获取 metadata
+     * @param revision
+     * @param instances
+     * @param metadataReport
+     * @return
+     */
     public static MetadataInfo getRemoteMetadata(
             String revision, List<ServiceInstance> instances, MetadataReport metadataReport) {
         ServiceInstance instance = selectInstance(instances);

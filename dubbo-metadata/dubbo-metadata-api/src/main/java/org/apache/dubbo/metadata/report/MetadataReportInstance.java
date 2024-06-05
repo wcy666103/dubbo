@@ -41,11 +41,14 @@ import static org.apache.dubbo.metadata.report.support.Constants.METADATA_REPORT
 
 /**
  * Repository of MetadataReport instances that can talk to remote metadata server.
+ * 可以与远程元数据服务器通信的MetadataReport实例存储库。
  *
  * MetadataReport instances are initiated during the beginning of deployer.start() and used by components that
  * need to interact with metadata server.
+ * MetadataReport实例在deploy .start()开始时启动，由以下组件使用需要与元数据服务器交互。
  *
  * If multiple metadata reports and registries need to be declared, it is recommended to group each two metadata report and registry together by giving them the same id:
+ * 如果需要声明多个元数据报告和注册表，建议使用相同的id将每个元数据报告和注册表分组在一起:
  * <dubbo:registry id=demo1 address="registry://"/>
  * <dubbo:metadata id=demo1 address="metadata://"/>
  *

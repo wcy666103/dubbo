@@ -218,7 +218,7 @@ public class DefaultApplicationDeployer extends AbstractDeployer<ApplicationMode
             }
             onInitialize();
 
-            // register shutdown hook
+            // register shutdown hook  在这里进行 shutdown hook的注册
             registerShutdownHook();
 
             startConfigCenter();
@@ -231,10 +231,10 @@ public class DefaultApplicationDeployer extends AbstractDeployer<ApplicationMode
 
             initMetricsService();
 
-            // @since 3.2.3
+            // @since 3.2.3 可观测进行注册
             initObservationRegistry();
 
-            // @since 2.7.8
+            // @since 2.7.8  元数据中心移动
             startMetadataCenter();
 
             initialized = true;

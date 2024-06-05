@@ -1,0 +1,5 @@
+# Serialization
+
+该类没有指定默认的序列化实现方式，但是在 support/DefaultSerializationSelector.java类中提供了 getordefalut方法
+
+其他使用到序列话的模块（如 remoting）都依赖了这个serialization-api模块，然后会使用这个类进行序列化实现的获取，或者返回默认序列化

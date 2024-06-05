@@ -69,6 +69,7 @@ public class ZookeeperMetadataReport extends AbstractMetadataReport {
 
     public ZookeeperMetadataReport(URL url, ZookeeperTransporter zookeeperTransporter) {
         super(url);
+//        todo 这个地方应该说的是 metadata吧？
         if (url.isAnyHost()) {
             throw new IllegalStateException("registry address == null");
         }

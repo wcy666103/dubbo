@@ -49,6 +49,7 @@ import static org.apache.dubbo.common.utils.CollectionUtils.isEmpty;
 
 /**
  * Implementation providing remote RPC service to facilitate the query of metadata information.
+ * 实现提供远程RPC服务，方便查询元数据信息。
  */
 public class MetadataServiceDelegation implements MetadataService, Disposable {
     ErrorTypeAwareLogger logger = LoggerFactory.getErrorTypeAwareLogger(getClass());

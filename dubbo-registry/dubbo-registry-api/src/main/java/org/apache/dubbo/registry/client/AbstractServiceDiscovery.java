@@ -61,6 +61,7 @@ import static org.apache.dubbo.registry.client.metadata.ServiceInstanceMetadataU
 
 /**
  * Each service discovery is bond to one application.
+ * 这是专门用来处理元数据的注册的
  */
 public abstract class AbstractServiceDiscovery implements ServiceDiscovery {
     private final ErrorTypeAwareLogger logger = LoggerFactory.getErrorTypeAwareLogger(AbstractServiceDiscovery.class);
@@ -216,6 +217,11 @@ public abstract class AbstractServiceDiscovery implements ServiceDiscovery {
         return this.metadataInfo;
     }
 
+    /**
+     * 根据版本号来进行元数据的查找
+     * @param revision
+     * @return
+     */
     @Override
     public MetadataInfo getLocalMetadata(String revision) {
         MetadataInfoStat metadataInfoStat = metadataInfos.get(revision);
@@ -228,6 +234,7 @@ public abstract class AbstractServiceDiscovery implements ServiceDiscovery {
 
     @Override
     public MetadataInfo getRemoteMetadata(String revision, List<ServiceInstance> instances) {
+//        就像spark中的那些 manager一样，通过这个manager来进行远程数据的获取（跟 p2p的广播数据获取差不多，只要是搞懂这个逻辑了可以尝试进行优化）
         MetadataInfo metadata = metaCacheManager.get(revision);
 
         if (metadata != null && metadata != MetadataInfo.EMPTY) {
@@ -239,6 +246,7 @@ public abstract class AbstractServiceDiscovery implements ServiceDiscovery {
             return metadata;
         }
 
+//        会用锁对这个东西进行锁住（能否将锁的粒度变细？）
         synchronized (metaCacheManager) {
             // try to load metadata from remote.
             int triedTimes = 0;
@@ -260,6 +268,7 @@ public abstract class AbstractServiceDiscovery implements ServiceDiscovery {
                     }
                     triedTimes++;
                     try {
+//                        很多地方都是，每次重试都是要 sleep一段时间的
                         Thread.sleep(1000);
                     } catch (InterruptedException e) {
                     }

@@ -20,6 +20,9 @@ import org.apache.dubbo.common.utils.SystemPropertyConfigUtils;
 
 import static org.apache.dubbo.common.constants.CommonConstants.DubboProperty.DUBBO_DEFAULT_REMOTING_SERIALIZATION_PROPERTY;
 
+/**
+ * 在这里 定义了默认的序列化框架，其他模块使用的时候会调用这个方法的getordefalut方法
+ */
 public class DefaultSerializationSelector {
 
     private static final String DEFAULT_REMOTING_SERIALIZATION_PROPERTY = "hessian2";

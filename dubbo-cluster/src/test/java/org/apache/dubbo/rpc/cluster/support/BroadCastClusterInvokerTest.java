@@ -118,6 +118,9 @@ class BroadCastClusterInvokerTest {
     }
 }
 
+/**
+ * 借鉴给 samples 库进行使用
+ */
 class MockInvoker implements Invoker<DemoService> {
     private static int count = 0;
     private URL url = URL.valueOf("test://127.0.0.1:8080/test");

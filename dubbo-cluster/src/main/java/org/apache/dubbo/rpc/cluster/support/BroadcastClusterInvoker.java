@@ -49,13 +49,23 @@ public class BroadcastClusterInvoker<T> extends AbstractClusterInvoker<T> {
         super(directory);
     }
 
+    /**
+     * 要么报错，要么返回最后一个调用的result
+     * @param invocation
+     * @param invokers
+     * @param loadbalance
+     * @return
+     * @throws RpcException
+     */
     @Override
     @SuppressWarnings({"unchecked", "rawtypes"})
     public Result doInvoke(final Invocation invocation, List<Invoker<T>> invokers, LoadBalance loadbalance)
             throws RpcException {
+//        拿到这次rpc请求的上下文对象
         RpcContext.getServiceContext().setInvokers((List) invokers);
         RpcException exception = null;
         Result result = null;
+//        getConsumerUrl  拿到消费者端的 url，以供下边获取一些 参数
         URL url = getUrl();
         // The value range of broadcast.fail.threshold must be 0～100.
         // 100 means that an exception will be thrown last, and 0 means that as long as an exception occurs, it will be
@@ -75,6 +85,7 @@ public class BroadcastClusterInvoker<T> extends AbstractClusterInvoker<T> {
         int failIndex = 0;
         for (int i = 0, invokersSize = invokers.size(); i < invokersSize; i++) {
             Invoker<T> invoker = invokers.get(i);
+//            因为是多个 rpc请求，所以每次都是需要 restore一下
             RpcContext.RestoreContext restoreContext = new RpcContext.RestoreContext();
             try {
                 RpcInvocation subInvocation = new RpcInvocation(
