@@ -25,6 +25,9 @@ import org.apache.dubbo.rpc.cluster.router.RouterResult;
 import java.util.List;
 
 /**
+ * 路由器的抽象类，包括优先级、route方法，等，感觉跟StateRouter接口差不多
+ * 不知道区别在哪
+ * 该接口定义的比较早，可能是为了兼容？？
  * Router. (SPI, Prototype, ThreadSafe)
  * <p>
  * <a href="http://en.wikipedia.org/wiki/Routing">Routing</a>
@@ -34,6 +37,7 @@ import java.util.List;
  */
 public interface Router extends Comparable<Router> {
 
+//    默认优先级？
     int DEFAULT_PRIORITY = Integer.MAX_VALUE;
 
     /**
@@ -45,7 +49,7 @@ public interface Router extends Comparable<Router> {
 
     /**
      * Filter invokers with current routing rule and only return the invokers that comply with the rule.
-     *
+     * 使用当前路由规则筛选调用者，只返回符合规则的调用者。
      * @param invokers   invoker list
      * @param url        refer url
      * @param invocation invocation
@@ -60,6 +64,7 @@ public interface Router extends Comparable<Router> {
     /**
      * ** This method can return the state of whether routerChain needed to continue route. **
      * Filter invokers with current routing rule and only return the invokers that comply with the rule.
+     * ** 该方法可以返回路由器链是否需要继续路由的状态。** 使用当前路由规则筛选调用程序，并仅返回符合规则的调用程序
      *
      * @param invokers   invoker list
      * @param url        refer url
@@ -77,6 +82,8 @@ public interface Router extends Comparable<Router> {
      * Notify the router the invoker list. Invoker list may change from time to time. This method gives the router a
      * chance to prepare before {@link Router#route(List, URL, Invocation)} gets called.
      *
+     * 通知路由器调用程序列表。调用程序列表可能会不时更改。此方法使路由器有机会在被调用之前 route(List, URL, Invocation) 进行准备。
+     * 就是当 Directory 对象有更新的时候哦，会调用这个 notify方法
      * @param invokers invoker list
      * @param <T>      invoker's type
      */
@@ -85,6 +92,8 @@ public interface Router extends Comparable<Router> {
     /**
      * To decide whether this router need to execute every time an RPC comes or should only execute when addresses or
      * rule change.
+     *
+     * 确定此路由器是否需要在每次 RPC 到来时执行，还是仅在地址或规则更改时执行。
      *
      * @return true if the router need to execute every time.
      */
@@ -95,12 +104,16 @@ public interface Router extends Comparable<Router> {
      * means the {@link #route(List, URL, Invocation)} would be empty. Most of time, most router implementation would
      * default this value to false.
      *
+     * 决定当调用程序都不能匹配路由器规则时，此路由器是否应生效，这意味着该 route(List, URL, Invocation) 规则将为空。大多数情况下，大多数路由器实现会将此值默认为 false。
+     * 返回：
+     * 如果调用程序均不与当前路由器匹配，则执行 true
      * @return true to execute if none of invokers matches the current router
      */
     boolean isForce();
 
     /**
      * Router's priority, used to sort routers.
+     * 路由器的优先级，用于对路由器进行排序
      *
      * @return router's priority
      */
@@ -110,6 +123,11 @@ public interface Router extends Comparable<Router> {
         // do nothing by default
     }
 
+    /**
+     * 根据定义的  priority 对router进行排序
+     * @param o the object to be compared.
+     * @return
+     */
     @Override
     default int compareTo(Router o) {
         if (o == null) {

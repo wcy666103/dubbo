@@ -52,17 +52,20 @@ public class SingleRouterChain<T> {
 
     /**
      * full list of addresses from registry, classified by method name.
+     * 注册表中的完整地址列表，按方法名称分类
      */
     private volatile BitList<Invoker<T>> invokers = BitList.emptyList();
 
     /**
      * containing all routers, reconstruct every time 'route://' urls change.
+     * 包含所有路由器，每次“route://”URL 更改时都会重建
      */
     private volatile List<Router> routers = Collections.emptyList();
 
     /**
      * Fixed router instances: ConfigConditionRouter, TagRouter, e.g.,
      * the rule for each instance may change but the instance will never delete or recreate.
+     * 固定路由器实例：ConfigConditionRouter、TagRouter，例如，每个实例的规则可能会更改，但实例永远不会删除或重新创建。
      */
     private volatile List<Router> builtinRouters = Collections.emptyList();
 
@@ -72,6 +75,7 @@ public class SingleRouterChain<T> {
 
     /**
      * Should continue route if current router's result is empty
+     * 如果当前路由器的结果为空，则应继续路由
      */
     private final boolean shouldFailFast;
 
@@ -92,6 +96,10 @@ public class SingleRouterChain<T> {
         this.routerSnapshotSwitcher = routerSnapshotSwitcher;
     }
 
+    /**
+     * 构建链条，里边其实是一个链条
+     * @param stateRouters
+     */
     private void initWithStateRouters(List<StateRouter<T>> stateRouters) {
         StateRouter<T> stateRouter = TailStateRouter.getInstance();
         for (int i = stateRouters.size() - 1; i >= 0; i--) {
@@ -106,6 +114,7 @@ public class SingleRouterChain<T> {
     /**
      * the resident routers must being initialized before address notification.
      * only for ut
+     * 在地址通知之前，必须初始化驻留路由器。仅适用于 UT
      */
     public void initWithRouters(List<Router> builtinRouters) {
         this.builtinRouters = builtinRouters;
@@ -117,7 +126,8 @@ public class SingleRouterChain<T> {
      * keep the routers up to date, that is, each time router URLs changes, we should update the routers list, only
      * keep the builtinRouters which are available all the time and the latest notified routers which are generated
      * from URLs.
-     *
+     * 如果我们在 2.7.0 之前的版本中使用 route:// 协议，每个 URL 都会生成一个 Router 实例，因此我们应该让路由器保持最新状态，
+     * 即每次路由器 URL 更改时，我们都应该更新路由器列表，只保留一直可用的 builtinRouters 和从 URL 生成的最新通知路由器。
      * @param routers routers from 'router://' rules in 2.6.x or before.
      */
     public void addRouters(List<Router> routers) {
@@ -136,7 +146,9 @@ public class SingleRouterChain<T> {
         return headStateRouter;
     }
 
+//    实际的进行过滤的route
     public List<Invoker<T>> route(URL url, BitList<Invoker<T>> availableInvokers, Invocation invocation) {
+//        因为变换了，报错
         if (invokers.getOriginList() != availableInvokers.getOriginList()) {
             logger.error(
                     INTERNAL_ERROR,
@@ -146,6 +158,7 @@ public class SingleRouterChain<T> {
                     "Reject to route, because the invokers has changed.");
             throw new IllegalStateException("reject to route, because the invokers has changed.");
         }
+//        打印快照 QOS是需要用的
         if (RpcContext.getServiceContext().isNeedPrintRouterSnapshot()) {
             return routeAndPrint(url, availableInvokers, invocation);
         } else {

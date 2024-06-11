@@ -22,6 +22,10 @@ import org.apache.dubbo.rpc.Invoker;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+/**
+ * 只有 MockInvokersSelector这个类使用到了该类
+ * @param <T>
+ */
 public class RouterGroupingState<T> {
     private final String routerName;
     private final int total;

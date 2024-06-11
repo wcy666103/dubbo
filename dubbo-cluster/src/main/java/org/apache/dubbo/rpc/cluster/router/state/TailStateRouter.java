@@ -23,6 +23,11 @@ import org.apache.dubbo.rpc.Invoker;
 import org.apache.dubbo.rpc.RpcException;
 import org.apache.dubbo.rpc.cluster.router.RouterSnapshotNode;
 
+/**
+ * 构建 chain 的最后一个节点
+ * 没有任何实际功能
+ * @param <T>
+ */
 public class TailStateRouter<T> implements StateRouter<T> {
     private static final TailStateRouter INSTANCE = new TailStateRouter();
 

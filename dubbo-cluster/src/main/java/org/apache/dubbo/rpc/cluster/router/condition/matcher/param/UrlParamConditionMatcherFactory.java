@@ -21,6 +21,7 @@ import org.apache.dubbo.rpc.cluster.router.condition.matcher.ConditionMatcher;
 import org.apache.dubbo.rpc.cluster.router.condition.matcher.ConditionMatcherFactory;
 import org.apache.dubbo.rpc.model.ModuleModel;
 
+//确保这是最后一个正在执行的匹配器。
 // Make sure this is the last matcher being executed.
 @Activate(order = Integer.MAX_VALUE)
 public class UrlParamConditionMatcherFactory implements ConditionMatcherFactory {

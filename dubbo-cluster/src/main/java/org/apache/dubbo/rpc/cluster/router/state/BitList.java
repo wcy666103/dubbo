@@ -31,6 +31,7 @@ import java.util.NoSuchElementException;
 import java.util.concurrent.ThreadLocalRandom;
 
 /**
+ * 工具类，是为了做缓存使用的
  * BitList based on BitMap implementation.
  * BitList is consists of `originList`, `rootSet` and `tailList`.
  * <p>
@@ -41,6 +42,9 @@ import java.util.concurrent.ThreadLocalRandom;
  * tailList: An additional list for BitList. Worked when adding totally new
  * elements to list. These elements will be appended to the last
  * of the BitList.
+ * 基于 BitMap 实现的 BitList。BitList 由 'originList'、'rootSet' 和 'tailList' 组成。
+ * originList：列表的初始元素。此列表不会在修改操作中更改（期望全部清除）。rootSet：用于存储 originList 索引的 bitMap 仍然存在。大多数修改操作都是在此位图上操作的。
+ * tailList：BitList 的附加列表。在向列表中添加全新元素时有效。这些元素将追加到 BitList 的最后一个。
  * <p>
  * An example of BitList:
  * originList:  A  B  C  D  E             (5 elements)

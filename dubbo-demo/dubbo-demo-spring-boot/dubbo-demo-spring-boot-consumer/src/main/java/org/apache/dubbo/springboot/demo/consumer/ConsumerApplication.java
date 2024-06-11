@@ -25,6 +25,8 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.stereotype.Service;
 
+import java.util.concurrent.CountDownLatch;
+
 @SpringBootApplication
 @Service
 @EnableDubbo
@@ -33,12 +35,13 @@ public class ConsumerApplication {
     @DubboReference
     private DemoService demoService;
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws InterruptedException {
 
         ConfigurableApplicationContext context = SpringApplication.run(ConsumerApplication.class, args);
         ConsumerApplication application = context.getBean(ConsumerApplication.class);
         String result = application.doSayHello("world");
         System.out.println("result: " + result);
+        new CountDownLatch(1).await();
     }
 
     public String doSayHello(String name) {

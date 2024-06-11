@@ -25,6 +25,7 @@ import org.apache.dubbo.rpc.cluster.Directory;
 import org.apache.dubbo.rpc.cluster.router.RouterSnapshotNode;
 
 /**
+ * 比Router接口少了优先级，并且感觉都是用的StateRouter，不知道Router接口存在的意义
  * State Router. (SPI, Prototype, ThreadSafe)
  * <p>
  * <a href="http://en.wikipedia.org/wiki/Routing">Routing</a>
@@ -48,6 +49,7 @@ public interface StateRouter<T> {
     /***
      * Filter invokers with current routing rule and only return the invokers that comply with the rule.
      * Caching address lists in BitMap mode improves routing performance.
+     * 使用当前路由规则过滤调用程序，并仅返回符合规则的调用程序。在 BitMap 模式下缓存地址列表可提高路由性能。
      * @param invokers  invoker bit list
      * @param url        refer url
      * @param invocation invocation
@@ -66,7 +68,7 @@ public interface StateRouter<T> {
     /**
      * To decide whether this router need to execute every time an RPC comes or should only execute when addresses or
      * rule change.
-     *
+     * 确定此路由器是否需要在每次 RPC 到来时执行，还是仅在地址或规则更改时执行。
      * @return true if the router need to execute every time.
      */
     boolean isRuntime();
@@ -91,7 +93,7 @@ public interface StateRouter<T> {
 
     /**
      * Build Router's Current State Snapshot for QoS
-     *
+     * 为 QoS 构建路由器的当前状态快照
      * @return Current State
      */
     String buildSnapshot();
@@ -102,7 +104,7 @@ public interface StateRouter<T> {
 
     /**
      * Notify next router node to current router.
-     *
+     * 将下一个路由器节点通知到当前路由器。
      * @param nextRouter next router node
      */
     void setNextRouter(StateRouter<T> nextRouter);

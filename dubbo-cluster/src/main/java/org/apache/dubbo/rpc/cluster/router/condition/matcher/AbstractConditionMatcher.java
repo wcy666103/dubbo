@@ -36,6 +36,9 @@ import static org.apache.dubbo.common.constants.LoggerCodeConstants.CLUSTER_FAIL
 /**
  * The abstract implementation of ConditionMatcher, records the match and mismatch patterns of this matcher while at the same time
  * provides the common match logics.
+ *
+ * ConditionMatcher 的抽象实现，记录了该匹配器的匹配和不匹配模式，同时提供了通用的匹配逻辑。
+ * 其他几个具体的Matcher都是继承自这个
  */
 public abstract class AbstractConditionMatcher implements ConditionMatcher {
     public static final ErrorTypeAwareLogger logger =
@@ -44,19 +47,25 @@ public abstract class AbstractConditionMatcher implements ConditionMatcher {
     final Set<String> matches = new HashSet<>();
     final Set<String> mismatches = new HashSet<>();
     private final ModuleModel model;
+
+//    ValuePattern的matcher只是 提供 shouldmatch  match方法返回的都是boolean类型对象
     private final List<ValuePattern> valueMatchers;
     protected final String key;
 
     public AbstractConditionMatcher(String key, ModuleModel model) {
+//        这个key 就是 rul
         this.key = key;
         this.model = model;
+//        通过spi给 range和wildcard都加载进来
         this.valueMatchers = model.getExtensionLoader(ValuePattern.class).getActivateExtensions();
     }
 
+//    拿到样品只从url中  拿到 调用的方法名
     public static String getSampleValueFromUrl(
+//            这个sample应该是url转成的 一个 参数key:value数组  invocation n调用
             String conditionKey, Map<String, String> sample, URL param, Invocation invocation) {
         String sampleValue;
-        // get real invoked method name from invocation
+        // get real invoked method name from invocation  方法名  这个条件是不是多余了
         if (invocation != null && (METHOD_KEY.equals(conditionKey) || METHODS_KEY.equals(conditionKey))) {
             sampleValue = RpcUtils.getMethodName(invocation);
         } else {
@@ -66,14 +75,18 @@ public abstract class AbstractConditionMatcher implements ConditionMatcher {
         return sampleValue;
     }
 
+//    是否匹配
     public boolean isMatch(Map<String, String> sample, URL param, Invocation invocation, boolean isWhenCondition) {
+//        到具体的不同实现中去，调用该实现的对应方法
         String value = getValue(sample, param, invocation);
         if (value == null) {
+//            如果基于匹配器类型的url、调用或附件中没有key
             // if key does not present in whichever of url, invocation or attachment based on the matcher type, then
             // return false.
             return false;
         }
 
+//        具体的matcher是提取规则
         if (!matches.isEmpty() && mismatches.isEmpty()) {
             for (String match : matches) {
                 if (doPatternMatch(match, value, param, invocation, isWhenCondition)) {
@@ -119,7 +132,7 @@ public abstract class AbstractConditionMatcher implements ConditionMatcher {
         return mismatches;
     }
 
-    // range, equal or other methods
+    // range, equal or other methods  范围、相等或其他方法
     protected boolean doPatternMatch(
             String pattern, String value, URL url, Invocation invocation, boolean isWhenCondition) {
         for (ValuePattern valueMatcher : valueMatchers) {
@@ -136,6 +149,7 @@ public abstract class AbstractConditionMatcher implements ConditionMatcher {
                 "There should at least has one ValueMatcher instance that applies to all patterns, will force to use wildcard matcher now.");
 
         ValuePattern paramValueMatcher =
+//                n. 通配符
                 model.getExtensionLoader(ValuePattern.class).getExtension("wildcard");
         return paramValueMatcher.match(pattern, value, url, invocation, isWhenCondition);
     }

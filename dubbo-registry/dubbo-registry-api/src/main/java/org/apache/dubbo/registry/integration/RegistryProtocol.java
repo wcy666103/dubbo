@@ -636,6 +636,7 @@ public class RegistryProtocol implements Protocol, ScopeModelAware {
             directory.setRegisteredConsumerUrl(urlToRegistry);
             registry.register(directory.getRegisteredConsumerUrl());
         }
+//        在这里进行 chain的构建
         directory.buildRouterChain(urlToRegistry);
         directory.subscribe(toSubscribeUrl(urlToRegistry));
 

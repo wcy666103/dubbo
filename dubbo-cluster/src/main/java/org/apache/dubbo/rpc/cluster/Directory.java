@@ -29,7 +29,7 @@ import java.util.List;
  * Directory. (SPI, Prototype, ThreadSafe)
  * <p>
  * <a href="http://en.wikipedia.org/wiki/Directory_service">Directory Service</a>
- *
+ * 目录服务或名称服务将网络资源的名称映射到它们各自的网络地址。它是一种共享信息基础架构
  * @see org.apache.dubbo.rpc.cluster.Cluster#join(Directory)
  */
 public interface Directory<T> extends Node {
@@ -44,7 +44,7 @@ public interface Directory<T> extends Node {
     /**
      * list invokers.
      * filtered by invocation
-     *
+     * 过滤过的
      * @return invokers
      */
     List<Invoker<T>> list(Invocation invocation) throws RpcException;
@@ -52,6 +52,7 @@ public interface Directory<T> extends Node {
     /**
      * list invokers
      * include all invokers from registry
+     * 所有的包括没有过滤的
      */
     List<Invoker<T>> getAllInvokers();
 
@@ -69,6 +70,7 @@ public interface Directory<T> extends Node {
 
     void discordAddresses();
 
+//    在这里绑定了 路由器链
     RouterChain<T> getRouterChain();
 
     /**

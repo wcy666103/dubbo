@@ -21,6 +21,10 @@ import org.apache.dubbo.common.constants.CommonConstants;
 import org.apache.dubbo.common.extension.Adaptive;
 import org.apache.dubbo.common.extension.SPI;
 
+/**
+ * 就是为了生成 StateRouter使用的
+ * 该模块中所有Factory的父类
+ */
 @SPI
 public interface StateRouterFactory {
     /**

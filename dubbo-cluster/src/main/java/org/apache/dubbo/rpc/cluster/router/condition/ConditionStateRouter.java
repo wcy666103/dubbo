@@ -49,6 +49,11 @@ import static org.apache.dubbo.rpc.cluster.Constants.RULE_KEY;
 import static org.apache.dubbo.rpc.cluster.Constants.RUNTIME_KEY;
 
 /**
+ * 继承自 AbstractStateRouter，其中的matchWhen和matchThen是自己根据自己特点加入的方法
+ *
+ * 这里边有condition对应的各种 matcherFactories，包括 Attachment、argument、urlparam
+ * parseRule是关键方法，根据string来解析使用哪个matcher
+ *
  * Condition Router directs traffics matching the 'when condition' to a particular address subset determined by the 'then condition'.
  * One typical condition rule is like below, with
  * 1. the 'when condition' on the left side of '=>' contains matching rule like 'method=sayHello' and 'method=sayHi'
@@ -68,11 +73,19 @@ import static org.apache.dubbo.rpc.cluster.Constants.RUNTIME_KEY;
  * - method=sayHello => region=hangzhou
  * - method=sayHi => address=*:20881
  * ...
+ * 条件路由器将与“当条件”匹配的流量定向到由“然后条件”确定的特定地址子集。
+ * 一个典型的条件规则如下所示，其中
+ * 1.'=>' 左侧的 'when condition' 包含匹配规则，如 'method=sayHello' 和 'method=sayHi'
+ * 2.“=>”右侧的“then condition”包含匹配规则，如“region=hangzhou”和“address=*：20881”
+ * 默认情况下，条件路由器支持匹配规则，如 'foo=bar'、'foo=bar*'、'arguments[0]=bar'、'attachments[foo]=bar'、'attachments[foo]=1~100' 等。
+ * 通过扩展 ConditionMatcherFactory 和 ValuePattern
+ * ---范围： 服务力： true 运行时： true 启用： true key： org.apache.dubbo.samples.governance.api.Demo服务条件： - method=sayHello => region=hangzhou - method=sayHi => address=*：20881 ...
  */
 public class ConditionStateRouter<T> extends AbstractStateRouter<T> {
     public static final String NAME = "condition";
 
     private static final ErrorTypeAwareLogger logger = LoggerFactory.getErrorTypeAwareLogger(AbstractStateRouter.class);
+//    综合起来，该正则表达式匹配的是以`&`、`!`、`=`或`,`作为分隔符的字符串，例如：`test&abc,def!123`。
     protected static final Pattern ROUTE_PATTERN = Pattern.compile("([&!=,]*)\\s*([^&!=,\\s]+)");
     protected Map<String, ConditionMatcher> whenCondition;
     protected Map<String, ConditionMatcher> thenCondition;
@@ -82,9 +95,11 @@ public class ConditionStateRouter<T> extends AbstractStateRouter<T> {
 
     public ConditionStateRouter(URL url, String rule, boolean force, boolean enabled) {
         super(url);
+//        父类属性
         this.setForce(force);
         this.enabled = enabled;
         matcherFactories =
+//                看到了，根据class进行取的
                 moduleModel.getExtensionLoader(ConditionMatcherFactory.class).getActivateExtensions();
         if (enabled) {
             this.init(rule);
@@ -94,15 +109,18 @@ public class ConditionStateRouter<T> extends AbstractStateRouter<T> {
     public ConditionStateRouter(URL url) {
         super(url);
         this.setUrl(url);
+//        默认是false
         this.setForce(url.getParameter(FORCE_KEY, false));
         matcherFactories =
                 moduleModel.getExtensionLoader(ConditionMatcherFactory.class).getActivateExtensions();
+//        默认启用
         this.enabled = url.getParameter(ENABLED_KEY, true);
         if (enabled) {
             init(url.getParameterAndDecoded(RULE_KEY));
         }
     }
 
+//    进来的是 method=getComment => region=Hangzhou & env=gray
     public void init(String rule) {
         try {
             if (rule == null || rule.trim().length() == 0) {
@@ -124,6 +142,13 @@ public class ConditionStateRouter<T> extends AbstractStateRouter<T> {
         }
     }
 
+    /**
+     * 关键方法，根据 string 来解析 matcher使用哪个
+     * rule： 第一次进来：method=getComment  第二次进来：region=Hangzhou & env=gray
+     * @param rule method=getComment
+     * @return  method:ConditionMatcher
+     * @throws ParseException
+     */
     private Map<String, ConditionMatcher> parseRule(String rule) throws ParseException {
         Map<String, ConditionMatcher> condition = new HashMap<>();
         if (StringUtils.isBlank(rule)) {
@@ -142,6 +167,7 @@ public class ConditionStateRouter<T> extends AbstractStateRouter<T> {
                 matcherPair = this.getMatcher(content);
                 condition.put(content, matcherPair);
             }
+//            下边就是根据不同的 分隔符，来确定不同的动作
             // The KV part of the condition expression
             else if ("&".equals(separator)) {
                 if (condition.get(content) == null) {
@@ -219,6 +245,7 @@ public class ConditionStateRouter<T> extends AbstractStateRouter<T> {
 
         if (CollectionUtils.isEmpty(invokers)) {
             if (needToPrintMessage) {
+//                以前路由器的调用器为空
                 messageHolder.set("Directly return. Reason: Invokers from previous router is empty.");
             }
             return invokers;
@@ -226,10 +253,12 @@ public class ConditionStateRouter<T> extends AbstractStateRouter<T> {
         try {
             if (!matchWhen(url, invocation)) {
                 if (needToPrintMessage) {
+//                    when 条件不满足
                     messageHolder.set("Directly return. Reason: WhenCondition not match.");
                 }
                 return invokers;
             }
+//            when 匹配上了 但是 then是空
             if (thenCondition == null) {
                 logger.warn(
                         CLUSTER_CONDITIONAL_ROUTE_LIST_EMPTY,
@@ -245,11 +274,13 @@ public class ConditionStateRouter<T> extends AbstractStateRouter<T> {
             BitList<Invoker<T>> result = invokers.clone();
             result.removeIf(invoker -> !matchThen(invoker.getUrl(), url));
 
+//            返回 符合匹配的结果
             if (!result.isEmpty()) {
                 if (needToPrintMessage) {
                     messageHolder.set("Match return.");
                 }
                 return result;
+//                如果开启了 force 需要打印 + 携带一些信息
             } else if (this.isForce()) {
                 logger.warn(
                         CLUSTER_CONDITIONAL_ROUTE_LIST_EMPTY,
@@ -280,17 +311,25 @@ public class ConditionStateRouter<T> extends AbstractStateRouter<T> {
 
     @Override
     public boolean isRuntime() {
+//        对于以前定义的路由器，我们总是返回true，也就是说，旧的路由器不再支持缓存了。
         // We always return true for previously defined Router, that is, old Router doesn't support cache anymore.
         //        return true;
         return this.getUrl().getParameter(RUNTIME_KEY, false);
     }
 
+    /**
+     * 返回对应的matcher
+     * @param key
+     * @return
+     */
     private ConditionMatcher getMatcher(String key) {
         for (ConditionMatcherFactory factory : matcherFactories) {
             if (factory.shouldMatch(key)) {
+//                直接只用返回一个？？
                 return factory.createMatcher(key, moduleModel);
             }
         }
+//        如果 没有就默认使用 para
         return moduleModel
                 .getExtensionLoader(ConditionMatcherFactory.class)
                 .getExtension("param")

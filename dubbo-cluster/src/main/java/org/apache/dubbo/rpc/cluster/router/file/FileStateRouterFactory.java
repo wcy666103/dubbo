@@ -31,6 +31,9 @@ import static org.apache.dubbo.rpc.cluster.Constants.RULE_KEY;
 import static org.apache.dubbo.rpc.cluster.Constants.RUNTIME_KEY;
 import static org.apache.dubbo.rpc.cluster.Constants.TYPE_KEY;
 
+/**
+ * 文件形式的 script，这个类就是进行了一个转换而已
+ */
 public class FileStateRouterFactory implements StateRouterFactory {
 
     public static final String NAME = "file";

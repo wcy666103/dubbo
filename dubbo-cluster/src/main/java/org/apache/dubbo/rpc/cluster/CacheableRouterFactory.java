@@ -23,10 +23,12 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 /**
+ * 怎么感觉重复了跟 StateRouterFactory那边
  * If you want to provide a router implementation based on design of v2.7.0, please extend from this abstract class.
  * For 2.6.x style router, please implement and use RouterFactory directly.
  */
 public abstract class CacheableRouterFactory implements RouterFactory {
+//    缓存 servicekey对应的router
     private ConcurrentMap<String, Router> routerMap = new ConcurrentHashMap<>();
 
     @Override

@@ -78,6 +78,8 @@ import static org.apache.dubbo.rpc.cluster.Constants.REFER_KEY;
 
 /**
  * Abstract implementation of Directory: Invoker list returned from this Directory's list method have been filtered by Routers
+ * 目录的抽象实现：从此目录的 list 方法返回的调用者列表已被 Routers 过滤
+ * RegistryDirectory
  */
 public abstract class AbstractDirectory<T> implements Directory<T> {
 
@@ -228,7 +230,7 @@ public abstract class AbstractDirectory<T> implements Directory<T> {
                     routerChain.getLock().readLock().unlock();
                 }
             }
-
+//  静态方法，留给子类实现的，比如说StaticDirectory 是会进行 route 过滤的
             List<Invoker<T>> routedResult = doList(singleChain, availableInvokers, invocation);
             if (routedResult.isEmpty()) {
                 // 2-2 - No provider available.

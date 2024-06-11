@@ -39,7 +39,7 @@ public interface RouterFactory {
     /**
      * Create router.
      * Since 2.7.0, most of the time, we will not use @Adaptive feature, so it's kept only for compatibility.
-     *
+     * 根据  protocol 进行调用选择
      * @param url url
      * @return router instance
      */

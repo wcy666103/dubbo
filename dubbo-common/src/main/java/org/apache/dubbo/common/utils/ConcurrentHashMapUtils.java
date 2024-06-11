@@ -27,11 +27,13 @@ public class ConcurrentHashMapUtils {
 
     /**
      * A temporary workaround for Java 8 ConcurrentHashMap#computeIfAbsent specific performance issue: JDK-8161372.</br>
+     * Java 8 ConcurrentHashMap#computeIfAbsent 特定性能问题的临时解决方法：JDK-8161372。
      * @see <a href="https://bugs.openjdk.java.net/browse/JDK-8161372">https://bugs.openjdk.java.net/browse/JDK-8161372</a>
      *
      */
     public static <K, V> V computeIfAbsent(ConcurrentMap<K, V> map, K key, Function<? super K, ? extends V> func) {
         Objects.requireNonNull(func);
+
         if (JRE.JAVA_8.isCurrentVersion()) {
             V v = map.get(key);
             if (null == v) {
@@ -53,6 +55,7 @@ public class ConcurrentHashMapUtils {
             }
             return v;
         } else {
+//            如果不是java8，将方法放进去
             return map.computeIfAbsent(key, func);
         }
     }

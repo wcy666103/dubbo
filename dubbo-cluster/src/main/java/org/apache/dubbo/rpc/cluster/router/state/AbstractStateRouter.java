@@ -29,6 +29,7 @@ import org.apache.dubbo.rpc.model.ModuleModel;
 
 /***
  * The abstract class of StateRoute.
+ * StateRoute的抽象类
  * @since 3.0
  */
 public abstract class AbstractStateRouter<T> implements StateRouter<T> {
@@ -90,6 +91,16 @@ public abstract class AbstractStateRouter<T> implements StateRouter<T> {
         // default empty implement
     }
 
+    /**
+     * 具体的route方法，并且是通用的
+     * @param invokers  invoker bit list
+     * @param url        refer url
+     * @param invocation invocation
+     * @param needToPrintMessage whether to print router state. Such as `use router branch a`.
+     * @param nodeHolder
+     * @return
+     * @throws RpcException
+     */
     @Override
     public final BitList<Invoker<T>> route(
             BitList<Invoker<T>> invokers,
@@ -150,7 +161,7 @@ public abstract class AbstractStateRouter<T> implements StateRouter<T> {
 
     /**
      * Filter invokers with current routing rule and only return the invokers that comply with the rule.
-     *
+     * 每个实例的具体实现
      * @param invokers all invokers to be routed
      * @param url consumerUrl
      * @param invocation invocation

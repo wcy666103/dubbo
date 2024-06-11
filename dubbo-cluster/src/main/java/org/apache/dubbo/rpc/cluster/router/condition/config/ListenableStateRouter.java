@@ -45,6 +45,8 @@ import static org.apache.dubbo.common.constants.LoggerCodeConstants.CLUSTER_FAIL
 
 /**
  * Abstract router which listens to dynamic configuration
+ *
+ 侦听动态配置的抽象路由器，实现类有 serviceStateRouter、appStateRouter、providerStateRouter
  */
 public abstract class ListenableStateRouter<T> extends AbstractStateRouter<T> implements ConfigurationListener {
     public static final String NAME = "LISTENABLE_ROUTER";
@@ -52,8 +54,10 @@ public abstract class ListenableStateRouter<T> extends AbstractStateRouter<T> im
 
     private static final ErrorTypeAwareLogger logger =
             LoggerFactory.getErrorTypeAwareLogger(ListenableStateRouter.class);
+//    保留一个这个对象，下边的 conditionRouters 就是根据这个对象生成的
     private volatile ConditionRouterRule routerRule;
     private volatile List<ConditionStateRouter<T>> conditionRouters = Collections.emptyList();
+//    对应的是 接口名称/app名称
     private final String ruleKey;
 
     public ListenableStateRouter(URL url, String ruleKey) {
@@ -75,6 +79,7 @@ public abstract class ListenableStateRouter<T> extends AbstractStateRouter<T> im
             conditionRouters = Collections.emptyList();
         } else {
             try {
+//                只有这个地方进行了parse的调用，将配置文件进行解析，生成对象
                 routerRule = ConditionRuleParser.parse(event.getContent());
                 generateConditions(routerRule);
             } catch (Exception e) {
@@ -137,10 +142,13 @@ public abstract class ListenableStateRouter<T> extends AbstractStateRouter<T> im
 
     private void generateConditions(ConditionRouterRule rule) {
         if (rule != null && rule.isValid()) {
+//            这里边已经是有了 scope属性的
             this.conditionRouters = rule.getConditions().stream()
+//                    将 ConditionRouterRule转换成 ConditionStateRouter
                     .map(condition ->
                             new ConditionStateRouter<T>(getUrl(), condition, rule.isForce(), rule.isEnabled()))
                     .collect(Collectors.toList());
+//            直接构建链？将下一个置为null
             for (ConditionStateRouter<T> conditionRouter : this.conditionRouters) {
                 conditionRouter.setNextRouter(TailStateRouter.getInstance());
             }
@@ -151,6 +159,7 @@ public abstract class ListenableStateRouter<T> extends AbstractStateRouter<T> im
         if (StringUtils.isEmpty(ruleKey)) {
             return;
         }
+//        org.apache.dubbo.springboot.demo.DemoService::.condition-router
         String routerKey = ruleKey + RULE_SUFFIX;
         this.getRuleRepository().addListener(routerKey, this);
         String rule = this.getRuleRepository().getRule(routerKey, DynamicConfiguration.DEFAULT_GROUP);

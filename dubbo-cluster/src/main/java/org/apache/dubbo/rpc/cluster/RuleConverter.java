@@ -21,6 +21,10 @@ import org.apache.dubbo.common.extension.SPI;
 
 import java.util.List;
 
+/**
+ * 也是为了兼容
+ * 在兼容模块有这个类的实现，为了转成 alibaba时候的定义对象
+ */
 @SPI
 public interface RuleConverter {
 

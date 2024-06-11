@@ -52,18 +52,19 @@ public class AttachmentConditionMatcher extends AbstractConditionMatcher {
             // split the rule
             String[] expressArray = key.split("\\.");
             String argumentExpress = expressArray[0];
+//            是否符合该正则 attachments\[(.+)\]
             final Matcher matcher = ATTACHMENTS_PATTERN.matcher(argumentExpress);
             if (!matcher.find()) {
                 return DOES_NOT_FOUND_VALUE;
             }
 
-            // extract the argument index
+            // extract the argument index 选择第一个匹配 正则的串
             String attachmentKey = matcher.group(1);
             if (StringUtils.isEmpty(attachmentKey)) {
                 return DOES_NOT_FOUND_VALUE;
             }
 
-            // extract the argument value
+            // extract the argument value  获取到通过的key拿到对应的value 应该就是
             return invocation.getAttachment(attachmentKey);
         } catch (Exception e) {
             logger.warn(

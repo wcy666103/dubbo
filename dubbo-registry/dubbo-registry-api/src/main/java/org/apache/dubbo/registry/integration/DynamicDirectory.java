@@ -191,6 +191,13 @@ public abstract class DynamicDirectory<T> extends AbstractDirectory<T> implement
         registry.unsubscribe(url, this);
     }
 
+    /**
+     * 这里会进行 过滤，具体就是传递如所有的 routechain + allInvokers
+     * @param singleRouterChain
+     * @param invokers
+     * @param invocation
+     * @return
+     */
     @Override
     public List<Invoker<T>> doList(
             SingleRouterChain<T> singleRouterChain, BitList<Invoker<T>> invokers, Invocation invocation) {

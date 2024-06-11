@@ -30,6 +30,7 @@ public interface ConditionMatcherFactory {
      * @param key the key of a particular form
      * @return true if matches, otherwise false
      */
+//    就是一个很简单的判定条件，为了避免浪费cpu进行大的计算吧，先确定有没有这个特征，然后才进行精确的计算
     boolean shouldMatch(String key);
 
     /**

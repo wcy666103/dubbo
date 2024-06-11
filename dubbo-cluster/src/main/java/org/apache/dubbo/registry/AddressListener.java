@@ -23,6 +23,7 @@ import org.apache.dubbo.rpc.cluster.Directory;
 
 import java.util.List;
 
+// 没找到任何相关实现呀，但是有调用
 @SPI(scope = ExtensionScope.MODULE)
 public interface AddressListener {
 

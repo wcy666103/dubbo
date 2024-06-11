@@ -31,6 +31,7 @@ import static org.apache.dubbo.rpc.cluster.Constants.VALID_KEY;
 
 /**
  * TODO Extract more code here if necessary
+ * 路由器的规则
  */
 public abstract class AbstractRouterRule {
     private String rawRule;
@@ -45,6 +46,11 @@ public abstract class AbstractRouterRule {
     private String scope;
     private String key;
 
+    /**
+     * object类型的map，最后转换成 boolean竟然是用tostring之后parse
+     * 这里只处理一些公用参数，其他的留在具体实现类中去实现
+     * @param map
+     */
     protected void parseFromMap0(Map<String, Object> map) {
         setRawRule((String) map.get(RAW_RULE_KEY));
 
@@ -77,7 +83,7 @@ public abstract class AbstractRouterRule {
         if (dynamic != null) {
             setDynamic(Boolean.parseBoolean(dynamic.toString()));
         }
-
+//       这里边定好了 scope属性
         setScope((String) map.get(SCOPE_KEY));
         setKey((String) map.get(KEY_KEY));
         setVersion((String) map.get(CONFIG_VERSION_KEY));

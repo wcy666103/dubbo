@@ -43,8 +43,11 @@ public class ConditionRuleParser {
     public static ConditionRouterRule parse(String rawRule) {
         Yaml yaml = new Yaml(new SafeConstructor(new LoaderOptions()));
         Map<String, Object> map = yaml.load(rawRule);
+//        用的 ConditionRouterRule的方法，设置的也是ConditionRouterRule的属性，有啥意义
         ConditionRouterRule rule = ConditionRouterRule.parseFromMap(map);
         rule.setRawRule(rawRule);
+
+//        这个 rawRule就是给整个yml配置文件都弄成一个字符串，conditions是个list里边放的很多个条件，最终的过滤条件就是在这里存储
         if (CollectionUtils.isEmpty(rule.getConditions())) {
             rule.setValid(false);
         }

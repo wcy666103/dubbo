@@ -23,7 +23,7 @@ import org.apache.dubbo.common.extension.SPI;
 
 /**
  * ConfiguratorFactory. (SPI, Singleton, ThreadSafe)
- *
+ * absent、override
  */
 @SPI
 public interface ConfiguratorFactory {

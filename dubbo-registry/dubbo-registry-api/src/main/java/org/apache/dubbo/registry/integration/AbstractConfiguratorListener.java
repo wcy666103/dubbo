@@ -44,6 +44,7 @@ import static org.apache.dubbo.rpc.cluster.Constants.TYPE_KEY;
 
 /**
  * AbstractConfiguratorListener
+ * 针对于 router的配置的 Listener
  */
 public abstract class AbstractConfiguratorListener implements ConfigurationListener {
     private static final ErrorTypeAwareLogger logger =

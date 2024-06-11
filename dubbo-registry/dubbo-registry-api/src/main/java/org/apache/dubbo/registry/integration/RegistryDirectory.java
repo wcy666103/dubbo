@@ -95,7 +95,7 @@ import static org.apache.dubbo.rpc.cluster.Constants.ROUTER_KEY;
 import static org.apache.dubbo.rpc.model.ScopeModelUtil.getModuleModel;
 
 /**
- * RegistryDirectory
+ * RegistryDirectory 他是实现自 org.apache.dubbo.rpc.cluster.directory.AbstractDirectory，然后这边的list其实已经被router过滤过了
  */
 public class RegistryDirectory<T> extends DynamicDirectory<T> {
     private static final ErrorTypeAwareLogger logger = LoggerFactory.getErrorTypeAwareLogger(RegistryDirectory.class);
@@ -193,6 +193,10 @@ public class RegistryDirectory<T> extends DynamicDirectory<T> {
         }
     }
 
+    /**
+     * 哪里生成的urls，就是将规则转换成为了 urls，来进行notify，将其对应的规则进行转换
+     * @param urls The list of registered information , is always not empty. The meaning is the same as the return value of {@link org.apache.dubbo.registry.RegistryService#lookup(URL)}.
+     */
     @Override
     public synchronized void notify(List<URL> urls) {
         if (isDestroyed()) {

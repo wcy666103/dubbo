@@ -21,7 +21,7 @@ import org.apache.dubbo.common.extension.SPI;
 import org.apache.dubbo.rpc.Invocation;
 
 /**
- *
+ *  模式匹配的 包括范围 通配符等等
  */
 @SPI
 public interface ValuePattern {

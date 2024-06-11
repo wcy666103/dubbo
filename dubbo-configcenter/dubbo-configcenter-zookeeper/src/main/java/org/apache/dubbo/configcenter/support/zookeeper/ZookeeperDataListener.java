@@ -77,6 +77,7 @@ public class ZookeeperDataListener implements DataListener {
         }
         ConfigChangedEvent configChangeEvent = new ConfigChangedEvent(key, group, (String) value, changeType);
         if (CollectionUtils.isNotEmpty(listeners)) {
+//            逐个调用监听器的process方法，在router中对应的就是ListenableStateRouter
             listeners.forEach(listener -> listener.process(configChangeEvent));
         }
 
