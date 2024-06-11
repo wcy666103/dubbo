@@ -20,10 +20,17 @@ import org.apache.dubbo.common.Version;
 import org.apache.dubbo.common.logger.Logger;
 import org.apache.dubbo.common.utils.NetUtils;
 
+/**
+ * 有安全保障的；万全的
+ * 失效保护
+ */
 public class FailsafeLogger implements Logger {
 
     private Logger logger;
 
+    /**
+     * 控制所有方法是否执行的一个 成员变量
+     */
     private static boolean disabled = false;
 
     public FailsafeLogger(Logger logger) {

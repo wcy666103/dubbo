@@ -31,6 +31,7 @@ import java.util.regex.Pattern;
 
 /**
  * A fail-safe (ignoring exception thrown by logger) wrapper of error type aware logger.
+ * 专门用于错误码使用的logger
  */
 public class FailsafeErrorTypeAwareLogger extends FailsafeLogger implements ListenableLogger {
 

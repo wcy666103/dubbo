@@ -18,6 +18,7 @@ package org.apache.dubbo.common.logger;
 
 /**
  * Log Listener, can registered to an {@link ListenableLogger}.
+ * 注册回调监听器
  */
 public interface LogListener {
 

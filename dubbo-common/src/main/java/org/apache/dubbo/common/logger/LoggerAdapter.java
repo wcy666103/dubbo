@@ -23,6 +23,7 @@ import java.io.File;
 
 /**
  * Logger provider
+ * 不同的实现框架对应不同的是 Adapter类
  */
 @SPI(scope = ExtensionScope.FRAMEWORK)
 public interface LoggerAdapter {
