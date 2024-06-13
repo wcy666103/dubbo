@@ -27,7 +27,7 @@ import java.util.stream.Collectors;
 import static org.apache.dubbo.common.constants.LoggerCodeConstants.CLUSTER_FAILED_RECEIVE_RULE;
 
 /**
- *
+ * 对应的config中的item的类
  */
 public class ConfigItem {
     private static final ErrorTypeAwareLogger logger = LoggerFactory.getErrorTypeAwareLogger(ConfigItem.class);

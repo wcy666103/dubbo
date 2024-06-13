@@ -56,6 +56,7 @@ public class ConfigParser {
         String scope = configuratorConfig.getScope();
         List<ConfigItem> items = configuratorConfig.getConfigs();
 
+//        判断过是app范围还是service范围
         if (ConfiguratorConfig.SCOPE_APPLICATION.equals(scope)) {
             items.forEach(item -> urls.addAll(appItemToUrls(item, configuratorConfig)));
         } else {
@@ -79,6 +80,11 @@ public class ConfigParser {
         return urls;
     }
 
+    /**
+     * 将整个yml信息转换成定义的配置对象
+     * @param rawConfig
+     * @return
+     */
     private static ConfiguratorConfig parseObject(String rawConfig) {
         Yaml yaml = new Yaml(new SafeConstructor(new LoaderOptions()));
         Map<String, Object> map = yaml.load(rawConfig);
@@ -89,6 +95,7 @@ public class ConfigParser {
         List<URL> urls = new ArrayList<>();
         List<String> addresses = parseAddresses(item);
 
+//        拼接成url，最后所有的配置都成为了这样的url形式的？
         addresses.forEach(addr -> {
             StringBuilder urlBuilder = new StringBuilder();
             urlBuilder.append("override://").append(addr).append('/');
@@ -115,6 +122,8 @@ public class ConfigParser {
                 urls.add(appendMatchCondition(URL.valueOf(urlBuilder.toString()), item));
             }
         });
+        System.out.println("serviceItemToUrls = " + "===conf to url==");
+        urls.forEach(System.out::println);
 
         return urls;
     }

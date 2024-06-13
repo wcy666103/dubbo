@@ -116,6 +116,7 @@ public class ConditionStateRouter<T> extends AbstractStateRouter<T> {
 //        默认启用
         this.enabled = url.getParameter(ENABLED_KEY, true);
         if (enabled) {
+//            应该加个this.init
             init(url.getParameterAndDecoded(RULE_KEY));
         }
     }
@@ -127,6 +128,7 @@ public class ConditionStateRouter<T> extends AbstractStateRouter<T> {
                 throw new IllegalArgumentException("Illegal route rule!");
             }
             rule = rule.replace("consumer.", "").replace("provider.", "");
+//            根据 => 的索引位置来分 when和then
             int i = rule.indexOf("=>");
             String whenRule = i < 0 ? null : rule.substring(0, i).trim();
             String thenRule = i < 0 ? rule.trim() : rule.substring(i + 2).trim();

@@ -57,7 +57,9 @@ import static org.apache.dubbo.metadata.annotation.processing.util.ServiceAnnota
 
 /**
  * Abstract {@link ServiceRestMetadataResolver} implementation
- *
+ * 解析元数据信息，将mvc实现或者是jaxr实现或者是non-anno实现的rest相关的东西，转换成 dubbo这边的元数据信息格式 可以查看官方文档去看
+ * 该静态类就是提取了所有可以重用的方法
+ *  https://cn.dubbo.apache.org/zh-cn/overview/reference/proposals/protocol-http/
  * @since 2.7.6
  */
 public abstract class AbstractServiceRestMetadataResolver implements ServiceRestMetadataResolver {

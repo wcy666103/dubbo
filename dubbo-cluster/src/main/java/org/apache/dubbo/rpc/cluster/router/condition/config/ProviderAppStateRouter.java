@@ -77,6 +77,7 @@ public class ProviderAppStateRouter<T> extends ListenableStateRouter<T> {
                 application = providerApplication;
                 String rawRule = this.getRuleRepository().getRule(key, DynamicConfiguration.DEFAULT_GROUP);
                 if (StringUtils.isNotEmpty(rawRule)) {
+//                    这里算是发送了一个消息，让process进行处理
                     this.process(new ConfigChangedEvent(key, DynamicConfiguration.DEFAULT_GROUP, rawRule));
                 }
             }

@@ -26,10 +26,12 @@ import org.apache.dubbo.rpc.cluster.router.state.StateRouter;
  */
 public class ConditionStateRouterFactory extends CacheableStateRouterFactory {
 
+//    这个name就是spi中标注的什么name会使用这个factory
     public static final String NAME = "condition";
 
     @Override
     protected <T> StateRouter<T> createRouter(Class<T> interfaceClass, URL url) {
+//        应该是通过该url新建一个新的stateRouter
         return new ConditionStateRouter<T>(url);
     }
 }

@@ -21,7 +21,8 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
- *
+ * 整个yml对应的config对象
+ * 不过他应该是configs，而不是 conditions
  */
 public class ConfiguratorConfig {
     public static final String MATCH_CONDITION = "MATCH_CONDITION";
@@ -38,6 +39,11 @@ public class ConfiguratorConfig {
     private Boolean enabled = true;
     private List<ConfigItem> configs;
 
+    /**
+     * 将 yml属性转换成map，然后将map中的属性提取出来弄成对象
+     * @param map
+     * @return
+     */
     @SuppressWarnings("unchecked")
     public static ConfiguratorConfig parseFromMap(Map<String, Object> map) {
         ConfiguratorConfig configuratorConfig = new ConfiguratorConfig();
@@ -50,6 +56,7 @@ public class ConfiguratorConfig {
             configuratorConfig.setEnabled(Boolean.parseBoolean(enabled.toString()));
         }
 
+//        具体的配置信息
         Object configs = map.get(CONFIGS_KEY);
         if (configs != null && List.class.isAssignableFrom(configs.getClass())) {
             configuratorConfig.setConfigs(((List<Map<String, Object>>) configs)

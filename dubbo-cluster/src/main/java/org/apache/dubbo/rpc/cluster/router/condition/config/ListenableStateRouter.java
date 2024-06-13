@@ -67,6 +67,10 @@ public abstract class ListenableStateRouter<T> extends AbstractStateRouter<T> im
         this.ruleKey = ruleKey;
     }
 
+    /**
+     * 还是这里是最主要的方法，test类就是这样，通过staterouter的实现类去构建event，然后被调用的就是这个process方法
+     * @param event config change event
+     */
     @Override
     public synchronized void process(ConfigChangedEvent event) {
         if (logger.isInfoEnabled()) {

@@ -94,9 +94,10 @@ public abstract class AbstractConfiguratorListener implements ConfigurationListe
         }
 
         if (event.getChangeType().equals(ConfigChangeType.DELETED)) {
+//            所有配置都清空
             configurators.clear();
         } else {
-            // ADDED or MODIFIED
+            // ADDED or MODIFIED  content就是内容
             if (!genConfiguratorsFromRawRule(event.getContent())) {
                 return;
             }
@@ -105,6 +106,11 @@ public abstract class AbstractConfiguratorListener implements ConfigurationListe
         notifyOverrides();
     }
 
+    /**
+     * 从 rawrule中拿到configuration
+     * @param rawConfig
+     * @return
+     */
     private boolean genConfiguratorsFromRawRule(String rawConfig) {
         List<URL> urls;
         try {
@@ -126,6 +132,7 @@ public abstract class AbstractConfiguratorListener implements ConfigurationListe
                 .map(url -> url.removeParameters(securityKey))
                 .map(url -> url.setScopeModel(moduleModel))
                 .collect(Collectors.toList());
+//        一个类对应一个config实例？
         configurators = Configurator.toConfigurators(safeUrls).orElse(configurators);
         return true;
     }

@@ -66,6 +66,7 @@ public class ProviderAppConditionStateRouterTest {
                 .thenReturn(rawRule);
         //        Mockito.when(ruleRepository.addListener()).thenReturn();
 
+//        mock了几个invoker
         BitList<Invoker<String>> invokers = getInvokers();
         router.notify(invokers);
 

@@ -32,7 +32,6 @@ public class ConditionRouterRule extends AbstractRouterRule {
 
 //    里边放的是String，如果要其他类型，是否就需要换成对象了
     private List<String> conditions;
-
 //    静态方法，里边会创建对应的对象，真会玩啊
     @SuppressWarnings("unchecked")
     public static ConditionRouterRule parseFromMap(Map<String, Object> map) {
@@ -48,6 +47,9 @@ public class ConditionRouterRule extends AbstractRouterRule {
             conditionRouterRule.setConditions(
                     ((List<Object>) conditions).stream().map(String::valueOf).collect(Collectors.toList()));
         }
+
+        System.out.println("condition.config.model.ConditionRouterRule.parseFromMap = " + "==转换后==");
+        conditionRouterRule.conditions.forEach(System.out::println);
 
         return conditionRouterRule;
     }

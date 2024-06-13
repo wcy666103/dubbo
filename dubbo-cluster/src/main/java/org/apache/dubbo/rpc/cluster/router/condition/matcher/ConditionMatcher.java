@@ -25,11 +25,17 @@ import java.util.Set;
 /**
  * ConditionMatcher represents a specific match condition of a condition rule.
  * <p>
- * The following condition rule '=bar&arguments[0]=hello* => region=hangzhou' consists of three ConditionMatchers:
+ * The following condition rule 'foo=bar&arguments[0]=hello* => region=hangzhou' consists of three ConditionMatchers:
  * 1. UrlParamConditionMatcher represented by 'foo=bar'
  * 2. ArgumentsConditionMatcher represented by 'arguments[0]=hello*'
  * 3. UrlParamConditionMatcher represented by 'region=hangzhou'
  * <p>
+ *  ConditionMatcher 表示条件规则的特定匹配条件。
+ * 以下条件规则 '=bar&arguments[0]=hello* => region=hangzhou' 由三个 ConditionMatcher 组成：
+ * 1. UrlParamConditionMatcher 由 'foo=bar' 表示
+ * 2. ArgumentsConditionMatcher 由 'arguments[0]=hello*' 表示
+ * 3. UrlParamConditionMatcher 表示为 'region=hangzhou'
+ *
  * It's easy to define your own matcher by extending {@link ConditionMatcherFactory}
  */
 public interface ConditionMatcher {

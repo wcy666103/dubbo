@@ -63,7 +63,11 @@ public interface Configurator extends Comparable<Configurator> {
      * <li>override:// rule is not supported... ,needs to be calculated by registry itself</li>
      * <li>override://0.0.0.0/ without parameters means clearing the override</li>
      * </ol>
-     *
+     * 将覆盖 url 转换为地图，以便在重新引用时使用。每次发送所有规则，url 都会重新组合并计算 URL 合约：
+     * override://0.0.0.0/......（ 或 override：//ip：port...？anyhost=true）&para1=value1...表示全局规则（所有提供程序生效）
+     * override：//ip：port...？anyhost=false 特殊规则（仅适用于特定提供商）
+     * override:// 规则不受支持...，需要由注册局本身计算
+     * override://0.0.0.0/ 没有参数意味着清除覆盖
      * @param urls URL list to convert
      * @return converted configurator list
      */
@@ -79,6 +83,7 @@ public interface Configurator extends Comparable<Configurator> {
 
         List<Configurator> configurators = new ArrayList<>(urls.size());
         for (URL url : urls) {
+//            推空保护，
             if (EMPTY_PROTOCOL.equals(url.getProtocol())) {
                 configurators.clear();
                 break;
