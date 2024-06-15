@@ -21,6 +21,7 @@ import org.apache.dubbo.rpc.model.ModuleModel;
 
 /**
  * Factory of ConditionMatcher instances.
+ * arg、url、para类型的实现
  */
 @SPI
 public interface ConditionMatcherFactory {

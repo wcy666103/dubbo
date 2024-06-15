@@ -148,7 +148,7 @@ public class ConditionStateRouter<T> extends AbstractStateRouter<T> {
      * 关键方法，根据 string 来解析 matcher使用哪个
      * rule： 第一次进来：method=getComment  第二次进来：region=Hangzhou & env=gray
      * @param rule method=getComment
-     * @return  method:ConditionMatcher
+     * @return  method:ConditionMatcher @{see ConditionMatcher}
      * @throws ParseException
      */
     private Map<String, ConditionMatcher> parseRule(String rule) throws ParseException {
@@ -162,9 +162,11 @@ public class ConditionStateRouter<T> extends AbstractStateRouter<T> {
         Set<String> values = null;
         final Matcher matcher = ROUTE_PATTERN.matcher(rule);
         while (matcher.find()) { // Try to match one by one
+//            分隔符
             String separator = matcher.group(1);
+//            内容
             String content = matcher.group(2);
-            // Start part of the condition expression.
+            // Start part of the condition expression. // 如果分隔符为空，说明这是条件表达式的开始部分
             if (StringUtils.isEmpty(separator)) {
                 matcherPair = this.getMatcher(content);
                 condition.put(content, matcherPair);
@@ -232,8 +234,8 @@ public class ConditionStateRouter<T> extends AbstractStateRouter<T> {
     @Override
     protected BitList<Invoker<T>> doRoute(
             BitList<Invoker<T>> invokers,
-            URL url,
-            Invocation invocation,
+            URL url,//本url
+            Invocation invocation, // RpcInvocation [methodName=sayHello, parameterTypes=[class java.lang.String]]
             boolean needToPrintMessage,
             Holder<RouterSnapshotNode<T>> nodeHolder,
             Holder<String> messageHolder)

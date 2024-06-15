@@ -36,6 +36,7 @@ import static org.apache.dubbo.rpc.cluster.Constants.MOCK_PROTOCOL;
 /**
  * A specific Router designed to realize mock feature.
  * If a request is configured to use mock, then this router guarantees that only the invokers with protocol MOCK appear in final the invoker list, all other invokers will be excluded.
+ * 旨在实现模拟功能的特定路由器。如果请求配置为使用 mock，则此路由器保证只有具有协议 MOCK 的调用程序才会出现在最终的调用程序列表中，所有其他调用程序都将被排除在外。
  */
 public class MockInvokersSelector<T> extends AbstractStateRouter<T> {
 

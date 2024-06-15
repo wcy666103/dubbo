@@ -114,7 +114,7 @@ public class SingleRouterChain<T> {
     /**
      * the resident routers must being initialized before address notification.
      * only for ut
-     * 在地址通知之前，必须初始化驻留路由器。仅适用于 UT
+     * 在地址通知之前，必须初始化驻留路由器。仅适用于 UT 单元测试
      */
     public void initWithRouters(List<Router> builtinRouters) {
         this.builtinRouters = builtinRouters;
@@ -173,6 +173,8 @@ public class SingleRouterChain<T> {
     }
 
     public List<Invoker<T>> simpleRoute(URL url, BitList<Invoker<T>> availableInvokers, Invocation invocation) {
+//        consumer://10.12.37.62/org.apache.dubbo.springboot.demo.DemoService?application=dubbo-springboot-demo-consumer&background=false&dubbo=2.0.2&executor-management-mode=isolation&file-cache=true&interface=org.apache.dubbo.springboot.demo.DemoService&methods=sayHello,sayHelloAsync&pid=29860&register.ip=10.12.37.62&release=3.2.13-SNAPSHOT&side=consumer&sticky=false&timestamp=1718421515586&unloadClusterRelated=false
+        System.out.println("simpleRoute.url = " + url);
         BitList<Invoker<T>> resultInvokers = availableInvokers.clone();
 
         // 1. route state router

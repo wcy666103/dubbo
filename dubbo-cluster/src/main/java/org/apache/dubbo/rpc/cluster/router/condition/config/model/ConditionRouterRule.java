@@ -27,6 +27,7 @@ import static org.apache.dubbo.rpc.cluster.Constants.CONDITIONS_KEY;
 /**
  * 所以走完这个方法之后，这个对象就是对应的那个配置文件中的素有的
  * 这里边是有 scope属性的，直接就是确定好是 service还是Application
+ * 对应的是一整个yml转换的rul对象
  */
 public class ConditionRouterRule extends AbstractRouterRule {
 
@@ -34,7 +35,7 @@ public class ConditionRouterRule extends AbstractRouterRule {
     private List<String> conditions;
 //    静态方法，里边会创建对应的对象，真会玩啊
     @SuppressWarnings("unchecked")
-    public static ConditionRouterRule parseFromMap(Map<String, Object> map) {
+    public static AbstractRouterRule parseFromMap(Map<String, Object> map) {
         ConditionRouterRule conditionRouterRule = new ConditionRouterRule();
 //        抽象类提供的方法
         conditionRouterRule.parseFromMap0(map);
@@ -49,6 +50,7 @@ public class ConditionRouterRule extends AbstractRouterRule {
         }
 
         System.out.println("condition.config.model.ConditionRouterRule.parseFromMap = " + "==转换后==");
+//        method=sayHello => region=hangzhou
         conditionRouterRule.conditions.forEach(System.out::println);
 
         return conditionRouterRule;

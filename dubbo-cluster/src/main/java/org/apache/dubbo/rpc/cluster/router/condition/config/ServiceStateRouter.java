@@ -21,6 +21,7 @@ import org.apache.dubbo.common.config.configcenter.DynamicConfiguration;
 
 /**
  * Service level router, "server-unique-name.condition-router"
+ * service的实例，在哪区分的实例
  */
 public class ServiceStateRouter<T> extends ListenableStateRouter<T> {
     public static final String NAME = "SERVICE_ROUTER";

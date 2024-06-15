@@ -194,6 +194,7 @@ public class RegistryDirectory<T> extends DynamicDirectory<T> {
     }
 
     /**
+     * 为什么是 DubboRegistryRetryTimer触发的这个
      * 哪里生成的urls，就是将规则转换成为了 urls，来进行notify，将其对应的规则进行转换
      * @param urls The list of registered information , is always not empty. The meaning is the same as the return value of {@link org.apache.dubbo.registry.RegistryService#lookup(URL)}.
      */

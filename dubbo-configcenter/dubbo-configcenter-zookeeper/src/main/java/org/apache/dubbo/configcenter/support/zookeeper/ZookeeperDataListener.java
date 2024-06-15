@@ -62,6 +62,22 @@ public class ZookeeperDataListener implements DataListener {
         return listeners;
     }
 
+    /**
+     *
+     * @param path /dubbo/config/dubbo/org.apache.dubbo.springboot.demo.DemoService::.condition-router
+     * @param value
+     * value的值就是下边给的
+     * conditions:
+     * - => host != 172.22.3.91
+     * - method=sayHi => address=*:20881
+     * enabled: true
+     * force: true
+     * key: org.apache.dubbo.springboot.demo.DemoService
+     * priority: 0
+     * runtime: false
+     * scope: service
+     * @param eventType
+     */
     @Override
     public void dataChanged(String path, Object value, EventType eventType) {
         if (!this.path.equals(path)) {
@@ -75,6 +91,7 @@ public class ZookeeperDataListener implements DataListener {
         } else {
             changeType = ConfigChangeType.MODIFIED;
         }
+//        key就是 org.apache.dubbo.springboot.demo.DemoService::.condition-router
         ConfigChangedEvent configChangeEvent = new ConfigChangedEvent(key, group, (String) value, changeType);
         if (CollectionUtils.isNotEmpty(listeners)) {
 //            逐个调用监听器的process方法，在router中对应的就是ListenableStateRouter

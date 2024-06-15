@@ -27,10 +27,14 @@ import java.util.stream.Collectors;
 import static org.apache.dubbo.common.constants.LoggerCodeConstants.CLUSTER_FAILED_RULE_PARSING;
 import static org.apache.dubbo.rpc.cluster.Constants.RULE_VERSION_V30;
 
+/**
+ * 其parseFrom方法会要求传递 version字段
+ */
 public class Tag {
     private static final ErrorTypeAwareLogger logger = LoggerFactory.getErrorTypeAwareLogger(Tag.class);
 
     private String name;
+//    这个是3.0之后出来的东西，直接跟原有的混在一块，直接用！
     private List<ParamMatch> match;
     private List<String> addresses;
 

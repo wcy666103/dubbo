@@ -48,6 +48,7 @@ public abstract class AbstractStateRouter<T> implements StateRouter<T> {
 
     public AbstractStateRouter(URL url) {
         moduleModel = url.getOrDefaultModuleModel();
+//        只有一个实现
         this.ruleRepository =
                 moduleModel.getExtensionLoader(GovernanceRuleRepository.class).getDefaultExtension();
         this.url = url;

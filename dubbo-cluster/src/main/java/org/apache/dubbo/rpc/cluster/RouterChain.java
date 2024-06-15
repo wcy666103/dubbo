@@ -48,6 +48,7 @@ public class RouterChain<T> {
     private static final ErrorTypeAwareLogger logger = LoggerFactory.getErrorTypeAwareLogger(RouterChain.class);
 
 //    类初始化的时候最少需要两个 SingleRouterChain参数，current会默认指向main
+//    这个router chain说的是appscriptstaterouter\appstaterouter\providerappstaterouter\tagstaterouter\standardmeshrulerouter\mockinvokersselector，是大的方面的
     private volatile SingleRouterChain<T> mainChain;
     private volatile SingleRouterChain<T> backupChain;
     private volatile SingleRouterChain<T> currentChain;
@@ -60,6 +61,13 @@ public class RouterChain<T> {
         return new RouterChain<>(new SingleRouterChain[] {chain1, chain2});
     }
 
+    /**
+     * 初始化的时候构建了这个，url是consumer的url
+     * @param interfaceClass
+     * @param url consumer://10.12.37.62/org.apache.dubbo.springboot.demo.DemoService?application=dubbo-springboot-demo-consumer&background=false&dubbo=2.0.2&executor-management-mode=isolation&file-cache=true&interface=org.apache.dubbo.springboot.demo.DemoService&methods=sayHello,sayHelloAsync&pid=21380&release=3.2.13-SNAPSHOT&side=consumer&sticky=false&timestamp=1718285838978&unloadClusterRelated=false
+     * @return
+     * @param <T>
+     */
     public static <T> SingleRouterChain<T> buildSingleChain(Class<T> interfaceClass, URL url) {
         ModuleModel moduleModel = url.getOrDefaultModuleModel();
 
@@ -74,12 +82,17 @@ public class RouterChain<T> {
                 .sorted(Router::compareTo)
                 .collect(Collectors.toList());
 
-//        StateRouter越要拿出来 ， Router就是为了兼容用的
+//        StateRouter也要拿出来 ， Router就是为了兼容用的
         List<StateRouter<T>> stateRouters =
-//                根据class来获取所有扩展对象，就是所有实现factory的都会获取到，所以说应该是包含所有factory实例的
+//                根据class来获取所有扩展对象，就是所有激活了 实现factory的都会获取到，所以说应该是包含所有factory实例的
+//                appscriptstaterouter\appstaterouter\providerappstaterouter\tagstaterouter\standardmeshrulerouter\mockinvokersselector，没有其他的了
                 moduleModel.getExtensionLoader(StateRouterFactory.class).getActivateExtension(url, ROUTER_KEY).stream()
+//                       interfaceClass =  org.apache.dubbo.springboot.demo.DemoService
                         .map(factory -> factory.getRouter(interfaceClass, url))
                         .collect(Collectors.toList());
+
+        System.err.println("buildSingleChain:====" + "==构建singlechain==");
+        System.err.println(url);
 
         boolean shouldFailFast = Boolean.parseBoolean(
                 ConfigurationUtils.getProperty(moduleModel, Constants.SHOULD_FAIL_FAST_KEY, "true"));
@@ -113,6 +126,7 @@ public class RouterChain<T> {
     }
 
     public SingleRouterChain<T> getSingleChain(URL url, BitList<Invoker<T>> availableInvokers, Invocation invocation) {
+        System.out.println("getSingleChain.url = " + url);
         // If current is in:
         // 1. `setInvokers` is in progress
         // 2. Most of the invocation should use backup chain => currentChain == backupChain

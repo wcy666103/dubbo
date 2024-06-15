@@ -46,6 +46,8 @@ import static org.apache.dubbo.rpc.cluster.Constants.TAGS_KEY;
  * - name: tag2
  * addresses: [ip3, ip4]
  * ...
+ *
+ * 新老版交替的参考
  */
 public class TagRouterRule extends AbstractRouterRule {
     private List<Tag> tags;

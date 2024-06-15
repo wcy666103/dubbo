@@ -25,8 +25,6 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.stereotype.Service;
 
-import java.util.concurrent.CountDownLatch;
-
 @SpringBootApplication
 @Service
 @EnableDubbo
@@ -39,9 +37,12 @@ public class ConsumerApplication {
 
         ConfigurableApplicationContext context = SpringApplication.run(ConsumerApplication.class, args);
         ConsumerApplication application = context.getBean(ConsumerApplication.class);
-        String result = application.doSayHello("world");
-        System.out.println("result: " + result);
-        new CountDownLatch(1).await();
+        while (true) {
+            String result = application.doSayHello("world");
+            Thread.sleep(5000);
+
+            System.out.println("result: " + result);
+        }
     }
 
     public String doSayHello(String name) {

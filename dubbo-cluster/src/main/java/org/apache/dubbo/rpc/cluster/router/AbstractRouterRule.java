@@ -31,7 +31,7 @@ import static org.apache.dubbo.rpc.cluster.Constants.VALID_KEY;
 
 /**
  * TODO Extract more code here if necessary
- * 路由器的规则
+ * 路由器的规则，整个yml共用属性的抽象
  */
 public abstract class AbstractRouterRule {
     private String rawRule;
