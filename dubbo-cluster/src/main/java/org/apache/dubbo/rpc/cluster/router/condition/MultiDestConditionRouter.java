@@ -1,13 +1,18 @@
 package org.apache.dubbo.rpc.cluster.router.condition;
 
 import org.apache.dubbo.common.URL;
+import org.apache.dubbo.common.logger.ErrorTypeAwareLogger;
+import org.apache.dubbo.common.logger.LoggerFactory;
+import org.apache.dubbo.common.utils.CollectionUtils;
 import org.apache.dubbo.common.utils.Holder;
+import org.apache.dubbo.common.utils.NetUtils;
 import org.apache.dubbo.common.utils.StringUtils;
 import org.apache.dubbo.rpc.Invocation;
 import org.apache.dubbo.rpc.Invoker;
 import org.apache.dubbo.rpc.RpcException;
 import org.apache.dubbo.rpc.cluster.router.RouterSnapshotNode;
 import org.apache.dubbo.rpc.cluster.router.condition.config.model.MultiDestCondition;
+import org.apache.dubbo.rpc.cluster.router.condition.config.model.MultiDestConditionRouterRule;
 import org.apache.dubbo.rpc.cluster.router.condition.matcher.ConditionMatcher;
 import org.apache.dubbo.rpc.cluster.router.condition.matcher.ConditionMatcherFactory;
 import org.apache.dubbo.rpc.cluster.router.state.AbstractStateRouter;
@@ -23,15 +28,18 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static org.apache.dubbo.common.constants.LoggerCodeConstants.CLUSTER_CONDITIONAL_ROUTE_LIST_EMPTY;
+import static org.apache.dubbo.common.constants.LoggerCodeConstants.CLUSTER_FAILED_EXEC_CONDITION_ROUTER;
 import static org.apache.dubbo.rpc.cluster.Constants.DefaultRouteConditionSubSetWeight;
 
 public class MultiDestConditionRouter<T> extends AbstractStateRouter<T> {
     public static final String NAME = "multi_condition";
 
+    private static final ErrorTypeAwareLogger logger = LoggerFactory.getErrorTypeAwareLogger(AbstractStateRouter.class);
     protected static final Pattern ROUTE_PATTERN = Pattern.compile("([&!=,]*)\\s*([^&!=,\\s]+)");
     private Map<String, ConditionMatcher> whenCondition;
     private boolean trafficDisable;
-    private List<CondSet> thenCondition;
+    private List<CondSet<T>> thenCondition;
     private int ratio;
     private int priority;
     private boolean force;
@@ -43,13 +51,15 @@ public class MultiDestConditionRouter<T> extends AbstractStateRouter<T> {
             Map<String, String> from,
             List<Map<String, String>> to,
             boolean force,
-            boolean enabled,
+            boolean trafficDisable,
             int ratio,
             int priority) {
         super(url);
         //        父类属性
         this.setForce(force);
-        this.enabled = enabled;
+        this.trafficDisable = trafficDisable;
+        this.ratio = ratio;
+        this.priority = priority;
         matcherFactories = moduleModel.getExtensionLoader(ConditionMatcherFactory.class)
                 .getActivateExtensions();
         if (enabled) {
@@ -58,17 +68,19 @@ public class MultiDestConditionRouter<T> extends AbstractStateRouter<T> {
     }
 
     public MultiDestConditionRouter(
-            URL url, MultiDestCondition multiDestCondition, boolean force, boolean enabled) {
+            URL url, MultiDestCondition multiDestCondition,boolean enabled) {
         super(url);
-        this.setForce(force);
+//        this.setForce(force);
         this.enabled = enabled;
+        matcherFactories =
+                moduleModel.getExtensionLoader(ConditionMatcherFactory.class).getActivateExtensions();
         covert(multiDestCondition, this);
         this.init(multiDestCondition.getFrom(), multiDestCondition.getTo());
     }
 
     //    进来的是  region=Hangzhou & env=gray
     public void init(Map<String, String> from, List<Map<String, String>> to) {
-        if (from == null || from.size() == 0 || to == null || to.size() == 0) {
+        if (from == null || to == null) {
             throw new IllegalArgumentException("Illegal route rule!");
         }
                 try {
@@ -78,16 +90,17 @@ public class MultiDestConditionRouter<T> extends AbstractStateRouter<T> {
                             (whenRule);
                     this.whenCondition = when;
 
+                    List<CondSet<T>> thenConditions = new ArrayList<>();
                     for (Map<String, String> toMap : to) {
                         String thenRule = toMap.get("match");
                         Map<String, ConditionMatcher> then =
                                 StringUtils.isBlank(thenRule) || "false".equals(thenRule) ? null : parseRule(thenRule);
                         // NOTE: It should be determined on the business level whether the `When condition` can be empty or not.
 
-                        this.thenCondition.add(new CondSet(then, Integer.valueOf(toMap.getOrDefault("weight",
+                        thenConditions.add(new CondSet(then, Integer.valueOf(toMap.getOrDefault("weight",
                                 String.valueOf(DefaultRouteConditionSubSetWeight)))));
                     }
-
+                    this.thenCondition = thenConditions;
                 } catch (ParseException e) {
                     throw new IllegalStateException(e.getMessage(), e);
                 }
@@ -200,13 +213,123 @@ public class MultiDestConditionRouter<T> extends AbstractStateRouter<T> {
             boolean needToPrintMessage,
             Holder<RouterSnapshotNode<T>> routerSnapshotNodeHolder,
             Holder<String> messageHolder) throws RpcException {
-        return null;
+
+        if (!enabled) {
+            if (needToPrintMessage) {
+                messageHolder.set("Directly return. Reason: ConditionRouter disabled.");
+            }
+            return invokers;
+        }
+
+        if (CollectionUtils.isEmpty(invokers)) {
+            if (needToPrintMessage) {
+                //                以前路由器的调用器为空
+                messageHolder.set("Directly return. Reason: Invokers from previous router is empty.");
+            }
+            return invokers;
+        }
+
+        try {
+            if (!matchWhen(url, invocation)) {
+                if (needToPrintMessage) {
+                    //                    when 条件不满足
+                    messageHolder.set("Directly return. Reason: WhenCondition not match.");
+                }
+                return invokers;
+            }
+            if (trafficDisable) {
+                invocation.setAttachment("TrafficDisableKey", new Object());
+                if (needToPrintMessage) {
+                    //                    when 条件不满足
+                    messageHolder.set("Directly return. Reason: TrafficDisableKey is true.");
+                }
+                return invokers;
+            }
+            //            when 匹配上了 但是 then是空
+            if (thenCondition == null || thenCondition.size() == 0) {
+                logger.warn(CLUSTER_CONDITIONAL_ROUTE_LIST_EMPTY, "condition state router thenCondition is empty", "",
+                        "The current consumer in the service blocklist. consumer: " + NetUtils.getLocalHost()
+                                + ", service: " + url.getServiceKey());
+                if (needToPrintMessage) {
+                    messageHolder.set("Empty return. Reason: ThenCondition is empty.");
+                }
+                return BitList.emptyList();
+            }
+
+            DestSet destinations = new DestSet();
+            for (CondSet condition : thenCondition) {
+                BitList<Invoker> res = BitList.emptyList();
+                for (Invoker invoker : invokers) {
+                    if (doMatch(getUrl(), null, invocation, condition.getCond(), false)) {
+                        res.add(invoker);
+                    }
+                }
+                if (!res.isEmpty()) {
+                    destinations.addDest(condition.getSubSetWeight(), res);
+                }
+            }
+
+            if (!destinations.getDests()
+                    .isEmpty()) {
+                BitList<Invoker<T>> res = destinations.randDest();
+                if (res.size() * 100 / invokers.size() > ratio) {
+                    return res;
+                }else {
+                    return BitList.emptyList();
+                }
+            }else {
+                return BitList.emptyList();
+            }
+
+        }  catch (Throwable t) {
+            logger.error(
+                    CLUSTER_FAILED_EXEC_CONDITION_ROUTER,
+                    "execute condition state router exception",
+                    "",
+                    "Failed to execute condition router rule: " + getUrl() + ", invokers: " + invokers + ", cause: "
+                            + t.getMessage(),
+                    t);
+        }
+
+        if (needToPrintMessage) {
+            messageHolder.set("Directly return. Reason: Error occurred ( or result is empty ).");
+        }
+        return invokers;
     }
 
     public void covert(MultiDestCondition multiDestCondition, MultiDestConditionRouter multiDestConditionRouter) {
+        if (multiDestCondition == null) {
+            throw new IllegalStateException("多地址条件为空");
+        }
         multiDestConditionRouter.setTrafficDisable(multiDestCondition.isTrafficDisable());
         multiDestConditionRouter.setRatio(multiDestCondition.getRatio());
         multiDestConditionRouter.setPriority(multiDestCondition.getPriority());
+        multiDestConditionRouter.setForce(multiDestCondition.isForce());
+        multiDestConditionRouter.setTrafficDisable(multiDestCondition.isTrafficDisable());
+    }
+
+    boolean matchWhen(URL url, Invocation invocation) {
+        if (CollectionUtils.isEmptyMap(whenCondition)) {
+            return true;
+        }
+
+        return doMatch(url, null, invocation, whenCondition, true);
+    }
+
+    private boolean doMatch(
+            URL url,
+            URL param,
+            Invocation invocation,
+            Map<String, ConditionMatcher> conditions,
+            boolean isWhenCondition) {
+        Map<String, String> sample = url.toOriginalMap();
+        for (Map.Entry<String, ConditionMatcher> entry : conditions.entrySet()) {
+            ConditionMatcher matchPair = entry.getValue();
+            if (!matchPair.isMatch(sample, param, invocation, isWhenCondition)) {
+                return false;
+            }
+        }
+        return true;
     }
 
     // Setter 方法
@@ -218,7 +341,7 @@ public class MultiDestConditionRouter<T> extends AbstractStateRouter<T> {
         this.trafficDisable = trafficDisable;
     }
 
-    public void setThenCondition(List<CondSet> thenCondition) {
+    public void setThenCondition(List<CondSet<T>> thenCondition) {
         this.thenCondition = thenCondition;
     }
 
@@ -243,9 +366,9 @@ public class MultiDestConditionRouter<T> extends AbstractStateRouter<T> {
         return trafficDisable;
     }
 
-    public List<CondSet> getThenCondition() {
-        return thenCondition;
-    }
+//    public List<CondSet<T>> getThenCondition() {
+//        return thenCondition;
+//    }
 
     public int getRatio() {
         return ratio;
@@ -261,7 +384,7 @@ public class MultiDestConditionRouter<T> extends AbstractStateRouter<T> {
 
 }
 
-class CondSet {
+class CondSet<T> {
     private Map<String, ConditionMatcher> cond;
     private int subSetWeight;
 
@@ -299,33 +422,37 @@ class CondSet {
         this.subSetWeight = subSetWeight;
     }
 
+    @Override
+    public String toString() {
+        return "CondSet{" + "cond=" + cond + ", subSetWeight=" + subSetWeight + '}';
+    }
 }
-class Dest {
+class Dest<T> {
     int weight;
-    List<Invoker> ivks;
+    BitList<Invoker<T>> ivks;
 
-    Dest(int weight, List<Invoker> ivks) {
+    Dest(int weight, BitList<Invoker<T>> ivks) {
         this.weight = weight;
         this.ivks = ivks;
     }
 }
-class DestSet {
-    private final List<Dest> dests;
+class DestSet<T> {
+    private final BitList<Dest<T>> dests;
     private int weightSum;
     private final Random random;
 
     public DestSet() {
-        this.dests = new ArrayList<>();
+        this.dests = BitList.emptyList();
         this.weightSum = 0;
         this.random = new Random();
     }
 
-    public void addDest(int weight, List<Invoker> ivks) {
+    public void addDest(int weight, BitList<Invoker<T>> ivks) {
         dests.add(new Dest(weight, ivks));
         weightSum += weight;
     }
 
-    public List<Invoker> randDest() {
+    public BitList<Invoker<T>> randDest() {
         if (dests.size() == 1) {
             return dests.get(0).ivks;
         }
@@ -339,6 +466,20 @@ class DestSet {
         return null; // 应该永远不会到达这里
     }
 
+    public BitList<Dest<T>> getDests() {
+        return dests;
+    }
 
+    public int getWeightSum() {
+        return weightSum;
+    }
+
+    public void setWeightSum(int weightSum) {
+        this.weightSum = weightSum;
+    }
+
+    public Random getRandom() {
+        return random;
+    }
 }
 

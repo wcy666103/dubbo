@@ -195,6 +195,7 @@ public class RegistryDirectory<T> extends DynamicDirectory<T> {
 
     /**
      * 为什么是 DubboRegistryRetryTimer触发的这个
+     * 这个是provider进来了反正是
      * 哪里生成的urls，就是将规则转换成为了 urls，来进行notify，将其对应的规则进行转换
      * @param urls The list of registered information , is always not empty. The meaning is the same as the return value of {@link org.apache.dubbo.registry.RegistryService#lookup(URL)}.
      */
@@ -254,6 +255,8 @@ public class RegistryDirectory<T> extends DynamicDirectory<T> {
     }
 
     // RefreshOverrideAndInvoker will be executed by registryCenter and configCenter, so it should be synchronized.
+//    .DemoService?application=dubbo-springboot-demo-provider&background=false&category=providers,configurators,routers&check=false&deprecated=false&dubbo=2.0.2&dynamic=true&executor-management-mode=isolation&file-cache=true&generic=false&interface=org.apache.dubbo.springboot.demo.DemoService&ipv6=2001:250:480c:2717:67c:16ff:feb8:fb58&methods=sayHello,sayHelloAsync&pid=8524&prefer.serialization=fastjson2,hessian2&release=3.2.13-SNAPSHOT&service-name-mapping=true&side=provider&sticky=false&unloadClusterRelated=false
+//    是provider端的url
     @Override
     protected synchronized void refreshOverrideAndInvoker(List<URL> urls) {
         // mock zookeeper://xxx?mock=return null
@@ -271,6 +274,10 @@ public class RegistryDirectory<T> extends DynamicDirectory<T> {
      * rule, which needs to be re-contrasted to decide whether to re-reference.</li>
      * </ol>
      *
+     * 将 invokerURL 列表转换为 Invoker 映射。转换规则如下：
+     * 如果 URL 已转换为调用程序，则不再重新引用并直接从缓存中获取它，请注意，URL 中的任何参数更改都将被重新引用。
+     * 如果传入的调用程序列表不为空，则表示它是最新的调用程序列表。
+     * 如果传入的 invokerUrl 列表为空，则表示该规则只是覆盖规则或路由规则，需要重新对比以决定是否重新引用。
      * @param invokerUrls this parameter can't be null
      */
     private void refreshInvoker(List<URL> invokerUrls) {
@@ -400,6 +407,7 @@ public class RegistryDirectory<T> extends DynamicDirectory<T> {
     }
 
     /**
+     * condition://0.0.0.0/xxx 在这里转换成对应的router！
      * @param urls
      * @return null : no routers ,do nothing
      * else :routers list

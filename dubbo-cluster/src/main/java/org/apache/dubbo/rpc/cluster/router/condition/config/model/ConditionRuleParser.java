@@ -52,15 +52,18 @@ public class ConditionRuleParser {
         String confVersion = (String) map.get(CONFIG_VERSION_KEY);
 
         if (confVersion != null && confVersion.startsWith(RULE_VERSION_V31)) {
-            rule = ConditionRouterRule.parseFromMap(map);
-            rule.setRawRule(rawRule);
-
-            if (CollectionUtils.isEmpty(((ConditionRouterRule)rule).getConditions())) {
+            rule = MultiDestConditionRouterRule.parseFromMap(map);
+            if (CollectionUtils.isEmpty(((MultiDestConditionRouterRule)rule).getConditions())) {
                 rule.setValid(false);
             }
         }else {
             rule = ConditionRouterRule.parseFromMap(map);
+            if (CollectionUtils.isEmpty(((ConditionRouterRule)rule).getConditions())) {
+                rule.setValid(false);
+            }
         }
+        rule.setRawRule(rawRule);
+
 
 //        这个 rawRule就是给整个yml配置文件都弄成一个字符串，conditions是个list里边放的很多个条件，最终的过滤条件就是在这里存储
 

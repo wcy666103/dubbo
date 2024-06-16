@@ -42,9 +42,11 @@ import org.apache.dubbo.rpc.cluster.router.state.TailStateRouter;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import static org.apache.dubbo.common.constants.LoggerCodeConstants.CLUSTER_FAILED_RULE_PARSING;
+import static org.apache.dubbo.rpc.cluster.Constants.RULE_VERSION_V31;
 
 /**
  * Abstract router which listens to dynamic configuration
@@ -99,6 +101,7 @@ public abstract class ListenableStateRouter<T> extends AbstractStateRouter<T> im
                 //                routerRule就是yml转成的对象，里边的ConditionRouterRules都是string的集合，需要的是
                 //                generateConditions将string的rul转换
                 generateConditions(routerRule);
+                System.out.println("生成结束");
             } catch (Exception e) {
                 logger.error(CLUSTER_FAILED_RULE_PARSING, "Failed to parse the raw condition rule", "",
                         "Failed to parse the raw condition rule and it will not take effect, please check "
@@ -124,16 +127,24 @@ public abstract class ListenableStateRouter<T> extends AbstractStateRouter<T> im
             return invokers;
         }
 
-        // We will check enabled status inside each router.
+        // We will check enabled status inside each router. 在里边检查是否enable
         StringBuilder resultMessage = null;
         if (needToPrintMessage) {
             resultMessage = new StringBuilder();
         }
-        for (AbstractStateRouter<T> router : conditionRouters) {
-            invokers = router.route(invokers, url, invocation, needToPrintMessage, nodeHolder);
-            if (needToPrintMessage) {
-                resultMessage.append(messageHolder.get());
+        if (routerRule instanceof MultiDestConditionRouterRule || routerRule.getVersion() != null &&routerRule.getVersion()
+                .startsWith(RULE_VERSION_V31)) {
+            for (MultiDestConditionRouter<T> multiDestConditionRouter : multiDestConditionRouters) {
+                invokers = multiDestConditionRouter.route(invokers, url, invocation, needToPrintMessage, nodeHolder);
             }
+        }else {
+            for (AbstractStateRouter<T> router : conditionRouters) {
+                invokers = router.route(invokers, url, invocation, needToPrintMessage, nodeHolder);
+            }
+        }
+
+        if (needToPrintMessage) {
+            resultMessage.append(messageHolder.get());
         }
 
         if (needToPrintMessage) {
@@ -175,11 +186,25 @@ public abstract class ListenableStateRouter<T> extends AbstractStateRouter<T> im
                 conditionRouter.setNextRouter(TailStateRouter.getInstance());
             }
         } else if (rule instanceof MultiDestConditionRouterRule) {
+            this.multiDestConditionRouters = ((MultiDestConditionRouterRule)rule).getConditions()
+                    .stream()
+                    .map(condition -> new MultiDestConditionRouter<T>(getUrl(),condition,rule.isEnabled()))
+                    .sorted((a,b) -> a.getPriority() - b.getPriority())
+                    .collect(Collectors.toList());
+
+            System.err.println("multiDestConditionRouters = " + multiDestConditionRouters);
+            for (MultiDestConditionRouter<T> conditionRouter : this.multiDestConditionRouters) {
+                conditionRouter.setNextRouter(TailStateRouter.getInstance());
+            }
 //            todo
         }
-
+        System.out.println("初始化 conditionRouter完成");
     }
 
+    /**
+     * 这里在新建时候发送消息，然后还是该类进行处理
+     * @param ruleKey
+     */
     private synchronized void init(String ruleKey) {
         if (StringUtils.isEmpty(ruleKey)) {
             return;

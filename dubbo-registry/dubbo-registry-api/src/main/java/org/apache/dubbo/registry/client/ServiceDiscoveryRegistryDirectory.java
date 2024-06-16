@@ -193,6 +193,8 @@ public class ServiceDiscoveryRegistryDirectory<T> extends DynamicDirectory<T> {
 
     @Override
     public synchronized void notify(List<URL> instanceUrls) {
+
+        System.out.println("ServiceDiscoveryRegistryDirectory.notify#instanceUrls = " + instanceUrls);
         if (isDestroyed()) {
             return;
         }
@@ -208,7 +210,8 @@ public class ServiceDiscoveryRegistryDirectory<T> extends DynamicDirectory<T> {
                 addressListenerExtensionLoader.getActivateExtension(getUrl(), (String[]) null);
         if (supportedListeners != null && !supportedListeners.isEmpty()) {
             for (AddressListener addressListener : supportedListeners) {
-//                通过这种方式统一唤醒
+                System.out.println("addressListener = " + addressListener);
+                //                通过这种方式统一唤醒
                 instanceUrls = addressListener.notify(instanceUrls, getConsumerUrl(), this);
             }
         }

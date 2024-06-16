@@ -158,6 +158,7 @@ public class RouterChain<T> {
      * 在第一时间通知路由器链来自注册表的初始地址。每当注册表中的地址发生更改时，都会通知。
      */
     public synchronized void setInvokers(BitList<Invoker<T>> invokers, Runnable switchAction) {
+        System.out.println("invokers.get(0) = " + invokers.get(0));
         try {
             // Lock to prevent directory continue list  本类中的一个属性，进行切换currentChain时候用
             lock.writeLock().lock();

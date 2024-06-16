@@ -1,21 +1,28 @@
 package org.apache.dubbo.rpc.cluster.router.condition.config.model;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 public class MultiDestCondition {
-    private Integer priority;
+    private int priority;
     private Map<String,String> from;
     private boolean trafficDisable;
     private List<Map<String,String>> to;
     private boolean force;
-    private Integer ratio;
+    private int ratio;
 
-    public Integer getPriority() {
+    public MultiDestCondition() {
+        this.from = new HashMap<String,String>();
+        this.to = new ArrayList<Map<String,String>>();
+    }
+
+    public int getPriority() {
         return priority;
     }
 
-    public void setPriority(Integer priority) {
+    public void setPriority(int priority) {
         this.priority = priority;
     }
 
@@ -51,11 +58,11 @@ public class MultiDestCondition {
         this.force = force;
     }
 
-    public Integer getRatio() {
+    public int getRatio() {
         return ratio;
     }
 
-    public void setRatio(Integer ratio) {
+    public void setRatio(int ratio) {
         this.ratio = ratio;
     }
 

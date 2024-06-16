@@ -106,6 +106,10 @@ public class ConditionStateRouter<T> extends AbstractStateRouter<T> {
         }
     }
 
+    /**
+     * 这个应该是支持的是 2.7.x以下版本用这样url来构建的
+     * @param url
+     */
     public ConditionStateRouter(URL url) {
         super(url);
         this.setUrl(url);

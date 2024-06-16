@@ -1,16 +1,25 @@
 package org.apache.dubbo.rpc.cluster.router.condition.config.model;
 
+import org.apache.dubbo.common.utils.JsonUtils;
 import org.apache.dubbo.rpc.cluster.router.AbstractRouterRule;
 import org.apache.dubbo.rpc.cluster.router.condition.matcher.ConditionMatcher;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 import static org.apache.dubbo.rpc.cluster.Constants.CONDITIONS_KEY;
+import static org.apache.dubbo.rpc.cluster.Constants.DefaultRoutePriority;
+import static org.apache.dubbo.rpc.cluster.Constants.DefaultRouteRatio;
+import static org.apache.dubbo.rpc.cluster.Constants.FORCE_KEY;
+import static org.apache.dubbo.rpc.cluster.Constants.PRIORITY_KEY;
+import static org.apache.dubbo.rpc.cluster.Constants.RATIO_KEY;
+import static org.apache.dubbo.rpc.cluster.Constants.TRAFFIC_DISABLE_KEY;
 
 public class MultiDestConditionRouterRule extends AbstractRouterRule {
 
-    private List<Map<String, Object>> conditions;
+    private List<MultiDestCondition> conditions;
+
 
     /**
      * @param map map = {configVersion=v3.1, scope=service, key=org.apache.dubbo.samples.CommentService, force=false,
@@ -22,40 +31,37 @@ public class MultiDestConditionRouterRule extends AbstractRouterRule {
      * @return
      */
     public static AbstractRouterRule parseFromMap(Map<String, Object> map) {
+
         MultiDestConditionRouterRule multiDestConditionRouterRule = new MultiDestConditionRouterRule();
         //        抽象类提供的方法
         multiDestConditionRouterRule.parseFromMap0(map);
         //        条件处理在这
-        Object conditions = map.get(CONDITIONS_KEY);
-        if (conditions != null && Map.class.isAssignableFrom(conditions.getClass())) {
-            //           这里边的每一条数据，应该都是按照 & 进行拆分之后然后分的
-            //            进来的是consumer，也就是说需要按照
-            //            multiDestConditionRouterRule.setConditions(((List<Object>) conditions).stream()
-            //                    .map(String::valueOf)
-            //                    .collect(Collectors.toList()));
-        }
+        List<Map<String,String>> conditions = (List<Map<String,String>>)map.get(CONDITIONS_KEY);
+        List<MultiDestCondition> multiDestConditions = new ArrayList<>();
 
-        //        确定此 Class 对象表示的类或接口是否与指定参数表示的类或接口相同，或者是该 Class 类或接口的超类或超接口。
-        //        if (conditions != null && List.class.isAssignableFrom(conditions.getClass())) {
-        //            //           这里边的每一条数据，应该都是按照 & 进行拆分之后然后分的
-        //            //            进来的是consumer，也就是说需要按照
-        //            multiDestConditionRouterRule.setConditions(
-        //                    ((List<Object>) conditions).stream().map(String::valueOf).collect(Collectors.toList()));
-        //        }
-        //
-        //        System.out.println("condition.config.model.ConditionRouterRule.parseFromMap = " + "==转换后==");
-        //        //        method=sayHello => region=hangzhou
-        //        conditionRouterRule.conditions.forEach(System.out::println);
-        //
-        //        return conditionRouterRule;
-        return null;
+        for (Map<String, String> condition : conditions) {
+//            MultiDestCondition multiDestCondition = new MultiDestCondition();
+//            multiDestCondition.setPriority(Integer.valueOf(condition.getOrDefault(PRIORITY_KEY,
+//                    String.valueOf(DefaultRoutePriority))));
+//            multiDestCondition.setForce(Boolean.valueOf(condition.getOrDefault(FORCE_KEY, String.valueOf(false))));
+//            multiDestCondition.setRatio(Integer.valueOf(condition.getOrDefault(RATIO_KEY, String.valueOf(DefaultRouteRatio))));
+//            multiDestCondition.setTrafficDisable(Boolean.valueOf(condition.getOrDefault(TRAFFIC_DISABLE_KEY,
+//                    String.valueOf(false))));
+            multiDestConditions.add((MultiDestCondition) JsonUtils.convertObject(condition, MultiDestCondition.class));
+        }
+        multiDestConditions.sort((a,b) -> a.getPriority() - b.getPriority());
+        multiDestConditionRouterRule.setConditions(multiDestConditions);
+
+        System.err.println("multiDestConditionRouterRule = " + multiDestConditionRouterRule);
+
+        return multiDestConditionRouterRule;
     }
 
-    public List<Map<String, Object>> getConditions() {
+    public List<MultiDestCondition> getConditions() {
         return conditions;
     }
 
-    public void setConditions(List<Map<String, Object>> conditions) {
+    public void setConditions(List<MultiDestCondition> conditions) {
         this.conditions = conditions;
     }
 }
