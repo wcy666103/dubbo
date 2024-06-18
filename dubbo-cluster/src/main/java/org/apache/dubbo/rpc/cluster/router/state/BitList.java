@@ -42,9 +42,13 @@ import java.util.concurrent.ThreadLocalRandom;
  * tailList: An additional list for BitList. Worked when adding totally new
  * elements to list. These elements will be appended to the last
  * of the BitList.
+ *
  * 基于 BitMap 实现的 BitList。BitList 由 'originList'、'rootSet' 和 'tailList' 组成。
- * originList：列表的初始元素。此列表不会在修改操作中更改（期望全部清除）。rootSet：用于存储 originList 索引的 bitMap 仍然存在。大多数修改操作都是在此位图上操作的。
+ * originList：列表的初始元素。此列表不会在修改操作中更改（期望全部清除）。
+ * rootSet：用于存储 originList 索引的 bitMap 仍然存在。大多数修改操作都是在此位图上操作的。
  * tailList：BitList 的附加列表。在向列表中添加全新元素时有效。这些元素将追加到 BitList 的最后一个。
+ * 一个附加列表，用于存储新添加的元素。这些元素会追加到 BitList 的末尾。
+ *
  * <p>
  * An example of BitList:
  * originList:  A  B  C  D  E             (5 elements)
@@ -120,6 +124,7 @@ public class BitList<E> extends AbstractList<E> implements Cloneable {
     /**
      * And operation between two bitList. Return a new cloned list.
      * TailList in source bitList will be totally saved even if it is not appeared in the target bitList.
+     * 和两个 bitList 之间的操作。返回新的克隆列表。源 bitList 中的 TailList 即使没有出现在目标 bitList 中，也会被完全保存。
      *
      * @param target target bitList
      * @return this bitList only contains those elements contain in both two list and source bitList's tailList

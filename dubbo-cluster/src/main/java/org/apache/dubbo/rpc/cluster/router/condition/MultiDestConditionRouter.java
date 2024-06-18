@@ -258,14 +258,15 @@ public class MultiDestConditionRouter<T> extends AbstractStateRouter<T> {
 
             DestSet destinations = new DestSet();
             for (CondSet condition : thenCondition) {
-                BitList<Invoker> res = BitList.emptyList();
+                BitList<Invoker<T>> res = invokers.clone();
+
                 for (Invoker invoker : invokers) {
-                    if (doMatch(getUrl(), null, invocation, condition.getCond(), false)) {
-                        res.add(invoker);
+                    if (!doMatch(invoker.getUrl(), url, null, condition.getCond(), false)) {
+                        res.remove(invoker);
                     }
                 }
                 if (!res.isEmpty()) {
-                    destinations.addDest(condition.getSubSetWeight(), res);
+                    destinations.addDest(condition.getSubSetWeight() == null ? DefaultRouteConditionSubSetWeight : condition.getSubSetWeight(), res.clone());
                 }
             }
 
@@ -278,7 +279,7 @@ public class MultiDestConditionRouter<T> extends AbstractStateRouter<T> {
                     return BitList.emptyList();
                 }
             }else {
-                return BitList.emptyList();
+                return invokers;
             }
 
         }  catch (Throwable t) {
@@ -325,6 +326,7 @@ public class MultiDestConditionRouter<T> extends AbstractStateRouter<T> {
         Map<String, String> sample = url.toOriginalMap();
         for (Map.Entry<String, ConditionMatcher> entry : conditions.entrySet()) {
             ConditionMatcher matchPair = entry.getValue();
+
             if (!matchPair.isMatch(sample, param, invocation, isWhenCondition)) {
                 return false;
             }
@@ -386,14 +388,14 @@ public class MultiDestConditionRouter<T> extends AbstractStateRouter<T> {
 
 class CondSet<T> {
     private Map<String, ConditionMatcher> cond;
-    private int subSetWeight;
+    private Integer subSetWeight;
 
     // 构造函数（可选）
     public CondSet() {
         subSetWeight = DefaultRouteConditionSubSetWeight;
     }
 
-    public CondSet(Map<String, ConditionMatcher> cond, int subSetWeight) {
+    public CondSet(Map<String, ConditionMatcher> cond, Integer subSetWeight) {
         this.cond = cond;
         this.subSetWeight = subSetWeight;
         if (subSetWeight <= 0) {
@@ -413,7 +415,7 @@ class CondSet<T> {
     }
 
     // Getter方法
-    public int getSubSetWeight() {
+    public Integer getSubSetWeight() {
         return subSetWeight;
     }
 
@@ -437,12 +439,12 @@ class Dest<T> {
     }
 }
 class DestSet<T> {
-    private final BitList<Dest<T>> dests;
+    private final List<Dest<T>> dests;
     private int weightSum;
     private final Random random;
 
     public DestSet() {
-        this.dests = BitList.emptyList();
+        this.dests = new ArrayList<>();
         this.weightSum = 0;
         this.random = new Random();
     }
@@ -466,7 +468,7 @@ class DestSet<T> {
         return null; // 应该永远不会到达这里
     }
 
-    public BitList<Dest<T>> getDests() {
+    public List<Dest<T>> getDests() {
         return dests;
     }
 

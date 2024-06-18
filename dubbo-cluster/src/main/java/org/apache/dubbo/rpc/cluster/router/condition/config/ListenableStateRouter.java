@@ -119,7 +119,7 @@ public abstract class ListenableStateRouter<T> extends AbstractStateRouter<T> im
             boolean needToPrintMessage,
             Holder<RouterSnapshotNode<T>> nodeHolder,
             Holder<String> messageHolder) throws RpcException {
-        if (CollectionUtils.isEmpty(invokers) || conditionRouters.size() == 0) {
+        if (CollectionUtils.isEmpty(invokers) || (conditionRouters.size() == 0 && multiDestConditionRouters.size() == 0)) {
             if (needToPrintMessage) {
                 messageHolder.set("Directly return. Reason: Invokers from previous router is empty or "
                         + "conditionRouters is empty.");
@@ -196,7 +196,6 @@ public abstract class ListenableStateRouter<T> extends AbstractStateRouter<T> im
             for (MultiDestConditionRouter<T> conditionRouter : this.multiDestConditionRouters) {
                 conditionRouter.setNextRouter(TailStateRouter.getInstance());
             }
-//            todo
         }
         System.out.println("初始化 conditionRouter完成");
     }
