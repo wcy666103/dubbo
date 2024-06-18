@@ -132,10 +132,22 @@ public abstract class ListenableStateRouter<T> extends AbstractStateRouter<T> im
         if (needToPrintMessage) {
             resultMessage = new StringBuilder();
         }
+
+        BitList<Invoker<T>> routeResult;
         if (routerRule instanceof MultiDestConditionRouterRule || routerRule.getVersion() != null &&routerRule.getVersion()
                 .startsWith(RULE_VERSION_V31)) {
             for (MultiDestConditionRouter<T> multiDestConditionRouter : multiDestConditionRouters) {
-                invokers = multiDestConditionRouter.route(invokers, url, invocation, needToPrintMessage, nodeHolder);
+                routeResult = multiDestConditionRouter.route(invokers, url, invocation, needToPrintMessage, nodeHolder);
+//                表示匹配未生效
+                if (invokers == routeResult) {
+                    continue;
+//                    不等于表示配置生效，但是还需要进一步排除是否需要 下一级匹配
+                }else if (routeResult.size() == 0 && !multiDestConditionRouter.isTrafficDisable() && !multiDestConditionRouter.isForce()){
+                    continue;
+//                    配置生效
+                }else {
+                    break;
+                }
             }
         }else {
             for (AbstractStateRouter<T> router : conditionRouters) {
@@ -188,7 +200,7 @@ public abstract class ListenableStateRouter<T> extends AbstractStateRouter<T> im
         } else if (rule instanceof MultiDestConditionRouterRule) {
             this.multiDestConditionRouters = ((MultiDestConditionRouterRule)rule).getConditions()
                     .stream()
-                    .map(condition -> new MultiDestConditionRouter<T>(getUrl(),condition,rule.isEnabled()))
+                    .map(condition -> new MultiDestConditionRouter<T>(getUrl(),condition,rule.isEnabled(),rule.isForce()))
                     .sorted((a,b) -> a.getPriority() - b.getPriority())
                     .collect(Collectors.toList());
 

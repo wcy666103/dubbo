@@ -12,7 +12,6 @@ import org.apache.dubbo.rpc.Invoker;
 import org.apache.dubbo.rpc.RpcException;
 import org.apache.dubbo.rpc.cluster.router.RouterSnapshotNode;
 import org.apache.dubbo.rpc.cluster.router.condition.config.model.MultiDestCondition;
-import org.apache.dubbo.rpc.cluster.router.condition.config.model.MultiDestConditionRouterRule;
 import org.apache.dubbo.rpc.cluster.router.condition.matcher.ConditionMatcher;
 import org.apache.dubbo.rpc.cluster.router.condition.matcher.ConditionMatcherFactory;
 import org.apache.dubbo.rpc.cluster.router.state.AbstractStateRouter;
@@ -43,6 +42,7 @@ public class MultiDestConditionRouter<T> extends AbstractStateRouter<T> {
     private int ratio;
     private int priority;
     private boolean force;
+    private boolean scopFroce;
     protected List<ConditionMatcherFactory> matcherFactories;
     private boolean enabled;
 
@@ -68,12 +68,13 @@ public class MultiDestConditionRouter<T> extends AbstractStateRouter<T> {
     }
 
     public MultiDestConditionRouter(
-            URL url, MultiDestCondition multiDestCondition,boolean enabled) {
+            URL url, MultiDestCondition multiDestCondition, boolean enabled, boolean scopFroce) {
         super(url);
-//        this.setForce(force);
+        //        this.setForce(force);
+        this.scopFroce = scopFroce;
         this.enabled = enabled;
-        matcherFactories =
-                moduleModel.getExtensionLoader(ConditionMatcherFactory.class).getActivateExtensions();
+        matcherFactories = moduleModel.getExtensionLoader(ConditionMatcherFactory.class)
+                .getActivateExtensions();
         covert(multiDestCondition, this);
         this.init(multiDestCondition.getFrom(), multiDestCondition.getTo());
     }
@@ -83,27 +84,26 @@ public class MultiDestConditionRouter<T> extends AbstractStateRouter<T> {
         if (from == null || to == null) {
             throw new IllegalArgumentException("Illegal route rule!");
         }
-                try {
-                    String whenRule = from.get("match");
-                    Map<String, ConditionMatcher> when =
-                            StringUtils.isBlank(whenRule) || "true".equals(whenRule) ? new HashMap<>() : parseRule
-                            (whenRule);
-                    this.whenCondition = when;
+        try {
+            String whenRule = from.get("match");
+            Map<String, ConditionMatcher> when =
+                    StringUtils.isBlank(whenRule) || "true".equals(whenRule) ? new HashMap<>() : parseRule(whenRule);
+            this.whenCondition = when;
 
-                    List<CondSet<T>> thenConditions = new ArrayList<>();
-                    for (Map<String, String> toMap : to) {
-                        String thenRule = toMap.get("match");
-                        Map<String, ConditionMatcher> then =
-                                StringUtils.isBlank(thenRule) || "false".equals(thenRule) ? null : parseRule(thenRule);
-                        // NOTE: It should be determined on the business level whether the `When condition` can be empty or not.
+            List<CondSet<T>> thenConditions = new ArrayList<>();
+            for (Map<String, String> toMap : to) {
+                String thenRule = toMap.get("match");
+                Map<String, ConditionMatcher> then =
+                        StringUtils.isBlank(thenRule) || "false".equals(thenRule) ? null : parseRule(thenRule);
+                // NOTE: It should be determined on the business level whether the `When condition` can be empty or not.
 
-                        thenConditions.add(new CondSet(then, Integer.valueOf(toMap.getOrDefault("weight",
-                                String.valueOf(DefaultRouteConditionSubSetWeight)))));
-                    }
-                    this.thenCondition = thenConditions;
-                } catch (ParseException e) {
-                    throw new IllegalStateException(e.getMessage(), e);
-                }
+                thenConditions.add(new CondSet(then, Integer.valueOf(toMap.getOrDefault("weight",
+                        String.valueOf(DefaultRouteConditionSubSetWeight)))));
+            }
+            this.thenCondition = thenConditions;
+        } catch (ParseException e) {
+            throw new IllegalStateException(e.getMessage(), e);
+        }
     }
 
     private Map<String, ConditionMatcher> parseRule(String rule) throws ParseException {
@@ -140,11 +140,8 @@ public class MultiDestConditionRouter<T> extends AbstractStateRouter<T> {
             else if ("=".equals(separator)) {
                 if (matcherPair == null) {
                     throw new ParseException(
-                            "Illegal route rule \""
-                                    + rule + "\", The error char '" + separator
-                                    + "' at index " + matcher.start() + " before \""
-                                    + content + "\".",
-                            matcher.start());
+                            "Illegal route rule \"" + rule + "\", The error char '" + separator + "' at index "
+                                    + matcher.start() + " before \"" + content + "\".", matcher.start());
                 }
 
                 values = matcherPair.getMatches();
@@ -154,11 +151,8 @@ public class MultiDestConditionRouter<T> extends AbstractStateRouter<T> {
             else if ("!=".equals(separator)) {
                 if (matcherPair == null) {
                     throw new ParseException(
-                            "Illegal route rule \""
-                                    + rule + "\", The error char '" + separator
-                                    + "' at index " + matcher.start() + " before \""
-                                    + content + "\".",
-                            matcher.start());
+                            "Illegal route rule \"" + rule + "\", The error char '" + separator + "' at index "
+                                    + matcher.start() + " before \"" + content + "\".", matcher.start());
                 }
 
                 values = matcherPair.getMismatches();
@@ -168,19 +162,14 @@ public class MultiDestConditionRouter<T> extends AbstractStateRouter<T> {
             else if (",".equals(separator)) { // Should be separated by ','
                 if (values == null || values.isEmpty()) {
                     throw new ParseException(
-                            "Illegal route rule \""
-                                    + rule + "\", The error char '" + separator
-                                    + "' at index " + matcher.start() + " before \""
-                                    + content + "\".",
-                            matcher.start());
+                            "Illegal route rule \"" + rule + "\", The error char '" + separator + "' at index "
+                                    + matcher.start() + " before \"" + content + "\".", matcher.start());
                 }
                 values.add(content);
             } else {
                 throw new ParseException(
-                        "Illegal route rule \"" + rule
-                                + "\", The error char '" + separator + "' at index "
-                                + matcher.start() + " before \"" + content + "\".",
-                        matcher.start());
+                        "Illegal route rule \"" + rule + "\", The error char '" + separator + "' at index "
+                                + matcher.start() + " before \"" + content + "\".", matcher.start());
             }
         }
         return condition;
@@ -188,6 +177,7 @@ public class MultiDestConditionRouter<T> extends AbstractStateRouter<T> {
 
     /**
      * 返回对应的matcher
+     *
      * @param key
      * @return
      */
@@ -199,12 +189,22 @@ public class MultiDestConditionRouter<T> extends AbstractStateRouter<T> {
             }
         }
         //        如果 没有就默认使用 para
-        return moduleModel
-                .getExtensionLoader(ConditionMatcherFactory.class)
+        return moduleModel.getExtensionLoader(ConditionMatcherFactory.class)
                 .getExtension("param")
                 .createMatcher(key, moduleModel);
     }
 
+    /**
+     * @param invokers                 all invokers to be routed
+     * @param url                      consumerUrl
+     * @param invocation               invocation
+     * @param needToPrintMessage       should current router print message
+     * @param routerSnapshotNodeHolder RouterSnapshotNode In general, router itself no need to care this param, just
+     *                                 pass to continueRoute
+     * @param messageHolder            message holder when router should current router print message
+     * @return 如果返回的invokers还是原来的invokers的话表示需要往下一个匹配
+     * @throws RpcException
+     */
     @Override
     protected BitList<Invoker<T>> doRoute(
             BitList<Invoker<T>> invokers,
@@ -232,18 +232,18 @@ public class MultiDestConditionRouter<T> extends AbstractStateRouter<T> {
         try {
             if (!matchWhen(url, invocation)) {
                 if (needToPrintMessage) {
-                    //                    when 条件不满足
+                    //                    when 条件不满足  需要继续匹配下一个multidesconditionRouter，返回 invokers？
                     messageHolder.set("Directly return. Reason: WhenCondition not match.");
                 }
                 return invokers;
             }
             if (trafficDisable) {
-                invocation.setAttachment("TrafficDisableKey", new Object());
+                //                invocation.setAttachment("TrafficDisableKey", new Object());
                 if (needToPrintMessage) {
                     //                    when 条件不满足
                     messageHolder.set("Directly return. Reason: TrafficDisableKey is true.");
                 }
-                return invokers;
+                return BitList.emptyList();
             }
             //            when 匹配上了 但是 then是空
             if (thenCondition == null || thenCondition.size() == 0) {
@@ -261,12 +261,14 @@ public class MultiDestConditionRouter<T> extends AbstractStateRouter<T> {
                 BitList<Invoker<T>> res = invokers.clone();
 
                 for (Invoker invoker : invokers) {
+//                    invoker.getUrl().getParameter("region","").equals("shanghai") && invoker.getUrl().getParameter("env","").equals("normal")
                     if (!doMatch(invoker.getUrl(), url, null, condition.getCond(), false)) {
                         res.remove(invoker);
                     }
                 }
                 if (!res.isEmpty()) {
-                    destinations.addDest(condition.getSubSetWeight() == null ? DefaultRouteConditionSubSetWeight : condition.getSubSetWeight(), res.clone());
+                    destinations.addDest(condition.getSubSetWeight()
+                            == null ? DefaultRouteConditionSubSetWeight : condition.getSubSetWeight(), res.clone());
                 }
             }
 
@@ -275,21 +277,21 @@ public class MultiDestConditionRouter<T> extends AbstractStateRouter<T> {
                 BitList<Invoker<T>> res = destinations.randDest();
                 if (res.size() * 100 / invokers.size() > ratio) {
                     return res;
-                }else {
-                    return BitList.emptyList();
+                } else {
+                   return BitList.emptyList();
                 }
+            } else if (force){
+                return BitList.emptyList();
+            } else if (scopFroce) {
+                return BitList.emptyList();
             }else {
                 return invokers;
             }
 
-        }  catch (Throwable t) {
-            logger.error(
-                    CLUSTER_FAILED_EXEC_CONDITION_ROUTER,
-                    "execute condition state router exception",
-                    "",
+        } catch (Throwable t) {
+            logger.error(CLUSTER_FAILED_EXEC_CONDITION_ROUTER, "execute condition state router exception", "",
                     "Failed to execute condition router rule: " + getUrl() + ", invokers: " + invokers + ", cause: "
-                            + t.getMessage(),
-                    t);
+                            + t.getMessage(), t);
         }
 
         if (needToPrintMessage) {
@@ -368,9 +370,9 @@ public class MultiDestConditionRouter<T> extends AbstractStateRouter<T> {
         return trafficDisable;
     }
 
-//    public List<CondSet<T>> getThenCondition() {
-//        return thenCondition;
-//    }
+    //    public List<CondSet<T>> getThenCondition() {
+    //        return thenCondition;
+    //    }
 
     public int getRatio() {
         return ratio;
@@ -429,8 +431,9 @@ class CondSet<T> {
         return "CondSet{" + "cond=" + cond + ", subSetWeight=" + subSetWeight + '}';
     }
 }
+
 class Dest<T> {
-    int weight;
+    int weight = DefaultRouteConditionSubSetWeight;
     BitList<Invoker<T>> ivks;
 
     Dest(int weight, BitList<Invoker<T>> ivks) {
@@ -438,6 +441,7 @@ class Dest<T> {
         this.ivks = ivks;
     }
 }
+
 class DestSet<T> {
     private final List<Dest<T>> dests;
     private int weightSum;

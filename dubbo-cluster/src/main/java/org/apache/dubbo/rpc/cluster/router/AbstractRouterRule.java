@@ -54,6 +54,7 @@ public abstract class AbstractRouterRule {
     protected void parseFromMap0(Map<String, Object> map) {
         setRawRule((String) map.get(RAW_RULE_KEY));
 
+//        参考这种形式来解决 yml到属性
         Object runtime = map.get(RUNTIME_KEY);
         if (runtime != null) {
             setRuntime(Boolean.parseBoolean(runtime.toString()));

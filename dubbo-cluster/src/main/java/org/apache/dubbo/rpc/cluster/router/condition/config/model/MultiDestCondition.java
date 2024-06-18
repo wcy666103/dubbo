@@ -7,16 +7,11 @@ import java.util.Map;
 
 public class MultiDestCondition {
     private int priority;
-    private Map<String,String> from;
+    private Map<String,String> from = new HashMap<>();
     private boolean trafficDisable;
-    private List<Map<String,String>> to;
+    private List<Map<String,String>> to = new ArrayList<>();
     private boolean force;
     private int ratio;
-
-    public MultiDestCondition() {
-        this.from = new HashMap<String,String>();
-        this.to = new ArrayList<Map<String,String>>();
-    }
 
     public int getPriority() {
         return priority;

@@ -136,6 +136,7 @@ public abstract class AbstractStateRouter<T> implements StateRouter<T> {
         BitList<Invoker<T>> routeResult;
 
         routeResult = doRoute(invokers, url, invocation, needToPrintMessage, nodeHolder, messageHolder);
+//        如果不是原来的就证明 route过滤掉了，就进行and
         if (routeResult != invokers) {
             routeResult = invokers.and(routeResult);
         }
