@@ -11,6 +11,8 @@ import org.apache.dubbo.rpc.Invocation;
 import org.apache.dubbo.rpc.Invoker;
 import org.apache.dubbo.rpc.RpcException;
 import org.apache.dubbo.rpc.cluster.router.RouterSnapshotNode;
+import org.apache.dubbo.rpc.cluster.router.condition.config.model.ConditionSubSet;
+import org.apache.dubbo.rpc.cluster.router.condition.config.model.DestinationSet;
 import org.apache.dubbo.rpc.cluster.router.condition.config.model.MultiDestCondition;
 import org.apache.dubbo.rpc.cluster.router.condition.matcher.ConditionMatcher;
 import org.apache.dubbo.rpc.cluster.router.condition.matcher.ConditionMatcherFactory;
@@ -22,7 +24,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -38,7 +39,7 @@ public class MultiDestConditionRouter<T> extends AbstractStateRouter<T> {
     protected static final Pattern ROUTE_PATTERN = Pattern.compile("([&!=,]*)\\s*([^&!=,\\s]+)");
     private Map<String, ConditionMatcher> whenCondition;
     private boolean trafficDisable;
-    private List<CondSet<T>> thenCondition;
+    private List<ConditionSubSet> thenCondition;
     private int ratio;
     private int priority;
     private boolean force;
@@ -90,14 +91,14 @@ public class MultiDestConditionRouter<T> extends AbstractStateRouter<T> {
                     StringUtils.isBlank(whenRule) || "true".equals(whenRule) ? new HashMap<>() : parseRule(whenRule);
             this.whenCondition = when;
 
-            List<CondSet<T>> thenConditions = new ArrayList<>();
+            List<ConditionSubSet> thenConditions = new ArrayList<>();
             for (Map<String, String> toMap : to) {
                 String thenRule = toMap.get("match");
                 Map<String, ConditionMatcher> then =
-                        StringUtils.isBlank(thenRule) || "false".equals(thenRule) ? null : parseRule(thenRule);
+                        StringUtils.isBlank(thenRule) || "false".equals(thenRule) ? new HashMap<>() : parseRule(thenRule);
                 // NOTE: It should be determined on the business level whether the `When condition` can be empty or not.
 
-                thenConditions.add(new CondSet(then, Integer.valueOf(toMap.getOrDefault("weight",
+                thenConditions.add(new ConditionSubSet(then, Integer.valueOf(toMap.getOrDefault("weight",
                         String.valueOf(DefaultRouteConditionSubSetWeight)))));
             }
             this.thenCondition = thenConditions;
@@ -256,13 +257,13 @@ public class MultiDestConditionRouter<T> extends AbstractStateRouter<T> {
                 return BitList.emptyList();
             }
 
-            DestSet destinations = new DestSet();
-            for (CondSet condition : thenCondition) {
+            DestinationSet destinations = new DestinationSet();
+            for (ConditionSubSet condition : thenCondition) {
                 BitList<Invoker<T>> res = invokers.clone();
 
                 for (Invoker invoker : invokers) {
 //                    invoker.getUrl().getParameter("region","").equals("shanghai") && invoker.getUrl().getParameter("env","").equals("normal")
-                    if (!doMatch(invoker.getUrl(), url, null, condition.getCond(), false)) {
+                    if (!doMatch(invoker.getUrl(), url, null, condition.getCondition(), false)) {
                         res.remove(invoker);
                     }
                 }
@@ -272,7 +273,7 @@ public class MultiDestConditionRouter<T> extends AbstractStateRouter<T> {
                 }
             }
 
-            if (!destinations.getDests()
+            if (!destinations.getDestinations()
                     .isEmpty()) {
                 BitList<Invoker<T>> res = destinations.randDest();
                 if (res.size() * 100 / invokers.size() > ratio) {
@@ -345,7 +346,7 @@ public class MultiDestConditionRouter<T> extends AbstractStateRouter<T> {
         this.trafficDisable = trafficDisable;
     }
 
-    public void setThenCondition(List<CondSet<T>> thenCondition) {
+    public void setThenCondition(List<ConditionSubSet> thenCondition) {
         this.thenCondition = thenCondition;
     }
 
@@ -386,106 +387,5 @@ public class MultiDestConditionRouter<T> extends AbstractStateRouter<T> {
         return force;
     }
 
-}
-
-class CondSet<T> {
-    private Map<String, ConditionMatcher> cond;
-    private Integer subSetWeight;
-
-    // 构造函数（可选）
-    public CondSet() {
-        subSetWeight = DefaultRouteConditionSubSetWeight;
-    }
-
-    public CondSet(Map<String, ConditionMatcher> cond, Integer subSetWeight) {
-        this.cond = cond;
-        this.subSetWeight = subSetWeight;
-        if (subSetWeight <= 0) {
-            this.subSetWeight = DefaultRouteConditionSubSetWeight;
-        }
-
-    }
-
-    // Getter方法
-    public Map<String, ConditionMatcher> getCond() {
-        return cond;
-    }
-
-    // Setter方法
-    public void setCond(Map<String, ConditionMatcher> cond) {
-        this.cond = cond;
-    }
-
-    // Getter方法
-    public Integer getSubSetWeight() {
-        return subSetWeight;
-    }
-
-    // Setter方法
-    public void setSubSetWeight(int subSetWeight) {
-        this.subSetWeight = subSetWeight;
-    }
-
-    @Override
-    public String toString() {
-        return "CondSet{" + "cond=" + cond + ", subSetWeight=" + subSetWeight + '}';
-    }
-}
-
-class Dest<T> {
-    int weight = DefaultRouteConditionSubSetWeight;
-    BitList<Invoker<T>> ivks;
-
-    Dest(int weight, BitList<Invoker<T>> ivks) {
-        this.weight = weight;
-        this.ivks = ivks;
-    }
-}
-
-class DestSet<T> {
-    private final List<Dest<T>> dests;
-    private int weightSum;
-    private final Random random;
-
-    public DestSet() {
-        this.dests = new ArrayList<>();
-        this.weightSum = 0;
-        this.random = new Random();
-    }
-
-    public void addDest(int weight, BitList<Invoker<T>> ivks) {
-        dests.add(new Dest(weight, ivks));
-        weightSum += weight;
-    }
-
-    public BitList<Invoker<T>> randDest() {
-        if (dests.size() == 1) {
-            return dests.get(0).ivks;
-        }
-        int sum = random.nextInt(weightSum);
-        for (Dest d : dests) {
-            sum -= d.weight;
-            if (sum <= 0) {
-                return d.ivks;
-            }
-        }
-        return null; // 应该永远不会到达这里
-    }
-
-    public List<Dest<T>> getDests() {
-        return dests;
-    }
-
-    public int getWeightSum() {
-        return weightSum;
-    }
-
-    public void setWeightSum(int weightSum) {
-        this.weightSum = weightSum;
-    }
-
-    public Random getRandom() {
-        return random;
-    }
 }
 

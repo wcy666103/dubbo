@@ -361,4 +361,37 @@ public class ProviderAppConditionStateRouterTestV31 {
 
         Assertions.assertEquals(invokers.size(), result.size());
     }
+
+    @Test
+    public void testApplicationConditionRouteBanSpecialTraffic() throws Exception {
+        String config = "configVersion: v3.1\n" +
+                "scope: application\n" +
+                "force: true\n" +
+                "runtime: true\n" +
+                "enabled: true\n" +
+                "key: shop\n" +
+                "conditions:\n" +
+                "  - from:\n" +
+                "      match: env=gray\n" +
+                "    to:\n" +
+                "      - match:\n" +
+                "    force: true\n" +
+                "    priority: 100\n" +
+                "  - from:\n" +
+                "      match:\n" +
+                "    to:\n" +
+                "      - match:\n" +
+                "    force: true\n" +
+                "    priority: 100\n";
+
+        AppStateRouter<String> router = new AppStateRouter<>(URL.valueOf("consumer://127.0.0.1/com.foo.BarService?env=gray&region=beijing"));
+        router.process(new ConfigChangedEvent("com.foo.BarService","",config, ConfigChangeType.ADDED));
+
+        RpcInvocation invocation = new RpcInvocation();
+        invocation.setMethodName("errMethod");
+
+        BitList<Invoker<String>> result = router.route(invokers.clone(), URL.valueOf("consumer://127.0.0.1/com.foo.BarService?env=gray&region=beijing"), invocation, false, new Holder<>());
+
+        Assertions.assertEquals(invokers.size(), result.size());
+    }
 }
