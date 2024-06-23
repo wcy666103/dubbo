@@ -143,8 +143,8 @@ public interface Constants {
 
     public static final String TRAFFIC_DISABLE_KEY = "trafficDisable";
     public static final String RATIO_KEY = "ratio";
-    public static final int DefaultRouteRatio = 0; // 假设的默认值
-    public static final int DefaultRouteConditionSubSetWeight = 100; // 假设的默认值
-    public static final int DefaultRoutePriority = 0; // 假设的默认值
+    public static final int DefaultRouteRatio = 0;
+    public static final int DefaultRouteConditionSubSetWeight = 100;
+    public static final int DefaultRoutePriority = 0;
 
 }

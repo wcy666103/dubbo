@@ -1,3 +1,19 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.apache.dubbo.rpc.cluster.router.condition;
 
 import org.apache.dubbo.common.URL;
@@ -31,6 +47,7 @@ import java.util.regex.Pattern;
 import static org.apache.dubbo.common.constants.LoggerCodeConstants.CLUSTER_CONDITIONAL_ROUTE_LIST_EMPTY;
 import static org.apache.dubbo.common.constants.LoggerCodeConstants.CLUSTER_FAILED_EXEC_CONDITION_ROUTER;
 import static org.apache.dubbo.rpc.cluster.Constants.DefaultRouteConditionSubSetWeight;
+import static org.apache.dubbo.rpc.cluster.Constants.RULE_KEY;
 
 public class MultiDestConditionRouter<T> extends AbstractStateRouter<T> {
     public static final String NAME = "multi_condition";
@@ -48,39 +65,16 @@ public class MultiDestConditionRouter<T> extends AbstractStateRouter<T> {
     private boolean enabled;
 
     public MultiDestConditionRouter(
-            URL url,
-            Map<String, String> from,
-            List<Map<String, String>> to,
-            boolean force,
-            boolean trafficDisable,
-            int ratio,
-            int priority) {
-        super(url);
-        //        父类属性
-        this.setForce(force);
-        this.trafficDisable = trafficDisable;
-        this.ratio = ratio;
-        this.priority = priority;
-        matcherFactories = moduleModel.getExtensionLoader(ConditionMatcherFactory.class)
-                .getActivateExtensions();
-        if (enabled) {
-            this.init(from, to);
-        }
-    }
-
-    public MultiDestConditionRouter(
             URL url, MultiDestCondition multiDestCondition, boolean enabled, boolean scopFroce) {
         super(url);
-        //        this.setForce(force);
         this.scopFroce = scopFroce;
         this.enabled = enabled;
         matcherFactories = moduleModel.getExtensionLoader(ConditionMatcherFactory.class)
                 .getActivateExtensions();
-        covert(multiDestCondition, this);
+        this.covert(multiDestCondition, this);
         this.init(multiDestCondition.getFrom(), multiDestCondition.getTo());
     }
 
-    //    进来的是  region=Hangzhou & env=gray
     public void init(Map<String, String> from, List<Map<String, String>> to) {
         if (from == null || to == null) {
             throw new IllegalArgumentException("Illegal route rule!");
@@ -118,16 +112,13 @@ public class MultiDestConditionRouter<T> extends AbstractStateRouter<T> {
         Set<String> values = null;
         final Matcher matcher = ROUTE_PATTERN.matcher(rule);
         while (matcher.find()) { // Try to match one by one
-            //            分隔符
             String separator = matcher.group(1);
-            //            内容
             String content = matcher.group(2);
             // Start part of the condition expression.
             if (StringUtils.isEmpty(separator)) {
                 matcherPair = this.getMatcher(content);
                 condition.put(content, matcherPair);
             }
-            //            下边就是根据不同的 分隔符，来确定不同的动作
             // The KV part of the condition expression
             else if ("&".equals(separator)) {
                 if (condition.get(content) == null) {
@@ -176,36 +167,17 @@ public class MultiDestConditionRouter<T> extends AbstractStateRouter<T> {
         return condition;
     }
 
-    /**
-     * 返回对应的matcher
-     *
-     * @param key
-     * @return
-     */
     private ConditionMatcher getMatcher(String key) {
         for (ConditionMatcherFactory factory : matcherFactories) {
             if (factory.shouldMatch(key)) {
-                //                直接只用返回一个？？
                 return factory.createMatcher(key, moduleModel);
             }
         }
-        //        如果 没有就默认使用 para
         return moduleModel.getExtensionLoader(ConditionMatcherFactory.class)
                 .getExtension("param")
                 .createMatcher(key, moduleModel);
     }
 
-    /**
-     * @param invokers                 all invokers to be routed
-     * @param url                      consumerUrl
-     * @param invocation               invocation
-     * @param needToPrintMessage       should current router print message
-     * @param routerSnapshotNodeHolder RouterSnapshotNode In general, router itself no need to care this param, just
-     *                                 pass to continueRoute
-     * @param messageHolder            message holder when router should current router print message
-     * @return 如果返回的invokers还是原来的invokers的话表示需要往下一个匹配
-     * @throws RpcException
-     */
     @Override
     protected BitList<Invoker<T>> doRoute(
             BitList<Invoker<T>> invokers,
@@ -224,7 +196,6 @@ public class MultiDestConditionRouter<T> extends AbstractStateRouter<T> {
 
         if (CollectionUtils.isEmpty(invokers)) {
             if (needToPrintMessage) {
-                //                以前路由器的调用器为空
                 messageHolder.set("Directly return. Reason: Invokers from previous router is empty.");
             }
             return invokers;
@@ -233,20 +204,16 @@ public class MultiDestConditionRouter<T> extends AbstractStateRouter<T> {
         try {
             if (!matchWhen(url, invocation)) {
                 if (needToPrintMessage) {
-                    //                    when 条件不满足  需要继续匹配下一个multidesconditionRouter，返回 invokers？
                     messageHolder.set("Directly return. Reason: WhenCondition not match.");
                 }
                 return invokers;
             }
             if (trafficDisable) {
-                //                invocation.setAttachment("TrafficDisableKey", new Object());
                 if (needToPrintMessage) {
-                    //                    when 条件不满足
                     messageHolder.set("Directly return. Reason: TrafficDisableKey is true.");
                 }
                 return BitList.emptyList();
             }
-            //            when 匹配上了 但是 then是空
             if (thenCondition == null || thenCondition.size() == 0) {
                 logger.warn(CLUSTER_CONDITIONAL_ROUTE_LIST_EMPTY, "condition state router thenCondition is empty", "",
                         "The current consumer in the service blocklist. consumer: " + NetUtils.getLocalHost()
@@ -262,30 +229,56 @@ public class MultiDestConditionRouter<T> extends AbstractStateRouter<T> {
                 BitList<Invoker<T>> res = invokers.clone();
 
                 for (Invoker invoker : invokers) {
-//                    invoker.getUrl().getParameter("region","").equals("shanghai") && invoker.getUrl().getParameter("env","").equals("normal")
                     if (!doMatch(invoker.getUrl(), url, null, condition.getCondition(), false)) {
                         res.remove(invoker);
                     }
                 }
                 if (!res.isEmpty()) {
-                    destinations.addDest(condition.getSubSetWeight()
+                    destinations.addDestination(condition.getSubSetWeight()
                             == null ? DefaultRouteConditionSubSetWeight : condition.getSubSetWeight(), res.clone());
                 }
             }
 
             if (!destinations.getDestinations()
                     .isEmpty()) {
-                BitList<Invoker<T>> res = destinations.randDest();
-                if (res.size() * 100 / invokers.size() > ratio) {
+                BitList<Invoker<T>> res = destinations.randDestination();
+                if (res.size() * 100 / invokers.size() > this.getRatio()) {
+                    if (needToPrintMessage) {
+                        messageHolder.set("Match return.");
+                    }
                     return res;
                 } else {
+                    if (needToPrintMessage) {
+                        messageHolder.set("Empty return. Reason: Ratio not match.");
+                    }
                    return BitList.emptyList();
                 }
-            } else if (force){
+            } else if (this.isForce()){
+                logger.warn(
+                        CLUSTER_CONDITIONAL_ROUTE_LIST_EMPTY,
+                        "execute condition state router result list is empty. and force=true",
+                        "",
+                        "The route result is empty and force execute. consumer: " + NetUtils.getLocalHost()
+                                + ", service: " + url.getServiceKey() + ", router: "
+                                + url.getParameterAndDecoded(RULE_KEY));
+                if (needToPrintMessage) {
+                    messageHolder.set("Empty return. Reason: Empty result from condition and condition is force.");
+                }
                 return BitList.emptyList();
-            } else if (scopFroce) {
+            } else if (this.isScopFroce()) {
+                logger.warn(
+                        CLUSTER_CONDITIONAL_ROUTE_LIST_EMPTY,
+                        "execute condition state router result list is empty. and config-force=true",
+                        "",
+                        "The route result is empty and force execute. consumer: " + NetUtils.getLocalHost()
+                                + ", service: " + url.getServiceKey() + ", router: "
+                                + url.getParameterAndDecoded(RULE_KEY));
+                if (needToPrintMessage) {
+                    messageHolder.set("Empty return. Reason: Empty result from condition and config-force is force.");
+                }
                 return BitList.emptyList();
             }else {
+//                The original invoker is returned in order to proceed to the next conditional route
                 return invokers;
             }
 
@@ -296,14 +289,14 @@ public class MultiDestConditionRouter<T> extends AbstractStateRouter<T> {
         }
 
         if (needToPrintMessage) {
-            messageHolder.set("Directly return. Reason: Error occurred ( or result is empty ).");
+            messageHolder.set("Directly return. Reason: Error occurred .");
         }
         return invokers;
     }
 
     public void covert(MultiDestCondition multiDestCondition, MultiDestConditionRouter multiDestConditionRouter) {
         if (multiDestCondition == null) {
-            throw new IllegalStateException("多地址条件为空");
+            throw new IllegalStateException("multiDestCondition is null");
         }
         multiDestConditionRouter.setTrafficDisable(multiDestCondition.isTrafficDisable());
         multiDestConditionRouter.setRatio(multiDestCondition.getRatio());
@@ -337,7 +330,6 @@ public class MultiDestConditionRouter<T> extends AbstractStateRouter<T> {
         return true;
     }
 
-    // Setter 方法
     public void setWhenCondition(Map<String, ConditionMatcher> whenCondition) {
         this.whenCondition = whenCondition;
     }
@@ -362,7 +354,6 @@ public class MultiDestConditionRouter<T> extends AbstractStateRouter<T> {
         this.force = force;
     }
 
-    // Getter 方法
     public Map<String, ConditionMatcher> getWhenCondition() {
         return whenCondition;
     }
@@ -370,10 +361,6 @@ public class MultiDestConditionRouter<T> extends AbstractStateRouter<T> {
     public boolean isTrafficDisable() {
         return trafficDisable;
     }
-
-    //    public List<CondSet<T>> getThenCondition() {
-    //        return thenCondition;
-    //    }
 
     public int getRatio() {
         return ratio;
@@ -387,5 +374,32 @@ public class MultiDestConditionRouter<T> extends AbstractStateRouter<T> {
         return force;
     }
 
+    public List<ConditionSubSet> getThenCondition() {
+        return thenCondition;
+    }
+
+    public boolean isScopFroce() {
+        return scopFroce;
+    }
+
+    public void setScopFroce(boolean scopFroce) {
+        this.scopFroce = scopFroce;
+    }
+
+    public List<ConditionMatcherFactory> getMatcherFactories() {
+        return matcherFactories;
+    }
+
+    public void setMatcherFactories(List<ConditionMatcherFactory> matcherFactories) {
+        this.matcherFactories = matcherFactories;
+    }
+
+    public boolean isEnabled() {
+        return enabled;
+    }
+
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
+    }
 }
 

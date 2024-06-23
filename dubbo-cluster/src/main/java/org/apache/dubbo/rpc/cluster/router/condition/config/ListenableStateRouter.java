@@ -42,7 +42,6 @@ import org.apache.dubbo.rpc.cluster.router.state.TailStateRouter;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 import static org.apache.dubbo.common.constants.LoggerCodeConstants.CLUSTER_FAILED_RULE_PARSING;
@@ -50,8 +49,6 @@ import static org.apache.dubbo.rpc.cluster.Constants.RULE_VERSION_V31;
 
 /**
  * Abstract router which listens to dynamic configuration
- * <p>
- * 侦听动态配置的抽象路由器，实现类有 serviceStateRouter、appStateRouter、providerStateRouter
  */
 public abstract class ListenableStateRouter<T> extends AbstractStateRouter<T> implements ConfigurationListener {
     public static final String NAME = "LISTENABLE_ROUTER";
@@ -59,13 +56,10 @@ public abstract class ListenableStateRouter<T> extends AbstractStateRouter<T> im
 
     private static final ErrorTypeAwareLogger logger =
             LoggerFactory.getErrorTypeAwareLogger(ListenableStateRouter.class);
-    //    保留一个这个对象，下边的 conditionRouters 就是根据这个对象生成的
     private volatile AbstractRouterRule routerRule;
     private volatile List<ConditionStateRouter<T>> conditionRouters = Collections.emptyList();
 
-    //    for 3.1
-    //    private volatile MultiDestConditionRouterRule multiRouterRule;
-    //    对应的是 接口名称/app名称
+    //    for v3.1
     private volatile List<MultiDestConditionRouter<T>> multiDestConditionRouters = Collections.emptyList();
     private final String ruleKey;
 
@@ -76,11 +70,6 @@ public abstract class ListenableStateRouter<T> extends AbstractStateRouter<T> im
         this.ruleKey = ruleKey;
     }
 
-    /**
-     * 来消息之后是在这 还是这里是最主要的方法，test类就是这样，通过staterouter的实现类去构建event，然后被调用的就是这个process方法
-     *
-     * @param event config change event
-     */
     @Override
     public synchronized void process(ConfigChangedEvent event) {
         if (logger.isInfoEnabled()) {
@@ -88,25 +77,24 @@ public abstract class ListenableStateRouter<T> extends AbstractStateRouter<T> im
                     + event.getContent());
         }
 
-        if (event.getChangeType()
-                .equals(ConfigChangeType.DELETED)) {
+        if (event.getChangeType().equals(ConfigChangeType.DELETED)) {
             routerRule = null;
             conditionRouters = Collections.emptyList();
 
-            conditionRouters = Collections.emptyList();
+            multiDestConditionRouters = Collections.emptyList();
         } else {
             try {
-                //                只有这个地方进行了parse的调用，将配置文件进行解析，生成对象
                 routerRule = ConditionRuleParser.parse(event.getContent());
-                //                routerRule就是yml转成的对象，里边的ConditionRouterRules都是string的集合，需要的是
-                //                generateConditions将string的rul转换
                 generateConditions(routerRule);
-                System.out.println("生成结束");
             } catch (Exception e) {
-                logger.error(CLUSTER_FAILED_RULE_PARSING, "Failed to parse the raw condition rule", "",
+                logger.error(
+                        CLUSTER_FAILED_RULE_PARSING,
+                        "Failed to parse the raw condition rule",
+                        "",
                         "Failed to parse the raw condition rule and it will not take effect, please check "
                                 + "if the condition rule matches with the template, the raw rule is:\n "
-                                + event.getContent(), e);
+                                + event.getContent(),
+                        e);
             }
         }
     }
@@ -121,13 +109,13 @@ public abstract class ListenableStateRouter<T> extends AbstractStateRouter<T> im
             Holder<String> messageHolder) throws RpcException {
         if (CollectionUtils.isEmpty(invokers) || (conditionRouters.size() == 0 && multiDestConditionRouters.size() == 0)) {
             if (needToPrintMessage) {
-                messageHolder.set("Directly return. Reason: Invokers from previous router is empty or "
-                        + "conditionRouters is empty.");
+                messageHolder.set(
+                        "Directly return. Reason: Invokers from previous router is empty or conditionRouters is empty.");
             }
             return invokers;
         }
 
-        // We will check enabled status inside each router. 在里边检查是否enable
+        // We will check enabled status inside each router.
         StringBuilder resultMessage = null;
         if (needToPrintMessage) {
             resultMessage = new StringBuilder();
@@ -138,13 +126,10 @@ public abstract class ListenableStateRouter<T> extends AbstractStateRouter<T> im
                 .startsWith(RULE_VERSION_V31)) {
             for (MultiDestConditionRouter<T> multiDestConditionRouter : multiDestConditionRouters) {
                 routeResult = multiDestConditionRouter.route(invokers, url, invocation, needToPrintMessage, nodeHolder);
-//                表示匹配未生效
                 if (invokers == routeResult) {
                     continue;
-//                    不等于表示配置生效，但是还需要进一步排除是否需要 下一级匹配
                 }else if (routeResult.size() == 0 && !multiDestConditionRouter.isTrafficDisable() && !multiDestConditionRouter.isForce()){
                     continue;
-//                    配置生效
                 }else {
                     break;
                 }
@@ -175,25 +160,16 @@ public abstract class ListenableStateRouter<T> extends AbstractStateRouter<T> im
         return routerRule != null && routerRule.isValid() && routerRule.isRuntime();
     }
 
-    /**
-     * 将String类型的rul，转换成 ConditionStateRouter集合
-     *
-     * @param rule
-     */
     private void generateConditions(AbstractRouterRule rule) {
         if (rule == null || !rule.isValid()) {return;}
 
         if (rule instanceof ConditionRouterRule) {
-            //            这里边已经是有了 scope属性的
             this.conditionRouters = ((ConditionRouterRule) rule).getConditions()
                     .stream()
-                    //                    将 ConditionRouterRule转换成 ConditionStateRouter
                     .map(condition -> new ConditionStateRouter<T>(getUrl(), condition, rule.isForce(),
                             rule.isEnabled()))
                     .collect(Collectors.toList());
-//getUrl() = consumer://10.12.37.62/org.apache.dubbo.springboot.demo.DemoService?application=dubbo-springboot-demo-consumer&background=false&dubbo=2.0.2&executor-management-mode=isolation&file-cache=true&interface=org.apache.dubbo.springboot.demo.DemoService&methods=sayHello,sayHelloAsync&pid=30316&release=3.2.13-SNAPSHOT&side=consumer&sticky=false&timestamp=1718419480020&unloadClusterRelated=false
-            System.err.println("getUrl() = " + getUrl());
-            //            直接构建链？将下一个置为null
+
             for (ConditionStateRouter<T> conditionRouter : this.conditionRouters) {
                 conditionRouter.setNextRouter(TailStateRouter.getInstance());
             }
@@ -204,28 +180,19 @@ public abstract class ListenableStateRouter<T> extends AbstractStateRouter<T> im
                     .sorted((a,b) -> a.getPriority() - b.getPriority())
                     .collect(Collectors.toList());
 
-            System.err.println("multiDestConditionRouters = " + multiDestConditionRouters);
             for (MultiDestConditionRouter<T> conditionRouter : this.multiDestConditionRouters) {
                 conditionRouter.setNextRouter(TailStateRouter.getInstance());
             }
         }
-        System.out.println("初始化 conditionRouter完成");
     }
 
-    /**
-     * 这里在新建时候发送消息，然后还是该类进行处理
-     * @param ruleKey
-     */
     private synchronized void init(String ruleKey) {
         if (StringUtils.isEmpty(ruleKey)) {
             return;
         }
-        //        org.apache.dubbo.springboot.demo.DemoService::.condition-router
         String routerKey = ruleKey + RULE_SUFFIX;
-        this.getRuleRepository()
-                .addListener(routerKey, this);
-        String rule = this.getRuleRepository()
-                .getRule(routerKey, DynamicConfiguration.DEFAULT_GROUP);
+        this.getRuleRepository().addListener(routerKey, this);
+        String rule = this.getRuleRepository().getRule(routerKey, DynamicConfiguration.DEFAULT_GROUP);
         if (StringUtils.isNotEmpty(rule)) {
             this.process(new ConfigChangedEvent(routerKey, DynamicConfiguration.DEFAULT_GROUP, rule));
         }
@@ -233,7 +200,6 @@ public abstract class ListenableStateRouter<T> extends AbstractStateRouter<T> im
 
     @Override
     public void stop() {
-        this.getRuleRepository()
-                .removeListener(ruleKey + RULE_SUFFIX, this);
+        this.getRuleRepository().removeListener(ruleKey + RULE_SUFFIX, this);
     }
 }
