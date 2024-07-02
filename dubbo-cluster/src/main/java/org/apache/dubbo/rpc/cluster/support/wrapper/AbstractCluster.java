@@ -74,6 +74,13 @@ public abstract class AbstractCluster implements Cluster {
         return new InvocationInterceptorInvoker<>(invoker, builders);
     }
 
+    /**
+     * 这具体的是实现是故障转移
+     * @param directory
+     * @return
+     * @param <T>
+     * @throws RpcException
+     */
     protected abstract <T> AbstractClusterInvoker<T> doJoin(Directory<T> directory) throws RpcException;
 
     static class ClusterFilterInvoker<T> extends AbstractClusterInvoker<T> {

@@ -30,6 +30,9 @@ import org.apache.dubbo.rpc.model.FrameworkModel;
 
 import static org.apache.dubbo.common.constants.CommonConstants.CONSUMER;
 
+/**
+ * 这里就是进行 router 过滤的那个 filter
+ */
 @Activate(group = {CONSUMER})
 public class RouterSnapshotFilter implements ClusterFilter, BaseFilter.Listener {
 

@@ -193,6 +193,7 @@ public abstract class ListenableStateRouter<T> extends AbstractStateRouter<T> im
         String routerKey = ruleKey + RULE_SUFFIX;
         this.getRuleRepository().addListener(routerKey, this);
         String rule = this.getRuleRepository().getRule(routerKey, DynamicConfiguration.DEFAULT_GROUP);
+//        如果当前的 serviceStateRouter的rule属性是null的话，则往下进行，否则的话是没有？？
         if (StringUtils.isNotEmpty(rule)) {
             this.process(new ConfigChangedEvent(routerKey, DynamicConfiguration.DEFAULT_GROUP, rule));
         }

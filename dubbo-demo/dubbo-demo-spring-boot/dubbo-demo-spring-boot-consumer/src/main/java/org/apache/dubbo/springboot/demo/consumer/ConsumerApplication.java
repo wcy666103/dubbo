@@ -19,6 +19,7 @@ package org.apache.dubbo.springboot.demo.consumer;
 import org.apache.dubbo.config.annotation.DubboReference;
 import org.apache.dubbo.config.spring.context.annotation.EnableDubbo;
 import org.apache.dubbo.springboot.demo.DemoService;
+import org.apache.dubbo.springboot.demo.DemoService2;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -33,19 +34,28 @@ public class ConsumerApplication {
     @DubboReference
     private DemoService demoService;
 
+    @DubboReference
+    private DemoService2 demoService2;
+
     public static void main(String[] args) throws InterruptedException {
 
         ConfigurableApplicationContext context = SpringApplication.run(ConsumerApplication.class, args);
         ConsumerApplication application = context.getBean(ConsumerApplication.class);
         while (true) {
             String result = application.doSayHello("world");
+
             Thread.sleep(5000);
 
+            String result2 = application.doSayHello("world");
             System.out.println("result: " + result);
+            System.out.println("result2: " + result2);
         }
     }
 
     public String doSayHello(String name) {
         return demoService.sayHello(name);
+    }
+    public String doSayHello2(String name) {
+        return demoService2.sayHello(name);
     }
 }

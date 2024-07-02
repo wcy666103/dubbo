@@ -66,6 +66,10 @@ import static org.apache.dubbo.common.constants.RegistryConstants.INIT;
  * There are two execution points:
  * - Refer, invoker behaviour is determined with default rule.
  * - Rule change, invoker behaviour is changed according to the newly received rule.
+ *
+ * 从配置中心收听@MigrationRule。
+ * - 迁移规则属于消费者应用范围。- 侦听器在所有调用者（接口）之间共享，它保持接口和处理程序之间的关系。
+ * 有两个执行点： - 引用，调用者的行为是用默认规则确定的。- 规则更改，调用者的行为根据新接收的规则进行更改。
  */
 @Activate
 public class MigrationRuleListener implements RegistryProtocolListener, ConfigurationListener {

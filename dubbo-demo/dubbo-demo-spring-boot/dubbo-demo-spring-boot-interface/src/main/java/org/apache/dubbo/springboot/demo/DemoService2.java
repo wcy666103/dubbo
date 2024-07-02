@@ -14,26 +14,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.dubbo.rpc.cluster.router.condition.config;
+package org.apache.dubbo.springboot.demo;
 
-import org.apache.dubbo.common.URL;
-import org.apache.dubbo.common.extension.Activate;
-import org.apache.dubbo.rpc.cluster.router.state.CacheableStateRouterFactory;
-import org.apache.dubbo.rpc.cluster.router.state.StateRouter;
+import java.util.concurrent.CompletableFuture;
 
-/**
- * Service level router factory
- * ServiceRouter should before AppRouter
- *
- * 这个是最先的，然后是provider（application），最后是
- */
-@Activate(order = 140)
-public class ServiceStateRouterFactory extends CacheableStateRouterFactory {
+public interface DemoService2 {
 
-    public static final String NAME = "service";
+    String sayHello(String name);
 
-    @Override
-    protected <T> StateRouter<T> createRouter(Class<T> interfaceClass, URL url) {
-        return new ServiceStateRouter<T>(url);
+    default CompletableFuture<String> sayHelloAsync(String name) {
+        return CompletableFuture.completedFuture(sayHello(name));
     }
 }

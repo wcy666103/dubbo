@@ -38,7 +38,8 @@ public interface Cluster {
 
     /**
      * Merge the directory invokers to a virtual invoker.
-     *
+     * 合并一个 目录的 invokers 到一个 虚拟 invoker
+     * 应该就是在那里边做失败、、、的选择
      * @param <T>
      * @param directory
      * @return cluster invoker

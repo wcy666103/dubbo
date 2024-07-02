@@ -23,7 +23,10 @@ import org.apache.dubbo.rpc.cluster.router.state.StateRouterFactory;
 
 /**
  * Application level router factory
- * AppRouter should after ServiceRouter
+ * AppRouter should after ServiceRouter 并且是在 service之后
+ *
+ * 这个 AppRouter保证的始终只有一个实例。
+ * 应该是dubbo的app级别的
  */
 @Activate(order = 150)
 public class AppStateRouterFactory implements StateRouterFactory {

@@ -31,6 +31,8 @@ import java.util.List;
  * <a href="http://en.wikipedia.org/wiki/Directory_service">Directory Service</a>
  * 目录服务或名称服务将网络资源的名称映射到它们各自的网络地址。它是一种共享信息基础架构
  * @see org.apache.dubbo.rpc.cluster.Cluster#join(Directory)
+ *
+ * 所以他也是一个 具体的对应zk下的一个目录
  */
 public interface Directory<T> extends Node {
 

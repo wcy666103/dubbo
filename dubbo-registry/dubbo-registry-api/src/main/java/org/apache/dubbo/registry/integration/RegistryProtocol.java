@@ -617,6 +617,15 @@ public class RegistryProtocol implements Protocol, ScopeModelAware {
         return doCreateInvoker(directory, cluster, registry, type);
     }
 
+    /**
+     * 构建完成之后 会 加入 Cluster中，
+     * @param directory
+     * @param cluster
+     * @param registry
+     * @param type
+     * @return
+     * @param <T>
+     */
     protected <T> ClusterInvoker<T> doCreateInvoker(
             DynamicDirectory<T> directory, Cluster cluster, Registry registry, Class<T> type) {
         directory.setRegistry(registry);

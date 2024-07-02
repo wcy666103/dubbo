@@ -14,26 +14,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.dubbo.rpc.cluster.router.condition.config;
+package org.apache.dubbo.springboot.demo.provider;
 
-import org.apache.dubbo.common.URL;
-import org.apache.dubbo.common.extension.Activate;
-import org.apache.dubbo.rpc.cluster.router.state.CacheableStateRouterFactory;
-import org.apache.dubbo.rpc.cluster.router.state.StateRouter;
+import org.apache.dubbo.config.annotation.DubboService;
+import org.apache.dubbo.rpc.RpcContext;
+import org.apache.dubbo.springboot.demo.DemoService;
+import org.apache.dubbo.springboot.demo.DemoService2;
 
-/**
- * Service level router factory
- * ServiceRouter should before AppRouter
- *
- * 这个是最先的，然后是provider（application），最后是
- */
-@Activate(order = 140)
-public class ServiceStateRouterFactory extends CacheableStateRouterFactory {
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-    public static final String NAME = "service";
+@DubboService
+public class DemoServiceImpl2 implements DemoService2 {
+
+    private static final Logger logger = LoggerFactory.getLogger(DemoServiceImpl2.class);
 
     @Override
-    protected <T> StateRouter<T> createRouter(Class<T> interfaceClass, URL url) {
-        return new ServiceStateRouter<T>(url);
+    public String sayHello(String name) {
+        logger.info("Hello " + name + ", request from consumer: "
+                + RpcContext.getContext().getRemoteAddress());
+        return "Hello " + name;
     }
 }

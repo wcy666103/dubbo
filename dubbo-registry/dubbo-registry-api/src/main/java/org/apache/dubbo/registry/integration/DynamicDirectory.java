@@ -59,6 +59,8 @@ import static org.apache.dubbo.remoting.Constants.CHECK_KEY;
 
 /**
  * DynamicDirectory
+ *
+ * 这里一个 serviceKey对应的就是一个实例。serviceKey说的就是 接口的完全限定类名
  */
 public abstract class DynamicDirectory<T> extends AbstractDirectory<T> implements NotifyListener {
 
@@ -294,6 +296,10 @@ public abstract class DynamicDirectory<T> extends AbstractDirectory<T> implement
         }
     }
 
+    /**
+     * 这里是根据调用的时候不同的 interface 来构建不同的chain的
+     * @param url
+     */
     public void buildRouterChain(URL url) {
         this.setRouterChain(RouterChain.buildChain(getInterface(), url));
     }
