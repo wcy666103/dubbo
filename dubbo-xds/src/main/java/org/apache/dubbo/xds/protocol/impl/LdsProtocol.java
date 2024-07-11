@@ -62,6 +62,7 @@ public class LdsProtocol extends AbstractProtocol<Listener> {
         subscribeResource(null);
     }
 
+//    对收到的xDS发现响应进行解码，将Listener类型的资源提取出来，并以Map的形式返回。
     @Override
     protected Map<String, Listener> decodeDiscoveryResponse(DiscoveryResponse response) {
         if (getTypeUrl().equals(response.getTypeUrl())) {
@@ -73,6 +74,7 @@ public class LdsProtocol extends AbstractProtocol<Listener> {
         return Collections.emptyMap();
     }
 
+//    解码资源到监听器以及解包Listener和HttpConnectionManager等操作。
     private Set<String> decodeResourceToListener(Listener resource) {
         return resource.getFilterChainsList().stream()
                 .flatMap(e -> e.getFiltersList().stream())

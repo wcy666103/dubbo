@@ -57,6 +57,7 @@ public class XdsChannel {
 
     private static final String PLAINTEXT = "plaintext";
 
+//    最终就是适配到了 grpc的 ManagedChannel 上去了
     private final ManagedChannel channel;
 
     public URL getUrl() {
@@ -71,9 +72,11 @@ public class XdsChannel {
         ManagedChannel managedChannel = null;
         this.url = url;
         try {
+//            todo 是否使用了 grpc-agent？？ 但是代码行为像是是否使用边车模式
             if (!url.getParameter(USE_AGENT, false)) {
                 // TODO：Need to consider situation where only user sa_jwt
                 if (PLAINTEXT.equals(url.getParameter(SECURITY))) {
+//                    NettyChannelBuilder 是grpc的shade的类
                     managedChannel = NettyChannelBuilder.forAddress(url.getHost(), url.getPort())
                             .usePlaintext()
                             .build();
@@ -99,6 +102,7 @@ public class XdsChannel {
                 Bootstrapper.BootstrapInfo bootstrapInfo = bootstrapper.bootstrap();
                 URLAddress address =
                         URLAddress.parse(bootstrapInfo.servers().get(0).target(), null, false);
+//                io.grpc.netty.shaded.io.netty.channel.epoll;
                 EpollEventLoopGroup elg = new EpollEventLoopGroup();
                 managedChannel = NettyChannelBuilder.forAddress(new DomainSocketAddress("/" + address.getPath()))
                         .eventLoopGroup(elg)
@@ -117,8 +121,20 @@ public class XdsChannel {
         channel = managedChannel;
     }
 
+    /**
+     *
+     * 这些函数是用于与Envoy代理进行gRPC通信的函数，用于进行Delta Discovery Requests（增量发现请求）。
+     * observeDeltaDiscoveryRequest函数创建一个StreamObserver，用于监听DeltaDiscoveryRequest类型的请求，并将其转换为DeltaDiscoveryResponse类型后发送给观察者。
+     * createDeltaDiscoveryRequest函数创建一个StreamObserver，用于发送DiscoveryRequest类型的请求，并接收DiscoveryResponse类型的响应。
+     * observeDeltaDiscoveryRequestV2和createDeltaDiscoveryRequestV2函数与上述两个函数类似，但使用的是Envoy的v2版本的API。
+     * 这些函数通过AggregatedDiscoveryServiceGrpc类的newStub方法创建了一个gRPC的存根，用于与Envoy代理建立连接并进行通信。
+     */
+
+// 数学中的 德尔塔（三角形）  主要就是在 AdsObserver 类中进行了使用，观察者模式
     public StreamObserver<DeltaDiscoveryRequest> observeDeltaDiscoveryRequest(
             StreamObserver<DeltaDiscoveryResponse> observer) {
+//        envoy的grpc的stub
+//        AggregatedDiscoveryServiceGrpc类是Envoy代理与配置服务器进行交互的gRPC服务的客户端存根（Stub）。在gRPC中，存根（Stub）是编译时生成的客户端代码，它提供了与远程服务通信的方法。
         return AggregatedDiscoveryServiceGrpc.newStub(channel).deltaAggregatedResources(observer);
     }
 

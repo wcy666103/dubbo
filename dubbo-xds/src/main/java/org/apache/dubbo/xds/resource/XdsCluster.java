@@ -21,6 +21,7 @@ import org.apache.dubbo.rpc.cluster.router.state.BitList;
 
 import java.util.List;
 
+// cluster包含多个 xdsEndPoint
 public class XdsCluster<T> {
     private String name;
 
@@ -35,7 +36,7 @@ public class XdsCluster<T> {
     public void setInvokers(BitList<Invoker<T>> invokers) {
         this.invokers = invokers;
     }
-
+// todo 向上移
     private BitList<Invoker<T>> invokers;
 
     public String getName() {

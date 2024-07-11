@@ -38,6 +38,12 @@ import io.grpc.stub.StreamObserver;
 
 import static org.apache.dubbo.common.constants.LoggerCodeConstants.REGISTRY_ERROR_REQUEST_XDS;
 
+/**
+ * 用于实现与其他支持xDS（eXtensible Discovery Service）协议的服务进行通信的组件。
+ * xDS协议是Envoy代理用来动态发现和配置服务的一种机制，而AdsObserver类则是Dubbo框架内部实现这一机制的具体逻辑。
+ *
+ * 观察并处理 DiscoveryRequest 和 DiscoveryResponse 消息。
+ */
 public class AdsObserver {
     private static final ErrorTypeAwareLogger logger = LoggerFactory.getErrorTypeAwareLogger(AdsObserver.class);
     private final ApplicationModel applicationModel;
@@ -64,11 +70,19 @@ public class AdsObserver {
         listeners.put(protocol.getTypeUrl(), protocol);
     }
 
+    /**
+     * 整个方法的目的是初始化或复用一个StreamObserver来发送一个DiscoveryRequest给服务端，并且在主线程上等待响应完成。
+     * @param discoveryRequest
+     */
     public void request(DiscoveryRequest discoveryRequest) {
         if (requestObserver == null) {
+//            如果是空的，说明这是第一次发送请求，因此需要创建一个新的StreamObserver实例
             requestObserver = xdsChannel.createDeltaDiscoveryRequest(new ResponseObserver(this, future));
         }
+//      todo Observer的onNext方法跟Stream的onNext方法作用不一样
+        //       将discoveryRequest发送给服务端。这触发了流式通信的开始，服务端将根据请求开始发送响应。
         requestObserver.onNext(discoveryRequest);
+//        将发送的DiscoveryRequest存储在一个名为observedResources的Map中，键是typeUrl，这可能是为了跟踪已经发送过的请求，以便后续处理或调试。
         observedResources.put(discoveryRequest.getTypeUrl(), discoveryRequest);
         try {
             // TODO：This is to make the child thread receive the information.

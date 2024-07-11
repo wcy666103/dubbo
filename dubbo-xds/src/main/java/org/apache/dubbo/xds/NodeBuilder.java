@@ -26,6 +26,10 @@ import com.google.protobuf.Struct;
 import com.google.protobuf.Value;
 import io.envoyproxy.envoy.config.core.v3.Node;
 
+/**
+ * 构建一个io.envoyproxy.envoy.config.core.v3.Node对象，该对象表示Envoy代理的节点信息。
+ * 它通过读取IstioEnv实例中的Pod名称、Pod命名空间、服务账户名称等环境变量信息来构建一个包含metadata的Node对象，并设置节点的ID和集群名称。
+ */
 public class NodeBuilder {
 
     private static final String SVC_CLUSTER_LOCAL = ".svc.cluster.local";

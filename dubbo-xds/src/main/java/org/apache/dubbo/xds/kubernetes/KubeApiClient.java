@@ -34,6 +34,7 @@ import io.kubernetes.client.util.Watch;
 import io.kubernetes.client.util.Watch.Response;
 import io.kubernetes.client.util.credentials.AccessTokenAuthentication;
 
+// 通过配置 KubeEnv配置信息，创建 KubeApiClient
 public class KubeApiClient {
     private final ApiClient apiClient;
 

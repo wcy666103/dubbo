@@ -38,10 +38,12 @@ import io.envoyproxy.envoy.service.discovery.v3.DiscoveryResponse;
 
 import static org.apache.dubbo.common.constants.LoggerCodeConstants.REGISTRY_ERROR_RESPONSE_XDS;
 
+//处理xDS协议中的ClusterLoadAssignment类型资源的监听和解码。
 public class EdsProtocol extends AbstractProtocol<ClusterLoadAssignment> {
 
     private static final ErrorTypeAwareLogger logger = LoggerFactory.getErrorTypeAwareLogger(EdsProtocol.class);
 
+//    XdsResourceListener的实例，用于监听集群资源的变化。当收到新的集群资源时，会通过subscribeResource方法订阅相应的资源。
     private XdsResourceListener<Cluster> clusterListener = clusters -> {
         Set<String> clusterNames = clusters.stream().map(Cluster::getName).collect(Collectors.toSet());
         this.subscribeResource(clusterNames);

@@ -45,6 +45,7 @@ import io.envoyproxy.envoy.service.discovery.v3.DiscoveryResponse;
 
 import static org.apache.dubbo.common.constants.LoggerCodeConstants.REGISTRY_ERROR_RESPONSE_XDS;
 
+//用于处理xDS协议中的Cluster类型的数据。提供了订阅和解析资源的能力，并提供了相应的解析方法。
 public class CdsProtocol extends AbstractProtocol<Cluster> {
     private static final ErrorTypeAwareLogger logger = LoggerFactory.getErrorTypeAwareLogger(CdsProtocol.class);
 
@@ -52,8 +53,24 @@ public class CdsProtocol extends AbstractProtocol<Cluster> {
         this.updateCallback = updateCallback;
     }
 
+//    java.util.function
     private Consumer<Set<String>> updateCallback;
 
+    /**
+     * ，Cluster类型的数据是Envoy代理用来定义其连接池和负载均衡策略的关键配置。
+     * Cluster描述了Envoy如何与一组后端服务进行通信，包括后端服务的位置、健康检查设置、负载均衡算法等。
+     * @param adsObserver
+     * @param node
+     * @param checkInterval
+     * @param applicationModel
+     *
+     * Cluster配置的作用是告诉Envoy如何与特定的服务或服务组进行交互。这包括但不限于：
+     * 指定后端服务的地址和端口。
+     * 配置负载均衡策略，如轮询、最少连接数、随机选择等。
+     * 设置健康检查参数，以确保后端服务的可用性。
+     * 定义超时和重试机制。
+     * 指定TLS/SSL设置，如果通信需要加密的话。
+     */
     public CdsProtocol(AdsObserver adsObserver, Node node, int checkInterval, ApplicationModel applicationModel) {
         super(adsObserver, node, checkInterval, applicationModel);
         List<CdsListener> ldsListeners =
@@ -86,6 +103,11 @@ public class CdsProtocol extends AbstractProtocol<Cluster> {
     //        return new HashMap<>();
     //    }
 
+    /**
+     * 用于解析DiscoveryResponse并返回一个Map，其中包含了Cluster的名称和对应的Cluster对象。
+     * @param response
+     * @return
+     */
     @Override
     protected Map<String, Cluster> decodeDiscoveryResponse(DiscoveryResponse response) {
         if (getTypeUrl().equals(response.getTypeUrl())) {

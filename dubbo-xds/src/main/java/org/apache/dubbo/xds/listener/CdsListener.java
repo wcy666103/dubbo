@@ -22,5 +22,6 @@ import org.apache.dubbo.xds.protocol.XdsResourceListener;
 
 import io.envoyproxy.envoy.config.cluster.v3.Cluster;
 
+// 没有具体实现呢还
 @SPI(scope = ExtensionScope.APPLICATION)
 public interface CdsListener extends XdsResourceListener<Cluster> {}

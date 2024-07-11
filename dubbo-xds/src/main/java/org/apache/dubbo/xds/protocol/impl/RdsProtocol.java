@@ -52,6 +52,7 @@ import io.envoyproxy.envoy.service.discovery.v3.DiscoveryResponse;
 
 import static org.apache.dubbo.common.constants.LoggerCodeConstants.REGISTRY_ERROR_RESPONSE_XDS;
 
+//实现了对xDS协议中Route Configuration的解析和处理。
 public class RdsProtocol extends AbstractProtocol<XdsRouteConfiguration> {
 
     private static final ErrorTypeAwareLogger logger = LoggerFactory.getErrorTypeAwareLogger(RdsProtocol.class);
@@ -80,6 +81,7 @@ public class RdsProtocol extends AbstractProtocol<XdsRouteConfiguration> {
     //        return new HashMap<>();
     //    }
 
+//    其转换为Dubbo内部的数据结构XdsRouteConfiguration。
     @Override
     protected Map<String, XdsRouteConfiguration> decodeDiscoveryResponse(DiscoveryResponse response) {
         if (getTypeUrl().equals(response.getTypeUrl())) {
@@ -92,6 +94,7 @@ public class RdsProtocol extends AbstractProtocol<XdsRouteConfiguration> {
         return Collections.emptyMap();
     }
 
+//    parse方法用于解析发现响应中的资源，将其转换为XdsRouteConfiguration列表。
     public List<XdsRouteConfiguration> parse(DiscoveryResponse response) {
 
         if (!getTypeUrl().equals(response.getTypeUrl())) {
@@ -105,6 +108,7 @@ public class RdsProtocol extends AbstractProtocol<XdsRouteConfiguration> {
                 .collect(Collectors.toList());
     }
 
+//    解析RouteConfiguration消息，并将其转换为XdsRouteConfiguration对象。
     public XdsRouteConfiguration parseRouteConfiguration(RouteConfiguration routeConfiguration) {
         XdsRouteConfiguration xdsRouteConfiguration = new XdsRouteConfiguration();
         xdsRouteConfiguration.setName(routeConfiguration.getName());
@@ -127,6 +131,7 @@ public class RdsProtocol extends AbstractProtocol<XdsRouteConfiguration> {
         return xdsRouteConfiguration;
     }
 
+//    解析VirtualHost消息，并将其转换为XdsVirtualHost对象。
     public XdsVirtualHost parseVirtualHost(VirtualHost virtualHost) {
         XdsVirtualHost xdsVirtualHost = new XdsVirtualHost();
 
@@ -141,6 +146,7 @@ public class RdsProtocol extends AbstractProtocol<XdsRouteConfiguration> {
         return xdsVirtualHost;
     }
 
+//    解析Route消息，并将其转换为XdsRoute对象
     public XdsRoute parseRoute(Route route) {
         XdsRoute xdsRoute = new XdsRoute();
 
@@ -152,6 +158,7 @@ public class RdsProtocol extends AbstractProtocol<XdsRouteConfiguration> {
         return xdsRoute;
     }
 
+//    解析RouteMatch消息，并将其转换为XdsRouteMatch对象。
     public XdsRouteMatch parseRouteMatch(RouteMatch routeMatch) {
         XdsRouteMatch xdsRouteMatch = new XdsRouteMatch();
         String prefix = routeMatch.getPrefix();
@@ -162,6 +169,7 @@ public class RdsProtocol extends AbstractProtocol<XdsRouteConfiguration> {
         return xdsRouteMatch;
     }
 
+//    解析RouteAction消息，并将其转换为XdsRouteAction对象
     public XdsRouteAction parseRouteAction(RouteAction routeAction) {
         XdsRouteAction xdsRouteAction = new XdsRouteAction();
 
@@ -180,6 +188,7 @@ public class RdsProtocol extends AbstractProtocol<XdsRouteConfiguration> {
         return ldsListener;
     }
 
+//    todo 这个属性应该是往前挪
     private final XdsResourceListener<Listener> ldsListener = resource -> {
         Set<String> set = resource.stream()
                 .flatMap(e -> listenerToConnectionManagerNames(e).stream())
@@ -187,6 +196,7 @@ public class RdsProtocol extends AbstractProtocol<XdsRouteConfiguration> {
         this.subscribeResource(set);
     };
 
+//    从Listener资源中提取出HttpConnectionManager的名称
     private Set<String> listenerToConnectionManagerNames(Listener resource) {
         return resource.getFilterChainsList().stream()
                 .flatMap(e -> e.getFiltersList().stream())
@@ -198,6 +208,7 @@ public class RdsProtocol extends AbstractProtocol<XdsRouteConfiguration> {
                 .collect(Collectors.toSet());
     }
 
+//    解析Any消息，并将其转换为HttpConnectionManager对象。
     private HttpConnectionManager unpackHttpConnectionManager(Any any) {
         try {
             if (!any.is(HttpConnectionManager.class)) {
@@ -210,6 +221,7 @@ public class RdsProtocol extends AbstractProtocol<XdsRouteConfiguration> {
         }
     }
 
+//    解析Any消息，并将其转换为RouteConfiguration对象。
     private static RouteConfiguration unpackRouteConfiguration(Any any) {
         try {
             return any.unpack(RouteConfiguration.class);

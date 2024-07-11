@@ -27,6 +27,7 @@ import java.util.Collection;
 
 import static org.apache.dubbo.config.Constants.SUPPORT_MESH_TYPE;
 
+//在MOdule启动之后的Listener
 public class XdsApplicationDeployListener implements ApplicationDeployListener {
     @Override
     public void onInitialize(ApplicationModel scopeModel) {}

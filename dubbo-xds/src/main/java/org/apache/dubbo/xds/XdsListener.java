@@ -18,6 +18,9 @@ package org.apache.dubbo.xds;
 
 import io.envoyproxy.envoy.service.discovery.v3.DiscoveryResponse;
 
+// 处理 DiscoveryResponse 消息
 public interface XdsListener {
+
+//    envoy.service.discovery.v3.DiscoveryResponse 是直接使用envoy提供的
     void process(DiscoveryResponse discoveryResponse);
 }

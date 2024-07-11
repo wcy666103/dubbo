@@ -42,6 +42,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+// 相当于对 Cluster的集合
 public class XdsDirectory<T> extends AbstractDirectory<T> {
 
     private final URL url;
