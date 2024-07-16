@@ -18,6 +18,7 @@ package org.apache.dubbo.xds.protocol;
 
 import java.util.List;
 
+// 处理 只有针对Router、Cluter的Listener实现了它，是一个临时的类结构吧
 public interface XdsResourceListener<T> {
 
     void onResourceUpdate(List<T> resource);

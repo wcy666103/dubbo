@@ -80,7 +80,9 @@ public class XdsRouter<T> extends AbstractStateRouter<T> {
 
     private String matchCluster(Invocation invocation) {
         String cluster = null;
+//        要想使用xds所需要的用户侧配置
         String serviceName = invocation.getInvoker().getUrl().getParameter("provided-by");
+//        获取对应的vh
         XdsVirtualHost xdsVirtualHost = pilotExchanger.getXdsVirtualHostMap().get(serviceName);
 
         // match route
@@ -120,6 +122,7 @@ public class XdsRouter<T> extends AbstractStateRouter<T> {
         List<Invoker<T>> filterInvokers = invokers.stream()
                 .filter(inv -> inv.getUrl().getParameter("clusterID").equals(clusterName))
                 .collect(Collectors.toList());
+//        todo 是否是 clone + remove比较好？
         return new BitList<>(filterInvokers);
     }
 }

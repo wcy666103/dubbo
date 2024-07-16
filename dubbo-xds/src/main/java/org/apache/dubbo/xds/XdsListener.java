@@ -18,7 +18,7 @@ package org.apache.dubbo.xds;
 
 import io.envoyproxy.envoy.service.discovery.v3.DiscoveryResponse;
 
-// 处理 DiscoveryResponse 消息
+// C E L R 这四种DS的统一父接口
 public interface XdsListener {
 
 //    envoy.service.discovery.v3.DiscoveryResponse 是直接使用envoy提供的

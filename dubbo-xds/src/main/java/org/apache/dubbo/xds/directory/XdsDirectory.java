@@ -71,6 +71,7 @@ public class XdsDirectory<T> extends AbstractDirectory<T> {
         this.protocolName = url.getParameter("protocol", "tri");
         this.protocol = directory.getProtocol();
         super.routerChain = directory.getRouterChain();
+//        这就是为什么要ApplicationModel一直传递的原因，里边还有一些BeanFactory呢，可以传递bean
         this.pilotExchanger =
                 url.getOrDefaultApplicationModel().getBeanFactory().getBean(PilotExchanger.class);
 

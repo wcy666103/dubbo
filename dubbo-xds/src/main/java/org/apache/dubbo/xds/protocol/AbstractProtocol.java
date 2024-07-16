@@ -43,12 +43,14 @@ import io.envoyproxy.envoy.config.core.v3.Node;
 import io.envoyproxy.envoy.service.discovery.v3.DiscoveryRequest;
 import io.envoyproxy.envoy.service.discovery.v3.DiscoveryResponse;
 
+// 所有 xDS的静态实现
 public abstract class AbstractProtocol<T> implements XdsProtocol, XdsListener {
 
     private static final ErrorTypeAwareLogger logger = LoggerFactory.getErrorTypeAwareLogger(AbstractProtocol.class);
 
     protected AdsObserver adsObserver;
 
+//    io.envoyproxy.envoy.config.core.v3.Node
     protected final Node node;
 
     private final int checkInterval;
@@ -131,6 +133,7 @@ public abstract class AbstractProtocol<T> implements XdsProtocol, XdsListener {
                 .collect(Collectors.toMap(k -> k, this::getCacheResource));
     }
 
+//    从remote获取资源
     public Map<String, T> getResourceFromRemote(Set<String> resourceNames) {
         try {
             resourceLock.lock();
@@ -185,7 +188,9 @@ public abstract class AbstractProtocol<T> implements XdsProtocol, XdsListener {
         // discoveryResponseListener(oldResource, newResult);
 
         Map<String, T> newResult = decodeDiscoveryResponse(discoveryResponse);
+//        唤醒所有的 resourceListener ，调用 onpudate方法
         resourceListeners.forEach(l -> l.onResourceUpdate(new ArrayList<>(newResult.values())));
+//        更新 resourceMap
         resourcesMap = newResult;
     }
 

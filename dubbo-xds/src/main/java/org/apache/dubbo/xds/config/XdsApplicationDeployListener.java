@@ -35,13 +35,13 @@ public class XdsApplicationDeployListener implements ApplicationDeployListener {
     @Override
     public void onStarting(ApplicationModel scopeModel) {
         Collection<RegistryConfig> registryConfigs =
-                scopeModel.getApplicationConfigManager().getRegistries();
+                scopeModel.getApplicationConfigManager().getRegistries(); // registry的只有一个的地址： istio://47.251.101.225:15010?security=plaintext
         for (RegistryConfig registryConfig : registryConfigs) {
-            String protocol = registryConfig.getProtocol();
+            String protocol = registryConfig.getProtocol(); //protocol为istio
             if (StringUtils.isNotEmpty(protocol) && SUPPORT_MESH_TYPE.contains(protocol)) {
-                URL url = URL.valueOf(registryConfig.getAddress());
+                URL url = URL.valueOf(registryConfig.getAddress()); //address直接成url了
                 url = url.setScopeModel(scopeModel);
-                scopeModel.getFrameworkModel().getBeanFactory().registerBean(PilotExchanger.createInstance(url));
+                scopeModel.getFrameworkModel().getBeanFactory().registerBean(PilotExchanger.createInstance(url)); //通过url创建PilotExchanger并且注入到beanFactory中
                 break;
             }
         }

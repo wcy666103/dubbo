@@ -62,6 +62,10 @@ public class PilotExchanger {
 
     private final Map<String, Set<XdsDirectory>> cdsListeners = new ConcurrentHashMap<>();
 
+    /**
+     *
+     * @param url istio://47.251.101.225:15010?security=plaintext
+     */
     protected PilotExchanger(URL url) {
         int pollingTimeout = url.getParameter("pollingTimeout", 10);
         adsObserver = new AdsObserver(url, NodeBuilder.build());
@@ -75,9 +79,11 @@ public class PilotExchanger {
         this.cdsProtocol =
                 new CdsProtocol(adsObserver, NodeBuilder.build(), pollingTimeout, url.getOrDefaultApplicationModel());
 
+//       定义的是route的configuration，后边会进行registry
         XdsResourceListener<XdsRouteConfiguration> pilotRdsListener =
                 xdsRouteConfigurations -> xdsRouteConfigurations.forEach(xdsRouteConfiguration -> xdsRouteConfiguration
                         .getVirtualHosts()
+//                        都是empty，dubbo的示例没有定义这些资源
                         .forEach((serviceName, xdsVirtualHost) -> {
                             this.xdsVirtualHostMap.put(serviceName, xdsVirtualHost);
                             // when resource update, notify subscribers
@@ -87,9 +93,10 @@ public class PilotExchanger {
                                 }
                             }
                         }));
-
+// 匿名类直接机洗属性放入到本类的静态变量中
         XdsResourceListener<ClusterLoadAssignment> pilotEdsListener = clusterLoadAssignments -> {
             List<XdsCluster> xdsClusters =
+//                    自定义方法来转换 ClusterLoadAssignment（grpc） to XdsCluster（dubbo）
                     clusterLoadAssignments.stream().map(this::parseCluster).collect(Collectors.toList());
             xdsClusters.forEach(xdsCluster -> {
                 this.xdsClusterMap.put(xdsCluster.getName(), xdsCluster);
@@ -120,6 +127,7 @@ public class PilotExchanger {
         return xdsClusterMap;
     }
 
+//     注册 route 资源
     public void subscribeRds(String applicationName, XdsDirectory listener) {
         rdsListeners.computeIfAbsent(applicationName, key -> new ConcurrentHashSet<>());
         rdsListeners.get(applicationName).add(listener);
@@ -132,6 +140,7 @@ public class PilotExchanger {
         rdsListeners.get(applicationName).remove(listener);
     }
 
+//    注册 Cluster 资源
     public void subscribeCds(String clusterName, XdsDirectory listener) {
         cdsListeners.computeIfAbsent(clusterName, key -> new ConcurrentHashSet<>());
         cdsListeners.get(clusterName).add(listener);

@@ -50,6 +50,10 @@ public class LdsProtocol extends AbstractProtocol<Listener> {
         super(adsObserver, node, checkInterval, applicationModel);
         List<LdsListener> ldsListeners =
                 applicationModel.getExtensionLoader(LdsListener.class).getActivateExtensions();
+
+        System.out.println("ldsListeners = " + ldsListeners);
+        ldsListeners.forEach(System.out::println);
+
         ldsListeners.forEach(this::registerListen);
     }
 
@@ -67,6 +71,7 @@ public class LdsProtocol extends AbstractProtocol<Listener> {
     protected Map<String, Listener> decodeDiscoveryResponse(DiscoveryResponse response) {
         if (getTypeUrl().equals(response.getTypeUrl())) {
             return response.getResourcesList().stream()
+//                    从 any 消息中解码 Listeners
                     .map(LdsProtocol::unpackListener)
                     .filter(Objects::nonNull)
                     .collect(Collectors.toConcurrentMap(Listener::getName, Function.identity()));
@@ -88,6 +93,7 @@ public class LdsProtocol extends AbstractProtocol<Listener> {
 
     private static Listener unpackListener(Any any) {
         try {
+//            io.envoyproxy.envoy.config.listener.v3.Listener
             return any.unpack(Listener.class);
         } catch (InvalidProtocolBufferException e) {
             logger.error(REGISTRY_ERROR_RESPONSE_XDS, "", "", "Error occur when decode xDS response.", e);

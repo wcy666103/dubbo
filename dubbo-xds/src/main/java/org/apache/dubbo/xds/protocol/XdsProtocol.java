@@ -17,7 +17,7 @@
 package org.apache.dubbo.xds.protocol;
 
 import java.util.Set;
-
+// 订阅资源的接口
 public interface XdsProtocol {
     /**
      * Gets all resources by the specified resource name.
