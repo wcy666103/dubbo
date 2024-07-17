@@ -108,7 +108,7 @@ public class RdsProtocol extends AbstractProtocol<XdsRouteConfiguration> {
                 .collect(Collectors.toList());
     }
 
-//    解析RouteConfiguration消息，并将其转换为XdsRouteConfiguration对象。
+//    解析io.envoyproxy.envoy.config.route.v3.RouteConfiguration消息，并将其转换为dubbo侧的XdsRouteConfiguration对象。
     public XdsRouteConfiguration parseRouteConfiguration(RouteConfiguration routeConfiguration) {
         XdsRouteConfiguration xdsRouteConfiguration = new XdsRouteConfiguration();
         xdsRouteConfiguration.setName(routeConfiguration.getName());

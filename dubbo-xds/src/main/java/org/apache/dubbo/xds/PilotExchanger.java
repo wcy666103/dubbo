@@ -88,6 +88,7 @@ public class PilotExchanger {
                             this.xdsVirtualHostMap.put(serviceName, xdsVirtualHost);
                             // when resource update, notify subscribers
                             if (rdsListeners.containsKey(serviceName)) {
+//                                把xdsDirectory 当做一个Listener这样好吗？
                                 for (XdsDirectory listener : rdsListeners.get(serviceName)) {
                                     listener.onRdsChange(serviceName, xdsVirtualHost);
                                 }
@@ -180,6 +181,7 @@ public class PilotExchanger {
         this.adsObserver.destroy();
     }
 
+//    todo 方法写的重复了，在CdsProtocol中有定义
     private XdsCluster parseCluster(ClusterLoadAssignment cluster) {
         XdsCluster xdsCluster = new XdsCluster();
 

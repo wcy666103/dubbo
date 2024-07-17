@@ -133,6 +133,7 @@ public class CdsProtocol extends AbstractProtocol<Cluster> {
 
         xdsCluster.setName(cluster.getClusterName());
 
+//        todo 对于cluster 套cluster的这种情况没有支持
         List<XdsEndpoint> xdsEndpoints = cluster.getEndpointsList().stream()
                 .flatMap(e -> e.getLbEndpointsList().stream())
                 .map(LbEndpoint::getEndpoint)

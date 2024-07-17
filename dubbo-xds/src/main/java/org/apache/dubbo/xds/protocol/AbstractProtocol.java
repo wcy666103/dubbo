@@ -78,6 +78,7 @@ public abstract class AbstractProtocol<T> implements XdsProtocol, XdsListener {
 
     protected ApplicationModel applicationModel;
 
+//    adsObserver 观察并处理 DiscoveryRequest 和 DiscoveryResponse 消息。
     public AbstractProtocol(AdsObserver adsObserver, Node node, int checkInterval, ApplicationModel applicationModel) {
         this.adsObserver = adsObserver;
         this.node = node;
@@ -116,6 +117,7 @@ public abstract class AbstractProtocol<T> implements XdsProtocol, XdsListener {
         return resourcesMap.get(resourceName);
     }
 
+//    todo 实现类中对于该方法的调用风格、位置不统一
     @Override
     public void subscribeResource(Set<String> resourceNames) {
         resourceNames = resourceNames == null ? Collections.emptySet() : resourceNames;
@@ -123,6 +125,7 @@ public abstract class AbstractProtocol<T> implements XdsProtocol, XdsListener {
         if (!resourceNames.isEmpty() && isCacheExistResource(resourceNames)) {
             getResourceFromCache(resourceNames);
         } else {
+//            LDS、EDS调用该方法时候是使用的null，肯定是走remote
             getResourceFromRemote(resourceNames);
         }
     }
@@ -160,6 +163,7 @@ public abstract class AbstractProtocol<T> implements XdsProtocol, XdsListener {
 
             Set<String> resourceNamesToObserve = new HashSet<>(resourceNames);
             resourceNamesToObserve.addAll(resourcesMap.keySet());
+//            是用来构建 request请求，来请求remote的资源的
             adsObserver.request(buildDiscoveryRequest(resourceNamesToObserve));
             logger.info("Send xDS Observe request to remote. Resource count: " + resourceNamesToObserve.size()
                     + ". Resource Type: " + getTypeUrl());
@@ -177,13 +181,15 @@ public abstract class AbstractProtocol<T> implements XdsProtocol, XdsListener {
                 .build();
     }
 
-    //    protected abstract Map<String, T> decodeDiscoveryResponse(DiscoveryResponse response);
-
+    /**
+     * 交给子类实现
+     * @param response
+     * @return
+     */
     protected abstract Map<String, T> decodeDiscoveryResponse(DiscoveryResponse response);
 
     @Override
     public final void process(DiscoveryResponse discoveryResponse) {
-        //        Map<String, T> newResult = decodeDiscoveryResponse(discoveryResponse);
         Map<String, T> oldResource = resourcesMap;
         // discoveryResponseListener(oldResource, newResult);
 

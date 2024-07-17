@@ -45,6 +45,13 @@ import io.grpc.stub.StreamObserver;
 
 import static org.apache.dubbo.common.constants.LoggerCodeConstants.REGISTRY_ERROR_CREATE_CHANNEL_XDS;
 
+/**
+ * 负责创建与Envoy代理进行gRPC通信的通道。该类通过传入的URL参数来决定创建明文传输的通道还是使用TLS传输的通道。
+ * 如果URL中包含use-agent参数且为true，则会使用grpc-agent来创建通道；
+ *      否则，根据URL中是否包含security参数来决定创建明文传输的通道还是使用TLS传输的通道。
+ * 在创建TLS传输的通道时，需要从URL中获取证书相关信息来创建SslContext。
+ * 该类还提供了与Envoy代理进行增量发现请求交互的方法。
+ */
 public class XdsChannel {
 
     private static final ErrorTypeAwareLogger logger = LoggerFactory.getErrorTypeAwareLogger(XdsChannel.class);
