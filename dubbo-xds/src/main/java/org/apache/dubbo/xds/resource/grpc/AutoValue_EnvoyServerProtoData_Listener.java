@@ -5,7 +5,7 @@ import org.apache.dubbo.xds.resource.grpc.EnvoyServerProtoData.FilterChain;
 
 import com.google.common.collect.ImmutableList;
 
-final class AutoValue_EnvoyServerProtoData_Listener extends EnvoyServerProtoData.Listener {
+class AutoValue_EnvoyServerProtoData_Listener extends EnvoyServerProtoData.Listener {
 
   private final String name;
 

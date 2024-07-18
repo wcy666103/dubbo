@@ -17,8 +17,9 @@
 package org.apache.dubbo.xds.resource.grpc;
 
 import org.apache.dubbo.xds.XdsInitializationException;
-import org.apache.dubbo.xds.resource.grpc.third.EnvoyProtoData.Node;
+import org.apache.dubbo.xds.resource.grpc.EnvoyProtoData.Node;
 
+import com.google.auto.value.AutoValue;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;

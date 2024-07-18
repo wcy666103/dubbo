@@ -16,6 +16,7 @@
 
 package org.apache.dubbo.xds.resource.grpc;
 
+import com.google.auto.value.AutoValue;
 import com.google.re2j.Pattern;
 
 import javax.annotation.Nullable;

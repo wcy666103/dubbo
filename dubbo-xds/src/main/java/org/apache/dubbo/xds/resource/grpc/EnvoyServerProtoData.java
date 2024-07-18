@@ -16,8 +16,7 @@
 
 package org.apache.dubbo.xds.resource.grpc;
 
-import org.apache.dubbo.xds.resource.grpc.third.TlsContextManager;
-
+import com.google.auto.value.AutoValue;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.util.Durations;

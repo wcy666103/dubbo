@@ -596,7 +596,7 @@ class XdsListenerResource extends XdsResourceType<LdsUpdate> {
   abstract static class LdsUpdate implements ResourceUpdate {
     // Http level api listener configuration.
     @Nullable
-    abstract HttpConnectionManager httpConnectionManager();
+    abstract org.apache.dubbo.xds.resource.grpc.HttpConnectionManager httpConnectionManager();
 
     // Tcp level listener configuration.
     @Nullable

@@ -22,6 +22,7 @@ import org.apache.dubbo.xds.resource.grpc.EnvoyServerProtoData.UpstreamTlsContex
 import org.apache.dubbo.xds.resource.grpc.XdsClient.ResourceUpdate;
 import org.apache.dubbo.xds.resource.grpc.XdsClientImpl.ResourceInvalidException;
 
+import com.google.auto.value.AutoValue;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableList;

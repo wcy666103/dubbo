@@ -31,7 +31,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * HttpConnectionManager is a network filter for proxying HTTP requests.
  */
 @AutoValue
-abstract class HttpConnectionManager {
+public abstract class HttpConnectionManager {
   // Total number of nanoseconds to keep alive an HTTP request/response stream.
   abstract long httpMaxStreamDurationNano();
 

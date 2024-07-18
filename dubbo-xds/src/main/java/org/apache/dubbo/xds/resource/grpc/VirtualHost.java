@@ -21,6 +21,7 @@ import org.apache.dubbo.xds.resource.grpc.Filter.FilterConfig;
 import org.apache.dubbo.xds.resource.grpc.Matchers.FractionMatcher;
 import org.apache.dubbo.xds.resource.grpc.Matchers.HeaderMatcher;
 
+import com.google.auto.value.AutoValue;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;

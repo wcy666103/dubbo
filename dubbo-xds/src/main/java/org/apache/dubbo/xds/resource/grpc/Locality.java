@@ -16,8 +16,6 @@
 
 package org.apache.dubbo.xds.resource.grpc;
 
-import org.apache.dubbo.xds.resource.grpc.third.AutoValue_Locality;
-
 /** Represents a network locality. */
 abstract class Locality {
   abstract String region();

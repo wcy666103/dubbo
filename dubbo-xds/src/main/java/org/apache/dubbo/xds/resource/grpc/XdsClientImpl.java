@@ -431,7 +431,7 @@ final class XdsClientImpl extends XdsClient
 //         xdsResourceType.typeName(), args.versionInfo, args.nonce, result.unpackedResources);
     Map<String, ParsedResource<T>> parsedResources = result.parsedResources;
     Set<String> invalidResources = result.invalidResources;
-    List<String> errors = result.errors;`
+    List<String> errors = result.errors;
     String errorDetail = null;
     if (errors.isEmpty()) {
       checkArgument(invalidResources.isEmpty(), "found invalid resources but missing errors");
@@ -589,8 +589,8 @@ final class XdsClientImpl extends XdsClient
       class ResourceNotFound implements Runnable {
         @Override
         public void run() {
-          logger.log(XdsLogLevel.INFO, "{0} resource {1} initial fetch timeout",
-              type, resource);
+//          logger.log(XdsLogLevel.INFO, "{0} resource {1} initial fetch timeout",
+//              type, resource);
           respTimer = null;
           onAbsent(null);
         }
@@ -622,13 +622,13 @@ final class XdsClientImpl extends XdsClient
       }
       stopTimer();
       String message = "Unsubscribing {0} resource {1} from server {2}";
-      XdsLogLevel logLevel = XdsLogLevel.INFO;
+//      XdsLogLevel logLevel = XdsLogLevel.INFO;
       if (resourceDeletionIgnored) {
         message += " for which we previously ignored a deletion";
-        logLevel = XdsLogLevel.FORCE_INFO;
+//        logLevel = XdsLogLevel.FORCE_INFO;
       }
-      logger.log(logLevel, message, type, resource,
-          serverInfo != null ? serverInfo.target() : "unknown");
+//      logger.log(logLevel, message, type, resource,
+//          serverInfo != null ? serverInfo.target() : "unknown");
     }
 
     boolean isWatched() {
@@ -651,9 +651,9 @@ final class XdsClientImpl extends XdsClient
       this.data = parsedResource.getResourceUpdate();
       absent = false;
       if (resourceDeletionIgnored) {
-        logger.log(XdsLogLevel.FORCE_INFO, "xds server {0}: server returned new version "
-                + "of resource for which we previously ignored a deletion: type {1} name {2}",
-            serverInfo != null ? serverInfo.target() : "unknown", type, resource);
+//        logger.log(XdsLogLevel.FORCE_INFO, "xds server {0}: server returned new version "
+//                + "of resource for which we previously ignored a deletion: type {1} name {2}",
+//            serverInfo != null ? serverInfo.target() : "unknown", type, resource);
         resourceDeletionIgnored = false;
       }
       if (!Objects.equals(oldData, data)) {
@@ -681,15 +681,15 @@ final class XdsClientImpl extends XdsClient
           serverInfo != null && serverInfo.ignoreResourceDeletion();
       if (ignoreResourceDeletionEnabled && type.isFullStateOfTheWorld() && data != null) {
         if (!resourceDeletionIgnored) {
-          logger.log(XdsLogLevel.FORCE_WARNING,
-              "xds server {0}: ignoring deletion for resource type {1} name {2}}",
-              serverInfo.target(), type, resource);
+//          logger.log(XdsLogLevel.FORCE_WARNING,
+//              "xds server {0}: ignoring deletion for resource type {1} name {2}}",
+//              serverInfo.target(), type, resource);
           resourceDeletionIgnored = true;
         }
         return;
       }
 
-      logger.log(XdsLogLevel.INFO, "Conclude {0} resource {1} not exist", type, resource);
+//      logger.log(XdsLogLevel.INFO, "Conclude {0} resource {1} not exist", type, resource);
       if (!absent) {
         data = null;
         absent = true;

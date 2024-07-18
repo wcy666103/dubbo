@@ -18,6 +18,7 @@ package org.apache.dubbo.xds.resource.grpc;
 
 import org.apache.dubbo.xds.resource.grpc.Filter.FilterConfig;
 
+import com.google.auto.value.AutoValue;
 import io.grpc.Status;
 
 import javax.annotation.Nullable;
