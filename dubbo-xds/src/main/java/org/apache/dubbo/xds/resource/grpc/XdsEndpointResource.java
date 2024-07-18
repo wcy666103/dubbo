@@ -16,6 +16,10 @@
 //
 //package org.apache.dubbo.xds.resource.grpc;
 //
+//import org.apache.dubbo.xds.resource.grpc.XdsClient.ResourceUpdate;
+//import org.apache.dubbo.xds.resource.grpc.XdsClientImpl.ResourceInvalidException;
+//import org.apache.dubbo.xds.resource.grpc.XdsEndpointResource.EdsUpdate;
+//
 //import com.google.common.annotations.VisibleForTesting;
 //import com.google.common.base.MoreObjects;
 //import com.google.common.collect.ImmutableList;
@@ -23,9 +27,6 @@
 //import io.envoyproxy.envoy.config.endpoint.v3.ClusterLoadAssignment;
 //import io.envoyproxy.envoy.type.v3.FractionalPercent;
 //import io.grpc.EquivalentAddressGroup;
-//import io.grpc.xds.Endpoints.DropOverload;
-//import io.grpc.xds.Endpoints.LocalityLbEndpoints;
-//import io.grpc.xds.XdsClientImpl.ResourceInvalidException;
 //
 //import javax.annotation.Nullable;
 //
@@ -42,7 +43,7 @@
 //
 //import static com.google.common.base.Preconditions.checkNotNull;
 //
-//class XdsEndpointResource extends XdsResourceType<XdsEndpointResource.EdsUpdate> {
+//class XdsEndpointResource extends XdsResourceType<EdsUpdate> {
 //  static final String ADS_TYPE_URL_EDS =
 //      "type.googleapis.com/envoy.config.endpoint.v3.ClusterLoadAssignment";
 //

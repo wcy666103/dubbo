@@ -98,6 +98,16 @@
       <groupId>io.envoyproxy.controlplane</groupId>
       <artifactId>api</artifactId>
     </dependency>
+<!--    <dependency>-->
+<!--      <groupId>io.grpc</groupId>-->
+<!--      <artifactId>grpc-xds</artifactId>-->
+<!--      <version>1.65.1</version>-->
+<!--    </dependency>-->
+    <dependency>
+      <groupId>com.google.re2j</groupId>
+      <artifactId>re2j</artifactId>
+      <version>1.7</version>
+    </dependency>
     <dependency>
       <groupId>com.google.protobuf</groupId>
       <artifactId>protobuf-java</artifactId>
