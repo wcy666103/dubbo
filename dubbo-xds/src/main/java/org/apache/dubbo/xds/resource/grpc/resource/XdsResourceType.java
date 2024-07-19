@@ -14,13 +14,30 @@
  * limitations under the License.
  */
 
-package org.apache.dubbo.xds.resource.grpc;
+package org.apache.dubbo.xds.resource.grpc.resource;
 
-import org.apache.dubbo.xds.resource.grpc.Bootstrapper.ServerInfo;
-import org.apache.dubbo.xds.resource.grpc.XdsClient.ResourceUpdate;
-import org.apache.dubbo.xds.resource.grpc.XdsClientImpl.ResourceInvalidException;
+
+import org.apache.dubbo.xds.bootstrap.Bootstrapper;
+import org.apache.dubbo.xds.bootstrap.Bootstrapper.ServerInfo;
+import org.apache.dubbo.xds.resource.grpc.resource.exception.ResourceInvalidException;
+import org.apache.dubbo.xds.resource.grpc.resource.filter.FilterRegistry;
+import org.apache.dubbo.xds.resource.grpc.resource.update.ResourceUpdate;
+
+import javax.annotation.Nullable;
+
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Joiner;
+import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
 import com.google.protobuf.Any;
 import com.google.protobuf.InvalidProtocolBufferException;
@@ -28,18 +45,7 @@ import com.google.protobuf.Message;
 import io.envoyproxy.envoy.service.discovery.v3.Resource;
 import io.grpc.LoadBalancerRegistry;
 
-import javax.annotation.Nullable;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import static com.google.common.base.Preconditions.checkNotNull;
-import static org.apache.dubbo.xds.resource.grpc.XdsClient.canonifyResourceName;
-import static org.apache.dubbo.xds.resource.grpc.XdsClient.isResourceNameValid;
 
 abstract class XdsResourceType<T extends ResourceUpdate> {
   static final String TYPE_URL_RESOURCE =
@@ -99,7 +105,7 @@ abstract class XdsResourceType<T extends ResourceUpdate> {
     final Bootstrapper.BootstrapInfo bootstrapInfo;
     final FilterRegistry filterRegistry;
     final LoadBalancerRegistry loadBalancerRegistry;
-    final TlsContextManager tlsContextManager;
+//    final TlsContextManager tlsContextManager;
     // Management server is required to always send newly requested resources, even if they
     // may have been sent previously (proactively). Thus, client does not need to cache
     // unrequested resources.
@@ -110,7 +116,7 @@ abstract class XdsResourceType<T extends ResourceUpdate> {
                 Bootstrapper.BootstrapInfo bootstrapInfo,
                 FilterRegistry filterRegistry,
                 LoadBalancerRegistry loadBalancerRegistry,
-                TlsContextManager tlsContextManager,
+//                TlsContextManager tlsContextManager,
                 @Nullable Set<String> subscribedResources) {
       this.serverInfo = serverInfo;
       this.versionInfo = versionInfo;
@@ -118,7 +124,7 @@ abstract class XdsResourceType<T extends ResourceUpdate> {
       this.bootstrapInfo = bootstrapInfo;
       this.filterRegistry = filterRegistry;
       this.loadBalancerRegistry = loadBalancerRegistry;
-      this.tlsContextManager = tlsContextManager;
+//      this.tlsContextManager = tlsContextManager;
       this.subscribedResources = subscribedResources;
     }
   }
@@ -156,7 +162,7 @@ abstract class XdsResourceType<T extends ResourceUpdate> {
       T resourceUpdate;
       try {
         resourceUpdate = doParse(args, unpackedMessage);
-      } catch (XdsClientImpl.ResourceInvalidException e) {
+      } catch (ResourceInvalidException e) {
         errors.add(String.format("%s response %s '%s' validation error: %s",
                 typeName(), unpackedClassName().getSimpleName(), cname, e.getMessage()));
         invalidResources.add(cname);
@@ -170,6 +176,59 @@ abstract class XdsResourceType<T extends ResourceUpdate> {
         errors);
 
   }
+
+    static String canonifyResourceName(String resourceName) {
+        checkNotNull(resourceName, "resourceName");
+        if (!resourceName.startsWith("xdstp:")) {
+            return resourceName;
+        }
+        URI uri = URI.create(resourceName);
+        String rawQuery = uri.getRawQuery();
+        Splitter ampSplitter = Splitter.on('&').omitEmptyStrings();
+        if (rawQuery == null) {
+            return resourceName;
+        }
+        List<String> queries = ampSplitter.splitToList(rawQuery);
+        if (queries.size() < 2) {
+            return resourceName;
+        }
+        List<String> canonicalContextParams = new ArrayList<>(queries.size());
+        for (String query : queries) {
+            canonicalContextParams.add(query);
+        }
+        Collections.sort(canonicalContextParams);
+        String canonifiedQuery = Joiner.on('&').join(canonicalContextParams);
+        return resourceName.replace(rawQuery, canonifiedQuery);
+    }
+
+
+    static boolean isResourceNameValid(String resourceName, String typeUrl) {
+        checkNotNull(resourceName, "resourceName");
+        if (!resourceName.startsWith("xdstp:")) {
+            return true;
+        }
+        URI uri;
+        try {
+            uri = new URI(resourceName);
+        } catch (URISyntaxException e) {
+            return false;
+        }
+        String path = uri.getPath();
+        // path must be in the form of /{resource type}/{id/*}
+        Splitter slashSplitter = Splitter.on('/').omitEmptyStrings();
+        if (path == null) {
+            return false;
+        }
+        List<String> pathSegs = slashSplitter.splitToList(path);
+        if (pathSegs.size() < 2) {
+            return false;
+        }
+        String type = pathSegs.get(0);
+        if (!type.equals(slashSplitter.splitToList(typeUrl).get(1))) {
+            return false;
+        }
+        return true;
+    }
 
   abstract T doParse(Args args, Message unpackedMessage) throws ResourceInvalidException;
 
