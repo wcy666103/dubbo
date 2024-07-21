@@ -46,6 +46,8 @@ public interface Constants {
 
     String CONDITIONS_KEY = "conditions";
 
+    String AFFINITY_KEY = "affinityAware";
+
     String TAGS_KEY = "tags";
 
     /**
@@ -146,5 +148,5 @@ public interface Constants {
     public static final int DefaultRouteRatio = 0;
     public static final int DefaultRouteConditionSubSetWeight = 100;
     public static final int DefaultRoutePriority = 0;
-
+    public static final int DefaultAffinityRatio = 0;
 }
