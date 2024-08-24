@@ -56,7 +56,7 @@ public class ConfiguratorConfig {
             configuratorConfig.setEnabled(Boolean.parseBoolean(enabled.toString()));
         }
 
-//        具体的配置信息
+        //        具体的配置信息
         Object configs = map.get(CONFIGS_KEY);
         if (configs != null && List.class.isAssignableFrom(configs.getClass())) {
             configuratorConfig.setConfigs(((List<Map<String, Object>>) configs)

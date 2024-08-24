@@ -52,7 +52,7 @@ public class AttachmentConditionMatcher extends AbstractConditionMatcher {
             // split the rule
             String[] expressArray = key.split("\\.");
             String argumentExpress = expressArray[0];
-//            是否符合该正则 attachments\[(.+)\]
+            //            是否符合该正则 attachments\[(.+)\]
             final Matcher matcher = ATTACHMENTS_PATTERN.matcher(argumentExpress);
             if (!matcher.find()) {
                 return DOES_NOT_FOUND_VALUE;

@@ -21,7 +21,7 @@ import org.apache.dubbo.common.extension.SPI;
 
 import static org.apache.dubbo.common.extension.ExtensionScope.MODULE;
 
-//spi上只有这一个实现
+// spi上只有这一个实现
 @SPI(value = "default", scope = MODULE)
 public interface GovernanceRuleRepository {
 

@@ -20,13 +20,10 @@ import org.apache.dubbo.common.logger.ErrorTypeAwareLogger;
 import org.apache.dubbo.common.logger.LoggerFactory;
 import org.apache.dubbo.rpc.cluster.router.AbstractRouterRule;
 
-import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import static org.apache.dubbo.common.constants.LoggerCodeConstants.CLUSTER_FAILED_RULE_PARSING;
 import static org.apache.dubbo.rpc.cluster.Constants.AFFINITY_KEY;
-import static org.apache.dubbo.rpc.cluster.Constants.CONDITIONS_KEY;
 import static org.apache.dubbo.rpc.cluster.Constants.DefaultAffinityRatio;
 
 /**
@@ -37,21 +34,22 @@ import static org.apache.dubbo.rpc.cluster.Constants.DefaultAffinityRatio;
 public class AffinityRouterRule extends AbstractRouterRule {
 
     private static final ErrorTypeAwareLogger logger = LoggerFactory.getErrorTypeAwareLogger(AffinityRouterRule.class);
-//    里边放的是String，如果要其他类型，是否就需要换成对象了
+    //    里边放的是String，如果要其他类型，是否就需要换成对象了
     private String affinityKey;
     private Double ratio;
-//    静态方法，里边会创建对应的对象，真会玩啊
+    //    静态方法，里边会创建对应的对象，真会玩啊
     @SuppressWarnings("unchecked")
     public static AffinityRouterRule parseFromMap(Map<String, Object> map) {
         AffinityRouterRule affinityRouterRule = new AffinityRouterRule();
-//        抽象类提供的方法
+        //        抽象类提供的方法
         affinityRouterRule.parseFromMap0(map);
-//        条件处理在这
+        //        条件处理在这
         Object conditions = map.get(AFFINITY_KEY);
 
-        Map<String,String> conditionMap = (Map<String, String>) conditions;
+        Map<String, String> conditionMap = (Map<String, String>) conditions;
         affinityRouterRule.setKey(conditionMap.get("key"));
-        affinityRouterRule.setRatio(Double.valueOf(conditionMap.getOrDefault("ratio",String.valueOf(DefaultAffinityRatio))));
+        affinityRouterRule.setRatio(
+                Double.valueOf(conditionMap.getOrDefault("ratio", String.valueOf(DefaultAffinityRatio))));
 
         if (affinityRouterRule.getRatio() > 100 || affinityRouterRule.getRatio() < 0) {
             logger.error(
@@ -63,7 +61,6 @@ public class AffinityRouterRule extends AbstractRouterRule {
         }
         return affinityRouterRule;
     }
-
 
     public AffinityRouterRule() {}
 

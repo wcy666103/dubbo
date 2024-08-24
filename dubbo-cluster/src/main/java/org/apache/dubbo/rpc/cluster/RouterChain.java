@@ -47,13 +47,14 @@ import static org.apache.dubbo.rpc.cluster.Constants.ROUTER_KEY;
 public class RouterChain<T> {
     private static final ErrorTypeAwareLogger logger = LoggerFactory.getErrorTypeAwareLogger(RouterChain.class);
 
-//    类初始化的时候最少需要两个 SingleRouterChain参数，current会默认指向main
-//    这个router chain说的是appscriptstaterouter\appstaterouter\providerappstaterouter\tagstaterouter\standardmeshrulerouter\mockinvokersselector，是大的方面的
+    //    类初始化的时候最少需要两个 SingleRouterChain参数，current会默认指向main
+    //    这个router
+    // chain说的是appscriptstaterouter\appstaterouter\providerappstaterouter\tagstaterouter\standardmeshrulerouter\mockinvokersselector，是大的方面的
     private volatile SingleRouterChain<T> mainChain;
     private volatile SingleRouterChain<T> backupChain;
     private volatile SingleRouterChain<T> currentChain;
 
-//    启动的时候完成的，在这里进行构建 org.apache.dubbo.registry.integration.RegistryProtocol
+    //    启动的时候完成的，在这里进行构建 org.apache.dubbo.registry.integration.RegistryProtocol
     @SuppressWarnings({"rawtypes", "unchecked"})
     public static <T> RouterChain<T> buildChain(Class<T> interfaceClass, URL url) {
         SingleRouterChain<T> chain1 = buildSingleChain(interfaceClass, url);
@@ -71,23 +72,24 @@ public class RouterChain<T> {
     public static <T> SingleRouterChain<T> buildSingleChain(Class<T> interfaceClass, URL url) {
         ModuleModel moduleModel = url.getOrDefaultModuleModel();
 
-//  拿到对应的router规则对应的factory
+        //  拿到对应的router规则对应的factory
         List<RouterFactory> extensionFactories =
                 moduleModel.getExtensionLoader(RouterFactory.class).getActivateExtension(url, ROUTER_KEY);
 
-//      根据factory拿到对应的 Router
+        //      根据factory拿到对应的 Router
         List<Router> routers = extensionFactories.stream()
                 .map(factory -> factory.getRouter(url))
-//                排序，这个是有优先级的！
+                //                排序，这个是有优先级的！
                 .sorted(Router::compareTo)
                 .collect(Collectors.toList());
 
-//        StateRouter也要拿出来 ， Router就是为了兼容用的
+        //        StateRouter也要拿出来 ， Router就是为了兼容用的
         List<StateRouter<T>> stateRouters =
-//                根据class来获取所有扩展对象，就是所有激活了 实现factory的都会获取到，所以说应该是包含所有factory实例的
-//                appscriptstaterouter\appstaterouter\providerappstaterouter\tagstaterouter\standardmeshrulerouter\mockinvokersselector，没有其他的了
+                //                根据class来获取所有扩展对象，就是所有激活了 实现factory的都会获取到，所以说应该是包含所有factory实例的
+                //
+                // appscriptstaterouter\appstaterouter\providerappstaterouter\tagstaterouter\standardmeshrulerouter\mockinvokersselector，没有其他的了
                 moduleModel.getExtensionLoader(StateRouterFactory.class).getActivateExtension(url, ROUTER_KEY).stream()
-//                       interfaceClass =  org.apache.dubbo.springboot.demo.DemoService
+                        //                       interfaceClass =  org.apache.dubbo.springboot.demo.DemoService
                         .map(factory -> factory.getRouter(interfaceClass, url))
                         .collect(Collectors.toList());
 
@@ -112,11 +114,11 @@ public class RouterChain<T> {
         this.currentChain = this.mainChain;
     }
 
-//    原子性：AtomicReference提供了一些原子方法，可以在多线程环境下原子性地操作引用对象。
-//
-//线程安全：由于AtomicReference的操作是原子性的，它可以确保在并发环境中正确处理引用对象的读取和更新，避免了竞态条件。
-//
-//引用对象的原子性操作：AtomicReference的原子方法如get、set、compareAndSet等，针对引用对象进行操作，而不是对象内部的属性或字段。
+    //    原子性：AtomicReference提供了一些原子方法，可以在多线程环境下原子性地操作引用对象。
+    //
+    // 线程安全：由于AtomicReference的操作是原子性的，它可以确保在并发环境中正确处理引用对象的读取和更新，避免了竞态条件。
+    //
+    // 引用对象的原子性操作：AtomicReference的原子方法如get、set、compareAndSet等，针对引用对象进行操作，而不是对象内部的属性或字段。
     private final AtomicReference<BitList<Invoker<T>>> notifyingInvokers = new AtomicReference<>();
 
     private final ReadWriteLock lock = new ReentrantReadWriteLock();
@@ -134,7 +136,7 @@ public class RouterChain<T> {
         //     If `availableInvokers` is created from origin invokers => use backup chain
         //     If `availableInvokers` is created from newly invokers  => use main chain
         BitList<Invoker<T>> notifying = notifyingInvokers.get();
-        if (notifying != null //正在使用
+        if (notifying != null // 正在使用
                 && currentChain == backupChain
                 && availableInvokers.getOriginList() == notifying.getOriginList()) {
             return mainChain;
@@ -177,7 +179,7 @@ public class RouterChain<T> {
         try {
             // Lock main chain to wait all invocation end
             // To wait until no one is using main chain.
-//            SingleRouterChain类中的一个属性，进行set chain的时候使用
+            //            SingleRouterChain类中的一个属性，进行set chain的时候使用
             mainChain.getLock().writeLock().lock();
 
             // refresh
@@ -201,10 +203,10 @@ public class RouterChain<T> {
         // Switch the invokers reference in directory.
         // Cannot switch before update main chain or after backup chain update success. Or that will cause state
         // inconsistent.
-//        runable方法开始运行
+        //        runable方法开始运行
         switchAction.run();
 
-//        将当前版本切换，并且备份版本也进行更新
+        //        将当前版本切换，并且备份版本也进行更新
         try {
             // Lock to prevent directory continue list
             // The invokers reference in directory now should be the newly one and should always use the newly one once

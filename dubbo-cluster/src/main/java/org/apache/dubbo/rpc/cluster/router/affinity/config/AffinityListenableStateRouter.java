@@ -29,26 +29,17 @@ import org.apache.dubbo.common.utils.StringUtils;
 import org.apache.dubbo.rpc.Invocation;
 import org.apache.dubbo.rpc.Invoker;
 import org.apache.dubbo.rpc.RpcException;
-import org.apache.dubbo.rpc.cluster.router.AbstractRouterRule;
 import org.apache.dubbo.rpc.cluster.router.RouterSnapshotNode;
 import org.apache.dubbo.rpc.cluster.router.affinity.AffinityStateRouter;
 import org.apache.dubbo.rpc.cluster.router.affinity.config.model.AffinityRouterRule;
 import org.apache.dubbo.rpc.cluster.router.affinity.config.model.AffinityRuleParser;
-import org.apache.dubbo.rpc.cluster.router.condition.ConditionStateRouter;
-import org.apache.dubbo.rpc.cluster.router.condition.MultiDestConditionRouter;
-import org.apache.dubbo.rpc.cluster.router.condition.config.model.ConditionRouterRule;
-import org.apache.dubbo.rpc.cluster.router.condition.config.model.ConditionRuleParser;
-import org.apache.dubbo.rpc.cluster.router.condition.config.model.MultiDestConditionRouterRule;
 import org.apache.dubbo.rpc.cluster.router.state.AbstractStateRouter;
 import org.apache.dubbo.rpc.cluster.router.state.BitList;
-import org.apache.dubbo.rpc.cluster.router.state.TailStateRouter;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static org.apache.dubbo.common.constants.LoggerCodeConstants.CLUSTER_FAILED_RULE_PARSING;
-import static org.apache.dubbo.rpc.cluster.Constants.RULE_VERSION_V31;
 
 /**
  * Abstract router which listens to dynamic configuration
@@ -103,7 +94,8 @@ public abstract class AffinityListenableStateRouter<T> extends AbstractStateRout
             Invocation invocation,
             boolean needToPrintMessage,
             Holder<RouterSnapshotNode<T>> nodeHolder,
-            Holder<String> messageHolder) throws RpcException {
+            Holder<String> messageHolder)
+            throws RpcException {
         if (CollectionUtils.isEmpty(invokers) || (affinityRouters.size() == 0)) {
             if (needToPrintMessage) {
                 messageHolder.set(
@@ -138,7 +130,7 @@ public abstract class AffinityListenableStateRouter<T> extends AbstractStateRout
         String routerKey = ruleKey + RULE_SUFFIX;
         this.getRuleRepository().addListener(routerKey, this);
         String rule = this.getRuleRepository().getRule(routerKey, DynamicConfiguration.DEFAULT_GROUP);
-//        如果当前的 serviceStateRouter的rule属性是null的话，则往下进行，否则的话是没有？？
+        //        如果当前的 serviceStateRouter的rule属性是null的话，则往下进行，否则的话是没有？？
         if (StringUtils.isNotEmpty(rule)) {
             this.process(new ConfigChangedEvent(routerKey, DynamicConfiguration.DEFAULT_GROUP, rule));
         }

@@ -46,7 +46,7 @@ class ConditionStateRouterTest {
     @BeforeEach
     public void setUp() throws Exception {}
 
-//    工具方法，将后边的rule与基 url进行结合
+    //    工具方法，将后边的rule与基 url进行结合
     private URL getRouteUrl(String rule) {
         return SCRIPT_URL.addParameterAndEncoded(RULE_KEY, rule);
     }

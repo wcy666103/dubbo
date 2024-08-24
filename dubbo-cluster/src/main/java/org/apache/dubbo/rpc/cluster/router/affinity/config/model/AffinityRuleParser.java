@@ -16,17 +16,13 @@
  */
 package org.apache.dubbo.rpc.cluster.router.affinity.config.model;
 
-import org.apache.dubbo.common.utils.CollectionUtils;
 import org.apache.dubbo.common.utils.StringUtils;
-import org.apache.dubbo.rpc.cluster.router.AbstractRouterRule;
-import org.apache.dubbo.rpc.cluster.router.condition.config.model.ConditionRouterRule;
-import org.apache.dubbo.rpc.cluster.router.condition.config.model.MultiDestConditionRouterRule;
+
+import java.util.Map;
 
 import org.yaml.snakeyaml.LoaderOptions;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.SafeConstructor;
-
-import java.util.Map;
 
 import static org.apache.dubbo.rpc.cluster.Constants.CONFIG_VERSION_KEY;
 import static org.apache.dubbo.rpc.cluster.Constants.RULE_VERSION_V31;
@@ -48,7 +44,7 @@ import static org.apache.dubbo.rpc.cluster.Constants.RULE_VERSION_V31;
 public class AffinityRuleParser {
 
     public static AffinityRouterRule parse(String rawRule) {
-        AffinityRouterRule rule ;
+        AffinityRouterRule rule;
         Yaml yaml = new Yaml(new SafeConstructor(new LoaderOptions()));
         Map<String, Object> map = yaml.load(rawRule);
         String confVersion = (String) map.get(CONFIG_VERSION_KEY);

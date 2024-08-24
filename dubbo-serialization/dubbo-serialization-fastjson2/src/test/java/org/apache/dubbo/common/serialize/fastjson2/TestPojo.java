@@ -14,17 +14,33 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.dubbo.rpc.cluster.router.affinity.config;
+package com.example.test;
 
-import org.apache.dubbo.common.URL;
+import java.io.Serializable;
+import java.util.Objects;
 
-/**
- * Application level router, "application.condition-router"
- */
-public class AffinityAppStateRouter<T> extends AffinityListenableStateRouter<T> {
-    public static final String NAME = "AFFINITY_APP_ROUTER";
+public class TestPojo implements Serializable {
+    private final String data;
 
-    public AffinityAppStateRouter(URL url) {
-        super(url, url.getApplication());
+    public TestPojo(String data) {
+        this.data = data;
+    }
+
+    @Override
+    public String toString() {
+        throw new IllegalAccessError();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        TestPojo testPojo = (TestPojo) o;
+        return Objects.equals(data, testPojo.data);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(data);
     }
 }
