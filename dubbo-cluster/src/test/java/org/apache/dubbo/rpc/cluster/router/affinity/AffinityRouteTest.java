@@ -16,49 +16,80 @@
  */
 package org.apache.dubbo.rpc.cluster.router.affinity;
 
+import org.apache.dubbo.common.URL;
+import org.apache.dubbo.common.config.configcenter.ConfigChangeType;
+import org.apache.dubbo.common.config.configcenter.ConfigChangedEvent;
+import org.apache.dubbo.common.utils.Holder;
+import org.apache.dubbo.rpc.Invoker;
+import org.apache.dubbo.rpc.RpcInvocation;
+import org.apache.dubbo.rpc.cluster.router.MockInvoker;
+import org.apache.dubbo.rpc.cluster.router.affinity.config.AffinityServiceStateRouter;
+import org.apache.dubbo.rpc.cluster.router.state.BitList;
+
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
+
 public class AffinityRouteTest {
 
+    private static BitList<Invoker<String>> invokers;
+
+    @BeforeAll
+    public static void setUp() {
+
+        List<String> providerUrls = Arrays.asList(
+                    "dubbo://127.0.0.1/com.foo.BarService",
+                    "dubbo://127.0.0.1/com.foo.BarService",
+                    "dubbo://127.0.0.1/com.foo.BarService?env=normal",
+                    "dubbo://127.0.0.1/com.foo.BarService?env=normal",
+                    "dubbo://127.0.0.1/com.foo.BarService?env=normal",
+                    "dubbo://127.0.0.1/com.foo.BarService?region=beijing",
+                    "dubbo://127.0.0.1/com.foo.BarService?region=beijing",
+                    "dubbo://127.0.0.1/com.foo.BarService?region=beijing",
+                    "dubbo://127.0.0.1/com.foo.BarService?region=beijing&env=gray",
+                    "dubbo://127.0.0.1/com.foo.BarService?region=beijing&env=gray",
+                    "dubbo://127.0.0.1/com.foo.BarService?region=beijing&env=gray",
+                    "dubbo://127.0.0.1/com.foo.BarService?region=beijing&env=gray",
+                    "dubbo://127.0.0.1/com.foo.BarService?region=beijing&env=normal",
+                    "dubbo://127.0.0.1/com.foo.BarService?region=hangzhou",
+                    "dubbo://127.0.0.1/com.foo.BarService?region=hangzhou",
+                    "dubbo://127.0.0.1/com.foo.BarService?region=hangzhou&env=gray",
+                    "dubbo://127.0.0.1/com.foo.BarService?region=hangzhou&env=gray",
+                    "dubbo://127.0.0.1/com.foo.BarService?region=hangzhou&env=normal",
+                    "dubbo://127.0.0.1/com.foo.BarService?region=hangzhou&env=normal",
+                    "dubbo://127.0.0.1/com.foo.BarService?region=hangzhou&env=normal",
+                    "dubbo://dubbo.apache.org/com.foo.BarService",
+                    "dubbo://dubbo.apache.org/com.foo.BarService",
+                    "dubbo://dubbo.apache.org/com.foo.BarService?env=normal",
+                    "dubbo://dubbo.apache.org/com.foo.BarService?env=normal",
+                    "dubbo://dubbo.apache.org/com.foo.BarService?env=normal",
+                    "dubbo://dubbo.apache.org/com.foo.BarService?region=beijing",
+                    "dubbo://dubbo.apache.org/com.foo.BarService?region=beijing",
+                    "dubbo://dubbo.apache.org/com.foo.BarService?region=beijing",
+                    "dubbo://dubbo.apache.org/com.foo.BarService?region=beijing&env=gray",
+                    "dubbo://dubbo.apache.org/com.foo.BarService?region=beijing&env=gray",
+                    "dubbo://dubbo.apache.org/com.foo.BarService?region=beijing&env=gray",
+                    "dubbo://dubbo.apache.org/com.foo.BarService?region=beijing&env=gray",
+                    "dubbo://dubbo.apache.org/com.foo.BarService?region=beijing&env=normal",
+                    "dubbo://dubbo.apache.org/com.foo.BarService?region=hangzhou",
+                    "dubbo://dubbo.apache.org/com.foo.BarService?region=hangzhou",
+                    "dubbo://dubbo.apache.org/com.foo.BarService?region=hangzhou&env=gray",
+                    "dubbo://dubbo.apache.org/com.foo.BarService?region=hangzhou&env=gray",
+                    "dubbo://dubbo.apache.org/com.foo.BarService?region=hangzhou&env=normal",
+                    "dubbo://dubbo.apache.org/com.foo.BarService?region=hangzhou&env=normal",
+                    "dubbo://dubbo.apache.org/com.foo.BarService?region=hangzhou&env=normal");
+
+        List<Invoker<String>> invokerList = providerUrls.stream()
+                .map(url -> new MockInvoker<String>(URL.valueOf(url)))
+                .collect(Collectors.toList());
+
+        invokers = new BitList<>(invokerList);
+    }
     //    private static final String[] providerUrls = {
-    //        "dubbo://127.0.0.1/com.foo.BarService",
-    //        "dubbo://127.0.0.1/com.foo.BarService",
-    //        "dubbo://127.0.0.1/com.foo.BarService?env=normal",
-    //        "dubbo://127.0.0.1/com.foo.BarService?env=normal",
-    //        "dubbo://127.0.0.1/com.foo.BarService?env=normal",
-    //        "dubbo://127.0.0.1/com.foo.BarService?region=beijing",
-    //        "dubbo://127.0.0.1/com.foo.BarService?region=beijing",
-    //        "dubbo://127.0.0.1/com.foo.BarService?region=beijing",
-    //        "dubbo://127.0.0.1/com.foo.BarService?region=beijing&env=gray",
-    //        "dubbo://127.0.0.1/com.foo.BarService?region=beijing&env=gray",
-    //        "dubbo://127.0.0.1/com.foo.BarService?region=beijing&env=gray",
-    //        "dubbo://127.0.0.1/com.foo.BarService?region=beijing&env=gray",
-    //        "dubbo://127.0.0.1/com.foo.BarService?region=beijing&env=normal",
-    //        "dubbo://127.0.0.1/com.foo.BarService?region=hangzhou",
-    //        "dubbo://127.0.0.1/com.foo.BarService?region=hangzhou",
-    //        "dubbo://127.0.0.1/com.foo.BarService?region=hangzhou&env=gray",
-    //        "dubbo://127.0.0.1/com.foo.BarService?region=hangzhou&env=gray",
-    //        "dubbo://127.0.0.1/com.foo.BarService?region=hangzhou&env=normal",
-    //        "dubbo://127.0.0.1/com.foo.BarService?region=hangzhou&env=normal",
-    //        "dubbo://127.0.0.1/com.foo.BarService?region=hangzhou&env=normal",
-    //        "dubbo://dubbo.apache.org/com.foo.BarService",
-    //        "dubbo://dubbo.apache.org/com.foo.BarService",
-    //        "dubbo://dubbo.apache.org/com.foo.BarService?env=normal",
-    //        "dubbo://dubbo.apache.org/com.foo.BarService?env=normal",
-    //        "dubbo://dubbo.apache.org/com.foo.BarService?env=normal",
-    //        "dubbo://dubbo.apache.org/com.foo.BarService?region=beijing",
-    //        "dubbo://dubbo.apache.org/com.foo.BarService?region=beijing",
-    //        "dubbo://dubbo.apache.org/com.foo.BarService?region=beijing",
-    //        "dubbo://dubbo.apache.org/com.foo.BarService?region=beijing&env=gray",
-    //        "dubbo://dubbo.apache.org/com.foo.BarService?region=beijing&env=gray",
-    //        "dubbo://dubbo.apache.org/com.foo.BarService?region=beijing&env=gray",
-    //        "dubbo://dubbo.apache.org/com.foo.BarService?region=beijing&env=gray",
-    //        "dubbo://dubbo.apache.org/com.foo.BarService?region=beijing&env=normal",
-    //        "dubbo://dubbo.apache.org/com.foo.BarService?region=hangzhou",
-    //        "dubbo://dubbo.apache.org/com.foo.BarService?region=hangzhou",
-    //        "dubbo://dubbo.apache.org/com.foo.BarService?region=hangzhou&env=gray",
-    //        "dubbo://dubbo.apache.org/com.foo.BarService?region=hangzhou&env=gray",
-    //        "dubbo://dubbo.apache.org/com.foo.BarService?region=hangzhou&env=normal",
-    //        "dubbo://dubbo.apache.org/com.foo.BarService?region=hangzhou&env=normal",
-    //        "dubbo://dubbo.apache.org/com.foo.BarService?region=hangzhou&env=normal"
+
     //    };
     //
     //    private List<Invoker> buildInvokers() {
@@ -98,45 +129,53 @@ public class AffinityRouteTest {
     //        }
     //    }
     //
-    //    @Test
-    //    void testAffinityRoute() {
-    //        AffinityRoute affinityRoute = new AffinityRoute();
-    //
-    //        List<Invoker> invokers = buildInvokers();
-    //        URL url = newUrl("consumer://127.0.0.1/com.foo.BarService?env=gray&region=beijing");
-    //        Invocation invocation = new RPCInvocation("getComment", null, null);
-    //
-    //        // Test base affinity router
-    //        affinityRoute.setEnabled(true);
-    //        affinityRoute.setMatcher(genMatcher("region"));
-    //        affinityRoute.setRatio(20);
-    //
-    //        InvokersFilters filters = new InvokersFilters().addMatcher("region=$region");
-    //
-    //        List<Invoker> res = affinityRoute.route(invokers, url, invocation);
-    //        List<Invoker> filtered = filters.filtrate(invokers, url, invocation);
-    //        if (filtered.size() < providerUrls.length * (affinityRoute.getRatio() / 100.0)) {
-    //            assertEquals(0, filtered.size());
-    //        } else {
-    //            assertEquals(filtered, res);
-    //        }
-    //
-    //        // Test bad ratio
-    //        affinityRoute.setRatio(101);
-    //        res = affinityRoute.route(invokers, url, invocation);
-    //        filtered = filters.filtrate(invokers, url, invocation);
-    //        assertTrue(res.isEmpty());
-    //
-    //        // Test ratio false
-    //        affinityRoute.setRatio(80);
-    //        res = affinityRoute.route(invokers, url, invocation);
-    //        filtered = filters.filtrate(invokers, url, invocation);
-    //        assertEquals(filtered, res);
-    //
-    //        // Test ignore affinity route
-    //        affinityRoute.setMatcher(genMatcher("bad-key"));
-    //        res = affinityRoute.route(invokers, url, invocation);
-    //        filtered = filters.filtrate(invokers, url, invocation);
-    //        assertEquals(filtered, res);
-    //    }
+        @Test
+        void testAffinityRoute() {
+            String config = "configVersion: v3.1\n"
+                    + "scope: service # Or application\n"
+                    + "key: service.apache.com\n"
+                    + "enabled: true\n"
+                    + "runtime: true\n"
+                    + "affinityAware:\n"
+                    + "  key: region\n"
+                    + "  ratio: 20\n";
+
+            AffinityServiceStateRouter<String> affinityRoute = new AffinityServiceStateRouter<>(
+                    URL.valueOf("consumer://127.0.0.1/com.foo.BarService?env=gray&region=beijing"));
+
+            affinityRoute.process(new ConfigChangedEvent("com.foo.BarService", "", config, ConfigChangeType.ADDED));
+
+            RpcInvocation invocation = new RpcInvocation();
+            invocation.setMethodName("getComment");
+
+            BitList<Invoker> res = affinityRoute.route(invokers.clone(),
+                    URL.valueOf("consumer://127.0.0.1/com.foo.BarService?env=gray&region=beijing"),
+                    invocation,
+                    false,
+                    new Holder<>());
+            List<Invoker> filtered = filters.filtrate(invokers, url, invocation);
+            if (filtered.size() < providerUrls.length * (affinityRoute.getRatio() / 100.0)) {
+                assertEquals(0, filtered.size());
+            } else {
+                assertEquals(filtered, res);
+            }
+
+            // Test bad ratio
+            affinityRoute.setRatio(101);
+            res = affinityRoute.route(invokers, url, invocation);
+            filtered = filters.filtrate(invokers, url, invocation);
+            assertTrue(res.isEmpty());
+
+            // Test ratio false
+            affinityRoute.setRatio(80);
+            res = affinityRoute.route(invokers, url, invocation);
+            filtered = filters.filtrate(invokers, url, invocation);
+            assertEquals(filtered, res);
+
+            // Test ignore affinity route
+            affinityRoute.setMatcher(genMatcher("bad-key"));
+            res = affinityRoute.route(invokers, url, invocation);
+            filtered = filters.filtrate(invokers, url, invocation);
+            assertEquals(filtered, res);
+        }
 }
