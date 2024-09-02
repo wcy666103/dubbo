@@ -148,7 +148,7 @@ public class AffinityRouteTest {
             RpcInvocation invocation = new RpcInvocation();
             invocation.setMethodName("getComment");
 
-            BitList<Invoker> res = affinityRoute.route(invokers.clone(),
+            BitList<Invoker<String>> res = affinityRoute.route(invokers.clone(),
                     URL.valueOf("consumer://127.0.0.1/com.foo.BarService?env=gray&region=beijing"),
                     invocation,
                     false,

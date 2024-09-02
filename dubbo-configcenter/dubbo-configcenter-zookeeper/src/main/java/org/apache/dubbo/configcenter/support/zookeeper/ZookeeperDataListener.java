@@ -91,10 +91,10 @@ public class ZookeeperDataListener implements DataListener {
         } else {
             changeType = ConfigChangeType.MODIFIED;
         }
-//        key就是 org.apache.dubbo.springboot.demo.DemoService::.condition-router
+        //        key就是 org.apache.dubbo.springboot.demo.DemoService::.condition-router
         ConfigChangedEvent configChangeEvent = new ConfigChangedEvent(key, group, (String) value, changeType);
         if (CollectionUtils.isNotEmpty(listeners)) {
-//            逐个调用监听器的process方法，在router中对应的就是ListenableStateRouter
+            //            逐个调用监听器的process方法，在router中对应的就是ListenableStateRouter
             listeners.forEach(listener -> listener.process(configChangeEvent));
         }
 

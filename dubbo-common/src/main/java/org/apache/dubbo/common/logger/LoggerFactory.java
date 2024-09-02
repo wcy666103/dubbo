@@ -80,11 +80,11 @@ public class LoggerFactory {
                 // try to use the first available adapter
                 for (Class<? extends LoggerAdapter> clazz : candidates) {
                     try {
-//                        尝试逐个初始化，如果可以就直接用了
+                        //                        尝试逐个初始化，如果可以就直接用了
                         LoggerAdapter loggerAdapter =
                                 clazz.getDeclaredConstructor().newInstance();
                         loggerAdapter.getLogger(LoggerFactory.class);
-//                        第一个for循环看看是否有对应的框架进行了配置文件配置
+                        //                        第一个for循环看看是否有对应的框架进行了配置文件配置
                         if (loggerAdapter.isConfigured()) {
                             setLoggerAdapter(loggerAdapter);
                             found = true;
@@ -100,7 +100,7 @@ public class LoggerFactory {
 
                 System.err.println("Dubbo: Unable to find a proper configured logger to log out.");
                 for (Class<? extends LoggerAdapter> clazz : candidates) {
-//                    这次的for循环没有纠结 是否进行配置这件事了
+                    //                    这次的for循环没有纠结 是否进行配置这件事了
                     try {
                         LoggerAdapter loggerAdapter =
                                 clazz.getDeclaredConstructor().newInstance();
