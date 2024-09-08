@@ -20,6 +20,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+/**
+ * 已经验证过的 资源更新的合集
+ * @param <T>
+ */
 public final class ValidatedResourceUpdate<T extends ResourceUpdate> {
     private Map<String, ParsedResource<T>> parsedResources;
     private Set<String> unpackedResources;

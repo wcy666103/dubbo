@@ -23,6 +23,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+/**
+ * 用于定义过滤链的匹配规则
+ */
 public class FilterChainMatch {
 
     private int destinationPort;

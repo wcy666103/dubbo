@@ -46,6 +46,7 @@ import com.google.protobuf.Message;
 import io.envoyproxy.envoy.service.discovery.v3.Resource;
 import io.grpc.LoadBalancerRegistry;
 
+// xdsResource的抽象基类 资源类型的管理和验证，确保资源数据的有效性和一致性。
 public abstract class XdsResourceType<T extends ResourceUpdate> {
     static final String TYPE_URL_RESOURCE = "type.googleapis.com/envoy.service.discovery.v3.Resource";
     static final String TRANSPORT_SOCKET_NAME_TLS = "envoy.transport_sockets.tls";
@@ -118,12 +119,18 @@ public abstract class XdsResourceType<T extends ResourceUpdate> {
         }
     }
 
+    /**
+     * 转换成了功解析的资源。这里是子类的公共方法，所以上层应该是还有一个判断message是哪个具体的类的，才能调用具体的类的该方法
+     * @param args
+     * @param resources
+     * @return
+     */
     public ValidatedResourceUpdate<T> parse(Args args, List<Any> resources) {
         Map<String, ParsedResource<T>> parsedResources = new HashMap<>(resources.size());
         Set<String> unpackedResources = new HashSet<>(resources.size());
         Set<String> invalidResources = new HashSet<>();
         List<String> errors = new ArrayList<>();
-
+//循环解析
         for (int i = 0; i < resources.size(); i++) {
             Any resource = resources.get(i);
 
@@ -223,6 +230,13 @@ public abstract class XdsResourceType<T extends ResourceUpdate> {
         return true;
     }
 
+    /**
+     * 留给具体的子类去实现
+     * @param args
+     * @param unpackedMessage
+     * @return
+     * @throws ResourceInvalidException
+     */
     abstract T doParse(Args args, Message unpackedMessage) throws ResourceInvalidException;
 
     /**

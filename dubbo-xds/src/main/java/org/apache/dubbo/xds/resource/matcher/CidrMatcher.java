@@ -19,11 +19,19 @@ package org.apache.dubbo.xds.resource.matcher;
 import java.math.BigInteger;
 import java.net.InetAddress;
 
+/**
+ * Classless Inter-Domain Routing）地址的匹配。
+ * 在 Envoy 或其他网络代理中，CidrMatcher 用于匹配 IP 地址
+ */
 public final class CidrMatcher {
 
     private final InetAddress addressPrefix;
 
     private final int prefixLen;
+
+    /*CIDR 匹配：
+匹配 IP 地址是否属于特定的 CIDR 范围。
+例如，匹配 192.168.0.0/24 范围内的 IP 地址*/
 
     /**
      * Returns matching result for this address.

@@ -15,7 +15,9 @@
  * limitations under the License.
  */
 package org.apache.dubbo.xds.resource.matcher;
-
+//基于概率的匹配机制。
+// 在 Envoy 或其他网络代理中，FractionMatcher 可以用于根据一定的概率规则来决定是否匹配某个条件。
+// 这种机制在负载均衡、A/B 测试和流量分割等场景中非常有用
 public final class FractionMatcher {
 
     private final int numerator;

@@ -47,7 +47,15 @@ import io.grpc.stub.StreamObserver;
 import static org.apache.dubbo.common.constants.LoggerCodeConstants.REGISTRY_ERROR_PARSING_XDS;
 import static org.apache.dubbo.common.constants.LoggerCodeConstants.REGISTRY_ERROR_REQUEST_XDS;
 
+//观察者模式的应用，专门用于处理Envoy的xDS协议中的资源更新
 public class AdsObserver {
+    /*Aggregated Discovery Service (ADS)：
+ADS 是 Envoy 中的一个协议，用于聚合各种xDS资源更新。
+AdsObserver 通常用于监听和处理这些聚合的资源更新。
+观察者模式：
+观察者模式是一种设计模式，用于实现对象之间的解耦。
+AdsObserver 作为观察者，会在收到资源更新时执行相应的操作。
+*/
     private static final ErrorTypeAwareLogger logger = LoggerFactory.getErrorTypeAwareLogger(AdsObserver.class);
     private final ApplicationModel applicationModel;
     private final URL url;
@@ -57,6 +65,7 @@ public class AdsObserver {
     private final Map<XdsResourceType<?>, ConcurrentMap<String, XdsRawResourceProtocol>> rawResourceListeners =
             new ConcurrentHashMap<>();
 
+//    包装过的类，用于向Envoy发送请求
     protected StreamObserver<DiscoveryRequest> requestObserver;
 
     private final CompletableFuture<String> future = new CompletableFuture<>();

@@ -66,6 +66,10 @@ import io.envoyproxy.envoy.config.route.v3.RouteConfiguration;
 import io.envoyproxy.envoy.type.v3.FractionalPercent;
 import io.grpc.Status;
 
+/**
+ * 处理路由配置资源的类
+ * 该类只有一个实例
+ */
 public class XdsRouteConfigureResource extends XdsResourceType<RdsUpdate> {
     static final String ADS_TYPE_URL_RDS = "type.googleapis.com/envoy.config.route.v3.RouteConfiguration";
     private static final String TYPE_URL_FILTER_CONFIG = "type.googleapis.com/envoy.config.route.v3.FilterConfig";
@@ -88,6 +92,7 @@ public class XdsRouteConfigureResource extends XdsResourceType<RdsUpdate> {
     @Override
     @Nullable
     String extractResourceName(Message unpackedResource) {
+//        envoy的 RouteConfiguration 该类处理的是这个类型
         if (!(unpackedResource instanceof RouteConfiguration)) {
             return null;
         }

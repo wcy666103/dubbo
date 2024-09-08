@@ -1,0 +1,7 @@
+XdsUpdate 只是实现了ResourceUpdate这个空接口
+里边应该是存储被解析过的xds资源的字段
+
+ParsedResource用来存储解析过的Xds以及对应的原RawResource
+
+ValidatedResourceUpdate用来存储解析过的Xds以及校验过的集合
+

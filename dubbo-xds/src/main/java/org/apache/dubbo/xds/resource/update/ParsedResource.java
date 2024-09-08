@@ -20,6 +20,10 @@ import org.apache.dubbo.common.utils.Assert;
 
 import com.google.protobuf.Any;
 
+/**
+ * 只是用来村粗已经转换过的 resourceUpdate和其对应的rawResource
+ * @param <T>
+ */
 public final class ParsedResource<T extends ResourceUpdate> {
     private final T resourceUpdate;
     private final Any rawResource;
