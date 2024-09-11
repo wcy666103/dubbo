@@ -29,13 +29,18 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import io.envoyproxy.envoy.config.core.v3.Node;
 
+//对 AdsObserver 进行的上层调用
+// 允许 Envoy 从外部管理服务器（如 Istio 或其他服务网格组件）获取配置信息。
 public class XdsRawResourceProtocol<T extends ResourceUpdate> {
 
+//    3.订阅资源
     private static final ErrorTypeAwareLogger logger =
             LoggerFactory.getErrorTypeAwareLogger(XdsRawResourceProtocol.class);
 
+//    只是对上层的一个引用而已，这个类还是配合 AdsObserver 进行的
     protected AdsObserver adsObserver;
 
+//    envoy 的node
     protected final Node node;
 
     private XdsResourceType<T> resourceTypeInstance;

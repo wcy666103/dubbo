@@ -44,6 +44,7 @@ import io.grpc.stub.StreamObserver;
 
 import static org.apache.dubbo.common.constants.LoggerCodeConstants.REGISTRY_ERROR_CREATE_CHANNEL_XDS;
 
+//创建和管理gRPC通道
 public class XdsChannel {
 
     private static final ErrorTypeAwareLogger logger = LoggerFactory.getErrorTypeAwareLogger(XdsChannel.class);

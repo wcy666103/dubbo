@@ -231,7 +231,7 @@ public abstract class XdsResourceType<T extends ResourceUpdate> {
     }
 
     /**
-     * 留给具体的子类去实现
+     * 留给具体的子类去实现  并且因为返回的是泛型T
      * @param args
      * @param unpackedMessage
      * @return

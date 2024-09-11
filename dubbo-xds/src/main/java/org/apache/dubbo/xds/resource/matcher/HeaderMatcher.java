@@ -21,7 +21,9 @@ import org.apache.dubbo.common.utils.Assert;
 import org.apache.dubbo.xds.resource.common.Range;
 
 import com.google.re2j.Pattern;
-
+//匹配 HTTP 请求头中的特定值。
+// 在 Envoy 或其他网络代理中，HeaderMatcher 用于根据请求头中的值来决定是否匹配某个条件。
+// 这种机制在路由、过滤和安全策略中非常有用。
 public final class HeaderMatcher {
 
     private final String name;

@@ -1,1 +1,2 @@
 XdsResourceType 又是父类，定义一些解析资源的公共方法
+像XdsClusterResource extends XdsResourceType<CdsUpdate>类就是子类并且泛型类型都定义好了
