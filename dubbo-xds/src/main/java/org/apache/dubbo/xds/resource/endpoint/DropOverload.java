@@ -16,12 +16,14 @@
  */
 package org.apache.dubbo.xds.resource.endpoint;
 
+//系统负载过高时选择性地丢弃部分请求，从而避免系统崩溃或性能下降。
 public class DropOverload {
 
+//    类别
     private final String category;
 
     private final int dropsPerMillion;
-
+//似乎是一个没有完成的类
     public DropOverload(String category, int dropsPerMillion) {
         if (category == null) {
             throw new NullPointerException("Null category");

@@ -24,6 +24,7 @@ import java.util.List;
 
 public class LbEndpoint {
 
+//    引入到 dubbo中的 url类中
     private final List<URLAddress> addresses;
 
     private final int loadBalancingWeight;

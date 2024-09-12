@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+//本地性的lb endpoints权重+优先级Bean
 public class LocalityLbEndpoints {
 
     private final List<LbEndpoint> endpoints;
