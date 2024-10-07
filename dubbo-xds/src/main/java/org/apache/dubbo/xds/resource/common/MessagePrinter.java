@@ -36,6 +36,8 @@ import io.envoyproxy.envoy.extensions.transport_sockets.tls.v3.DownstreamTlsCont
 import io.envoyproxy.envoy.extensions.transport_sockets.tls.v3.UpstreamTlsContext;
 
 /**
+ * 将Protobuf消息转换为人类可读的字符串格式
+ * 特别适用于包含com.google.protobuf.Any字段的消息
  * Converts protobuf message to human readable String format. Useful for protobuf messages containing
  * {@link com.google.protobuf.Any} fields.
  */
@@ -43,7 +45,7 @@ public final class MessagePrinter {
 
     private MessagePrinter() {}
 
-    // The initialization-on-demand holder idiom.
+    // The initialization-on-demand holder idiom. 懒加载模式
     private static class LazyHolder {
         static final JsonFormat.Printer printer = newPrinter();
 

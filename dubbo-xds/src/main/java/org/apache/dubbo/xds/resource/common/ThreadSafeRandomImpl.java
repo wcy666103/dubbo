@@ -17,7 +17,7 @@
 package org.apache.dubbo.xds.resource.common;
 
 import java.util.concurrent.ThreadLocalRandom;
-
+// 这个为什么要包装没看懂
 public final class ThreadSafeRandomImpl implements ThreadSafeRandom {
 
     public static final ThreadSafeRandom instance = new ThreadSafeRandomImpl();

@@ -18,19 +18,22 @@ package org.apache.dubbo.xds.resource.cluster;
 
 import org.apache.dubbo.common.lang.Nullable;
 
+/**
+ * 基于失败率的驱逐策略配置
+ */
 public class FailurePercentageEjection {
 
     @Nullable
-    private final Integer threshold;
+    private final Integer threshold; //失败率阈值。
 
     @Nullable
-    private final Integer enforcementPercentage;
+    private final Integer enforcementPercentage;// 执行百分比。
 
     @Nullable
-    private final Integer minimumHosts;
+    private final Integer minimumHosts; //最小主机数。
 
     @Nullable
-    private final Integer requestVolume;
+    private final Integer requestVolume; //请求量
 
     static FailurePercentageEjection create(
             @Nullable Integer threshold,

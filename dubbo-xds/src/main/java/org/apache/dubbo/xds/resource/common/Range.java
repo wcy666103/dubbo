@@ -16,6 +16,7 @@
  */
 package org.apache.dubbo.xds.resource.common;
 
+// 只是简单的表示 [start,end]的范围
 public final class Range {
 
     private final long start;

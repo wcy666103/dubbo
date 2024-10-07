@@ -16,12 +16,16 @@
  */
 package org.apache.dubbo.xds.resource.common;
 
+/**
+ * 表示分数百分比
+ * Envoy 代理中，FractionalPercent 类型常用于表示负载均衡权重、采样率等。
+ */
 public final class FractionalPercent {
 
     enum DenominatorType {
-        HUNDRED,
-        TEN_THOUSAND,
-        MILLION
+        HUNDRED, // 百分比
+        TEN_THOUSAND, // 十万分比
+        MILLION // 百万分比
     }
 
     private final int numerator;

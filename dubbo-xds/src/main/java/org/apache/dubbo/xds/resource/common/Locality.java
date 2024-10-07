@@ -16,6 +16,9 @@
  */
 package org.apache.dubbo.xds.resource.common;
 
+/**
+ * 本地性实体类，记录 zone 和 region
+ */
 public class Locality {
 
     private String region;

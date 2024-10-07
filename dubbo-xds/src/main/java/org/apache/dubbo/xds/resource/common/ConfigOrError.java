@@ -20,6 +20,7 @@ import org.apache.dubbo.common.utils.Assert;
 
 // TODO(zdapeng): Unify with ClientXdsClient.StructOrError, or just have parseFilterConfig() throw
 //     certain types of Exception.
+// 用来 包裹 conf 或者 error信息的
 public class ConfigOrError<T> {
 
     /**

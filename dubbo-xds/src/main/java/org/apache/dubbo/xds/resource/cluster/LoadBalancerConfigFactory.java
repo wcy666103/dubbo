@@ -54,6 +54,22 @@ import io.envoyproxy.envoy.extensions.load_balancing_policies.wrr_locality.v3.Wr
  * Note that if this field is used, it will override any configuration set using the legacy approach. The new
  * configuration approach is explained in detail in the <a href="
  * https://github.com/grpc/proposal/blob/master/A52-xds-custom-lb-policies.md">Custom LB Policies gRFC</a>
+ * 创建和管理负载均衡器配置
+ *      配置转换：
+ *          将不同类型的负载均衡配置转换为统一的服务配置格式。
+ *          支持多种配置类型（如 LeastRequest、自定义配置等）。
+ *      异常处理：
+ *          定义了 ResourceInvalidException 异常，用于处理无效配置的情况。
+ *          自定义异常 MaxRecursionReachedException 用于处理配置递归过深的问题。
+ *      配置解析：
+ *          解析 JSON 配置，将其转换为 Java 对象。
+ *          提取配置类型名称，并进行相应的处理。
+ *      负载均衡策略支持：
+ *          支持多种负载均衡策略（如 RING_HASH、ROUND_ROBIN、LEAST_REQUEST 等）。
+ *          根据不同的负载均衡策略创建相应的服务配置。
+ * 工厂方法：
+ * 提供静态方法 convertToServiceConfig 用于根据给定的 Cluster 对象创建负载均衡配置。
+ * 内部实现不同的负载均衡策略转换方法（如 convertRingHashConfig、convertLeastRequestConfig 等）。
  */
 public class LoadBalancerConfigFactory {
 
