@@ -20,6 +20,12 @@ import org.apache.dubbo.common.lang.Nullable;
 
 import com.google.protobuf.util.Durations;
 
+/**
+ * 定义异常检测策略
+ *
+ * 存储异常检测相关的配置参数
+ * 从Envoy配置创建OutlierDetection实例的方法
+ */
 public class OutlierDetection {
 
     @Nullable

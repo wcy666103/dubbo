@@ -70,6 +70,8 @@ import io.envoyproxy.envoy.extensions.load_balancing_policies.wrr_locality.v3.Wr
  * 工厂方法：
  * 提供静态方法 convertToServiceConfig 用于根据给定的 Cluster 对象创建负载均衡配置。
  * 内部实现不同的负载均衡策略转换方法（如 convertRingHashConfig、convertLeastRequestConfig 等）。
+ *
+ * LoadBalancingPolicyConverter 静态内部类实现负载均衡策略的转换。
  */
 public class LoadBalancerConfigFactory {
 

@@ -18,6 +18,9 @@ package org.apache.dubbo.xds.resource.cluster;
 
 import org.apache.dubbo.common.lang.Nullable;
 
+/**
+ * 成功率驱逐的配置，
+ */
 public class SuccessRateEjection {
 
     @Nullable

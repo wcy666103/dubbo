@@ -18,6 +18,9 @@ package org.apache.dubbo.xds.resource.filter;
 
 import java.util.Objects;
 
+/**
+ * name 与 filter config 的一个组合
+ */
 public class NamedFilterConfig {
     // filter instance name
     final String name;
