@@ -16,6 +16,9 @@
  */
 package org.apache.dubbo.xds.resource.filter.rbac;
 
+/**
+ * 实现一个RBAC（基于角色的访问控制）策略匹配器：
+ */
 final class PolicyMatcher implements Matcher {
 
     private final String name;
@@ -31,6 +34,11 @@ final class PolicyMatcher implements Matcher {
         return new PolicyMatcher(name, permissions, principals);
     }
 
+    /**
+     * 检查给定参数是否同时满足权限和主体的匹配条件。
+     * @param args
+     * @return
+     */
     @Override
     public boolean matches(Object args) {
         return getPermissions().matches(args) && getPrincipals().matches(args);

@@ -36,6 +36,11 @@ import io.grpc.internal.GrpcUtil;
 
 /**
  * HttpFault filter implementation.
+ * HTTP故障注入过滤器
+ * 配置解析：从Protobuf消息中解析故障延迟和故障终止配置。
+ * 类型检查：确保传入的消息类型正确，并处理无效配置错误。
+ * 百分比解析：根据不同的分母类型（如百分比、千分比等）解析百分数。
+ * 延迟与终止配置：支持基于头部或固定延迟的故障注入，以及HTTP状态码或gRPC状态码的故障终止。
  */
 public final class FaultFilter implements Filter, ClientFilter {
 

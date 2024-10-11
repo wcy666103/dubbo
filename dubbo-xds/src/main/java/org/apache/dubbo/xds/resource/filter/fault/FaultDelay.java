@@ -18,7 +18,7 @@ package org.apache.dubbo.xds.resource.filter.fault;
 
 import org.apache.dubbo.common.lang.Nullable;
 import org.apache.dubbo.xds.resource.common.FractionalPercent;
-
+//表示故障注入中的延迟配置
 final class FaultDelay {
 
     @Nullable

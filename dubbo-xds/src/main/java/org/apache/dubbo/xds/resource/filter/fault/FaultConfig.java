@@ -18,7 +18,7 @@ package org.apache.dubbo.xds.resource.filter.fault;
 
 import org.apache.dubbo.common.lang.Nullable;
 import org.apache.dubbo.xds.resource.filter.FilterConfig;
-
+//配置故障注入策略 存储了故障延迟(faultDelay)、故障终止(faultAbort)配置及最大并发故障数
 final class FaultConfig implements FilterConfig {
 
     @Nullable

@@ -18,6 +18,10 @@ package org.apache.dubbo.xds.resource.filter.rbac;
 
 import org.apache.dubbo.xds.resource.matcher.CidrMatcher;
 
+/**
+ * 基于源IP地址匹配的过滤器
+ * 委托模式属于 装饰者模式（Decorator Pattern） 的一种变体。
+ */
 final class SourceIpMatcher implements Matcher {
 
     private final CidrMatcher delegate;

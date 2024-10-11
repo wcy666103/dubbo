@@ -20,6 +20,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+/**
+ * 封装授权配置信息
+ * 存储不可变的策略匹配器列表policies和动作action
+ */
 final class AuthConfig {
 
     private final List<PolicyMatcher> policies;

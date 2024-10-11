@@ -18,6 +18,9 @@ package org.apache.dubbo.xds.resource.filter.rbac;
 
 import org.apache.dubbo.xds.resource.matcher.StringMatcher;
 
+/**
+ * 又是 装饰器模式来做的委托
+ */
 final class PathMatcher implements Matcher {
 
     private final StringMatcher delegate;

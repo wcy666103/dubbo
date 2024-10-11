@@ -26,6 +26,7 @@ import java.util.Map;
 
 /**
  * A registry for all supported {@link Filter}s. Filters can be queried from the registry by any of the
+ * 单例模式管理所有支持的过滤器（Filter），通过类型URL进行查询。
  * {@link Filter#typeUrls() type URLs}.
  */
 public class FilterRegistry {

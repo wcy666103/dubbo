@@ -22,6 +22,7 @@ import com.google.protobuf.Message;
 
 /**
  * Defines the parsing functionality of an HTTP filter. A Filter may optionally implement either
+ * 定义了HTTP过滤器的解析功能
  * {@link ClientFilter} or {@link ServerFilter} or both, indicating it is capable of working on
  * the client side or server side or both, respectively.
  */
@@ -34,12 +35,14 @@ public interface Filter {
     String[] typeUrls();
 
     /**
+     * 顶层
      * Parses the top-level filter config from raw proto message. The message may be either a
      * {@link com.google.protobuf.Any} or a {@link com.google.protobuf.Struct}.
      */
     ConfigOrError<? extends FilterConfig> parseFilterConfig(Message rawProtoMessage);
 
     /**
+     * pre的filter
      * Parses the per-filter override filter config from raw proto message. The message may be either a
      * {@link com.google.protobuf.Any} or a {@link com.google.protobuf.Struct}.
      */

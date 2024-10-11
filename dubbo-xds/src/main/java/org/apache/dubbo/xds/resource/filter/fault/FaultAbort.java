@@ -21,7 +21,7 @@ import org.apache.dubbo.common.utils.Assert;
 import org.apache.dubbo.xds.resource.common.FractionalPercent;
 
 import io.grpc.Status;
-
+//定义故障终止策略
 final class FaultAbort {
 
     @Nullable

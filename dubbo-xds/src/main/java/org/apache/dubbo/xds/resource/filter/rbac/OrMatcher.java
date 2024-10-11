@@ -23,6 +23,9 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+/**
+ * 通过组合多个Matcher对象，创建一个逻辑或（OR）匹配器
+ */
 final class OrMatcher implements Matcher {
 
     private final List<? extends Matcher> anyMatch;
