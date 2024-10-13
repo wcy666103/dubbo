@@ -18,6 +18,9 @@ package org.apache.dubbo.xds.resource.filter.rbac;
 
 import org.apache.dubbo.common.lang.Nullable;
 
+/**
+ * 用于表示认证决策结果
+ */
 final class AuthDecision {
 
     private final Action decision;

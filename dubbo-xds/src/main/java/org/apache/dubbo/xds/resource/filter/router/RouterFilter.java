@@ -26,8 +26,9 @@ import com.google.protobuf.Message;
  * Router filter implementation. Currently this filter does not parse any field in the config.
  */
 public enum RouterFilter implements Filter {
+//    单例INSTANCE
     INSTANCE;
-
+//TYPE_URL为路由过滤器类型URL
     static final String TYPE_URL = "type.googleapis.com/envoy.extensions.filters.http.router.v3.Router";
 
     public static final FilterConfig ROUTER_CONFIG = new FilterConfig() {
@@ -45,6 +46,7 @@ public enum RouterFilter implements Filter {
         return new String[] {TYPE_URL};
     }
 
+//    解析配置信息并返回ROUTER_CONFIG。
     public ConfigOrError<? extends FilterConfig> parseFilterConfig(Message rawProtoMessage) {
         return ConfigOrError.fromConfig(ROUTER_CONFIG);
     }
