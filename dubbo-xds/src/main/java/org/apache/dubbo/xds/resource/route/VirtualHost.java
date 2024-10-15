@@ -25,6 +25,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+/**
+ * 虚拟主机模型
+ * 虚拟主机名称、域名列表、路由列表和过滤器配置
+ */
 public class VirtualHost {
 
     private String name;

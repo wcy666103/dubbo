@@ -23,6 +23,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
+/**
+ * 监听器名称、地址、过滤链列表及默认过滤链。
+ */
 public class Listener {
 
     private String name;

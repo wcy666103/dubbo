@@ -19,6 +19,9 @@ package org.apache.dubbo.xds.resource.common;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
+/**
+ * 表示 CIDR（无类别域间路由）范围，包含 IP 地址前缀和前缀长度。
+ */
 public class CidrRange {
 
     private final InetAddress addressPrefix;

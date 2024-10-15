@@ -26,6 +26,10 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
+/**
+ * 管理 HTTP 连接的相关配置
+ * 包括最大流持续时间、路由发现服务名称、虚拟主机列表和 HTTP 过滤器配置
+ */
 public class HttpConnectionManager {
 
     private long httpMaxStreamDurationNano;

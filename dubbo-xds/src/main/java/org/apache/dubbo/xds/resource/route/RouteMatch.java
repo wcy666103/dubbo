@@ -30,7 +30,9 @@ public final class RouteMatch {
     private final PathMatcher pathMatcher;
 
     private final List<HeaderMatcher> headerMatchers;
-
+    /**
+     * 可选的FractionMatcher用于实现灰度或概率路由。
+     */
     @Nullable
     private final FractionMatcher fractionMatcher;
 
