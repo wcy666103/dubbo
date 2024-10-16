@@ -29,15 +29,14 @@ import org.apache.dubbo.common.utils.StringUtils;
 import org.apache.dubbo.rpc.Invocation;
 import org.apache.dubbo.rpc.Invoker;
 import org.apache.dubbo.rpc.RpcException;
+import org.apache.dubbo.rpc.cluster.router.AbstractRouterRule;
 import org.apache.dubbo.rpc.cluster.router.RouterSnapshotNode;
 import org.apache.dubbo.rpc.cluster.router.affinity.AffinityStateRouter;
 import org.apache.dubbo.rpc.cluster.router.affinity.config.model.AffinityRouterRule;
 import org.apache.dubbo.rpc.cluster.router.affinity.config.model.AffinityRuleParser;
 import org.apache.dubbo.rpc.cluster.router.state.AbstractStateRouter;
 import org.apache.dubbo.rpc.cluster.router.state.BitList;
-
-import java.util.Collections;
-import java.util.List;
+import org.apache.dubbo.rpc.cluster.router.state.TailStateRouter;
 
 import static org.apache.dubbo.common.constants.LoggerCodeConstants.CLUSTER_FAILED_RULE_PARSING;
 
@@ -51,7 +50,7 @@ public abstract class AffinityListenableStateRouter<T> extends AbstractStateRout
     private static final ErrorTypeAwareLogger logger =
             LoggerFactory.getErrorTypeAwareLogger(AffinityListenableStateRouter.class);
     private volatile AffinityRouterRule affinityRouterRule;
-    private volatile List<AffinityStateRouter<T>> affinityRouters = Collections.emptyList();
+    private volatile AffinityStateRouter<T> affinityRouter;
     private final String ruleKey;
 
     public AffinityListenableStateRouter(URL url, String ruleKey) {
@@ -70,10 +69,11 @@ public abstract class AffinityListenableStateRouter<T> extends AbstractStateRout
 
         if (event.getChangeType().equals(ConfigChangeType.DELETED)) {
             affinityRouterRule = null;
-            affinityRouters = Collections.emptyList();
+            affinityRouter = null;
         } else {
             try {
                 affinityRouterRule = AffinityRuleParser.parse(event.getContent());
+                generateConditions(affinityRouterRule);
             } catch (Exception e) {
                 logger.error(
                         CLUSTER_FAILED_RULE_PARSING,
@@ -96,10 +96,10 @@ public abstract class AffinityListenableStateRouter<T> extends AbstractStateRout
             Holder<RouterSnapshotNode<T>> nodeHolder,
             Holder<String> messageHolder)
             throws RpcException {
-        if (CollectionUtils.isEmpty(invokers) || (affinityRouters.size() == 0)) {
+        if (CollectionUtils.isEmpty(invokers) || affinityRouter == null) {
             if (needToPrintMessage) {
                 messageHolder.set(
-                        "Directly return. Reason: Invokers from previous router is empty or affinityRouters is empty.");
+                        "Directly return. Reason: Invokers from previous router is empty or affinityRouter is null.");
             }
             return invokers;
         }
@@ -109,11 +109,9 @@ public abstract class AffinityListenableStateRouter<T> extends AbstractStateRout
         if (needToPrintMessage) {
             resultMessage = new StringBuilder();
         }
-        for (AbstractStateRouter<T> router : affinityRouters) {
-            invokers = router.route(invokers, url, invocation, needToPrintMessage, nodeHolder);
-            if (needToPrintMessage) {
-                resultMessage.append(messageHolder.get());
-            }
+        invokers = affinityRouter.route(invokers, url, invocation, needToPrintMessage, nodeHolder);
+        if (needToPrintMessage) {
+            resultMessage.append(messageHolder.get());
         }
 
         if (needToPrintMessage) {
@@ -121,6 +119,24 @@ public abstract class AffinityListenableStateRouter<T> extends AbstractStateRout
         }
 
         return invokers;
+    }
+
+    @Override
+    public boolean isForce() {
+        return (affinityRouterRule != null && affinityRouterRule.isForce());
+    }
+
+    private boolean isRuleRuntime() {
+        return affinityRouterRule != null && affinityRouterRule.isValid() && affinityRouterRule.isRuntime();
+    }
+
+    private void generateConditions(AbstractRouterRule rule) {
+        if (rule == null || !rule.isValid()) {
+            return;
+        }
+        AffinityRouterRule affinityRule = (AffinityRouterRule)rule;
+        affinityRouter = new AffinityStateRouter<>(getUrl(), affinityRule.getAffinityKey(),affinityRule.getRatio(),affinityRule.isEnabled());
+        affinityRouter.setNextRouter(TailStateRouter.getInstance());
     }
 
     private synchronized void init(String ruleKey) {
@@ -134,6 +150,10 @@ public abstract class AffinityListenableStateRouter<T> extends AbstractStateRout
         if (StringUtils.isNotEmpty(rule)) {
             this.process(new ConfigChangedEvent(routerKey, DynamicConfiguration.DEFAULT_GROUP, rule));
         }
+    }
+
+    public AffinityStateRouter<T> getAffinityRouter() {
+        return affinityRouter;
     }
 
     @Override

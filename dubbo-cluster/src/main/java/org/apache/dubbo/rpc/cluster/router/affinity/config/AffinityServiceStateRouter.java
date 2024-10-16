@@ -18,14 +18,13 @@ package org.apache.dubbo.rpc.cluster.router.affinity.config;
 
 import org.apache.dubbo.common.URL;
 import org.apache.dubbo.common.config.configcenter.DynamicConfiguration;
-import org.apache.dubbo.rpc.cluster.router.condition.config.ListenableStateRouter;
 
 /**
  * Service level router, "server-unique-name.condition-router"
  * service的实例，在哪区分的实例
  * 对应的位置应该是在
  */
-public class AffinityServiceStateRouter<T> extends ListenableStateRouter<T> {
+public class AffinityServiceStateRouter<T> extends AffinityListenableStateRouter<T> {
     public static final String NAME = "AFFINITY_SERVICE_ROUTER";
 
     public AffinityServiceStateRouter(URL url) {

@@ -29,18 +29,23 @@ import org.apache.dubbo.rpc.cluster.router.state.BitList;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import static org.junit.Assert.assertEquals;
 
 public class AffinityRouteTest {
 
     private static BitList<Invoker<String>> invokers;
 
+    private static List<String> providerUrls;
+
     @BeforeAll
     public static void setUp() {
 
-        List<String> providerUrls = Arrays.asList(
+        providerUrls = Arrays.asList(
                     "dubbo://127.0.0.1/com.foo.BarService",
                     "dubbo://127.0.0.1/com.foo.BarService",
                     "dubbo://127.0.0.1/com.foo.BarService?env=normal",
@@ -88,94 +93,130 @@ public class AffinityRouteTest {
 
         invokers = new BitList<>(invokerList);
     }
-    //    private static final String[] providerUrls = {
+    public List<String> filtrate(List<String> invokers, String key) {
 
-    //    };
-    //
-    //    private List<Invoker> buildInvokers() {
-    //        List<Invoker> res = new ArrayList<>();
-    //        for (String url : providerUrls) {
-    //            URL u = new URL(url);
-    //            res.add(new BaseInvoker(u));
-    //        }
-    //        return res;
-    //    }
-    //
-    //    private URL newUrl(String s) {
-    //        return new URL(s);
-    //    }
-    //
-    //    private FieldMatcher genMatcher(String key) {
-    //        return new FieldMatcher(key);
-    //    }
-    //
-    //    class InvokersFilters extends ArrayList<FieldMatcher> {
-    //        public InvokersFilters addMatcher(String rule) {
-    //            this.add(genMatcher(rule));
-    //            return this;
-    //        }
-    //
-    //        public List<Invoker> filtrate(List<Invoker> invokers, URL url, Invocation invocation) {
-    //            for (FieldMatcher cond : this) {
-    //                List<Invoker> tmpInv = new ArrayList<>();
-    //                for (Invoker invoker : invokers) {
-    //                    if (cond.matchInvoker(url, invoker, invocation)) {
-    //                        tmpInv.add(invoker);
-    //                    }
-    //                }
-    //                invokers = tmpInv;
-    //            }
-    //            return invokers;
-    //        }
-    //    }
-    //
-        @Test
-        void testAffinityRoute() {
-            String config = "configVersion: v3.1\n"
-                    + "scope: service # Or application\n"
-                    + "key: service.apache.com\n"
-                    + "enabled: true\n"
-                    + "runtime: true\n"
-                    + "affinityAware:\n"
-                    + "  key: region\n"
-                    + "  ratio: 20\n";
+        return invokers.stream()
+                .filter(invoker -> invoker.contains(key))
+                .collect(Collectors.toList());
+    }
+    @Test
+    void testMetAffinityRoute() {
+        String config = "configVersion: v3.1\n"
+                + "scope: service\n"
+                + "key: service.apache.com\n"
+                + "enabled: true\n"
+                + "runtime: true\n"
+                + "affinityAware:\n"
+                + "  key: region\n"
+                + "  ratio: 20\n";
 
-            AffinityServiceStateRouter<String> affinityRoute = new AffinityServiceStateRouter<>(
-                    URL.valueOf("consumer://127.0.0.1/com.foo.BarService?env=gray&region=beijing"));
+        AffinityServiceStateRouter<String> affinityRoute = new AffinityServiceStateRouter<>(
+                URL.valueOf("consumer://127.0.0.1/com.foo.BarService?env=gray&region=beijing"));
 
-            affinityRoute.process(new ConfigChangedEvent("com.foo.BarService", "", config, ConfigChangeType.ADDED));
+        affinityRoute.process(new ConfigChangedEvent("com.foo.BarService", "", config, ConfigChangeType.ADDED));
 
-            RpcInvocation invocation = new RpcInvocation();
-            invocation.setMethodName("getComment");
+        RpcInvocation invocation = new RpcInvocation();
+        invocation.setMethodName("getComment");
 
-            BitList<Invoker<String>> res = affinityRoute.route(invokers.clone(),
-                    URL.valueOf("consumer://127.0.0.1/com.foo.BarService?env=gray&region=beijing"),
-                    invocation,
-                    false,
-                    new Holder<>());
-            List<Invoker> filtered = filters.filtrate(invokers, url, invocation);
-            if (filtered.size() < providerUrls.length * (affinityRoute.getRatio() / 100.0)) {
-                assertEquals(0, filtered.size());
-            } else {
-                assertEquals(filtered, res);
-            }
+        BitList<Invoker<String>> res = affinityRoute.route(invokers.clone(),
+                URL.valueOf("consumer://127.0.0.1/com.foo.BarService?env=gray&region=beijing"),
+                invocation,
+                false,
+                new Holder<>());
+        List<String> filtered = filtrate(new ArrayList<String>(providerUrls), "region=beijing");
 
-            // Test bad ratio
-            affinityRoute.setRatio(101);
-            res = affinityRoute.route(invokers, url, invocation);
-            filtered = filters.filtrate(invokers, url, invocation);
-            assertTrue(res.isEmpty());
+        assertEquals(filtered.size(), res.size());
+        System.out.println("The affinity routing condition is met and the result is routed");
 
-            // Test ratio false
-            affinityRoute.setRatio(80);
-            res = affinityRoute.route(invokers, url, invocation);
-            filtered = filters.filtrate(invokers, url, invocation);
-            assertEquals(filtered, res);
+    }
 
-            // Test ignore affinity route
-            affinityRoute.setMatcher(genMatcher("bad-key"));
-            res = affinityRoute.route(invokers, url, invocation);
-            filtered = filters.filtrate(invokers, url, invocation);
-            assertEquals(filtered, res);
-        }
+    @Test
+    void testUnMetAffinityRoute() {
+        String config = "configVersion: v3.1\n"
+                + "scope: service\n"
+                + "key: service.apache.com\n"
+                + "enabled: true\n"
+                + "runtime: true\n"
+                + "affinityAware:\n"
+                + "  key: region\n"
+                + "  ratio: 80\n";
+
+        AffinityServiceStateRouter<String> affinityRoute = new AffinityServiceStateRouter<>(
+                URL.valueOf("consumer://127.0.0.1/com.foo.BarService?env=gray&region=beijing"));
+
+        affinityRoute.process(new ConfigChangedEvent("com.foo.BarService", "", config, ConfigChangeType.ADDED));
+
+        RpcInvocation invocation = new RpcInvocation();
+        invocation.setMethodName("getComment");
+
+        BitList<Invoker<String>> res = affinityRoute.route(invokers.clone(),
+                URL.valueOf("consumer://127.0.0.1/com.foo.BarService?env=gray&region=beijing"),
+                invocation,
+                false,
+                new Holder<>());
+        List<String> filtered = filtrate(new ArrayList<String>(providerUrls), "region=beijing");
+
+        assertEquals(invokers.size(), res.size());
+        System.out.println("The affinity routing condition was not met and the result was not routed");
+    }
+
+    @Test
+    void testRatioEqualsAffinityRoute() {
+        String config = "configVersion: v3.1\n"
+                + "scope: service\n"
+                + "key: service.apache.com\n"
+                + "enabled: true\n"
+                + "runtime: true\n"
+                + "affinityAware:\n"
+                + "  key: region\n"
+                + "  ratio: 40\n";
+
+        AffinityServiceStateRouter<String> affinityRoute = new AffinityServiceStateRouter<>(
+                URL.valueOf("consumer://127.0.0.1/com.foo.BarService?env=gray&region=beijing"));
+
+        affinityRoute.process(new ConfigChangedEvent("com.foo.BarService", "", config, ConfigChangeType.ADDED));
+
+        RpcInvocation invocation = new RpcInvocation();
+        invocation.setMethodName("getComment");
+
+        BitList<Invoker<String>> res = affinityRoute.route(invokers.clone(),
+                URL.valueOf("consumer://127.0.0.1/com.foo.BarService?env=gray&region=beijing"),
+                invocation,
+                false,
+                new Holder<>());
+        List<String> filtered = filtrate(new ArrayList<String>(providerUrls), "region=beijing");
+
+        assertEquals(filtered.size(), res.size());
+        System.out.println("The affinity routing condition is met and the result is routed");
+    }
+
+    @Test
+    void testRatioNotEqualsAffinityRoute() {
+        String config = "configVersion: v3.1\n"
+                + "scope: service\n"
+                + "key: service.apache.com\n"
+                + "enabled: true\n"
+                + "runtime: true\n"
+                + "affinityAware:\n"
+                + "  key: region\n"
+                + "  ratio: 40.1\n";
+
+        AffinityServiceStateRouter<String> affinityRoute = new AffinityServiceStateRouter<>(
+                URL.valueOf("consumer://127.0.0.1/com.foo.BarService?env=gray&region=beijing"));
+
+        affinityRoute.process(new ConfigChangedEvent("com.foo.BarService", "", config, ConfigChangeType.ADDED));
+
+        RpcInvocation invocation = new RpcInvocation();
+        invocation.setMethodName("getComment");
+
+        BitList<Invoker<String>> res = affinityRoute.route(invokers.clone(),
+                URL.valueOf("consumer://127.0.0.1/com.foo.BarService?env=gray&region=beijing"),
+                invocation,
+                false,
+                new Holder<>());
+        List<String> filtered = filtrate(new ArrayList<String>(providerUrls), "region=beijing");
+
+        assertEquals(invokers.size(), res.size());
+        System.out.println("The affinity routing condition was not met and the result was not routed");
+    }
 }

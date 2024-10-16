@@ -17,14 +17,20 @@
 package org.apache.dubbo.rpc.cluster.router.affinity.config;
 
 import org.apache.dubbo.common.URL;
+import org.apache.dubbo.common.extension.Activate;
+import org.apache.dubbo.rpc.cluster.router.state.CacheableStateRouterFactory;
+import org.apache.dubbo.rpc.cluster.router.state.StateRouter;
 
 /**
- * Application level router, "application.condition-router"
+ * Tag router factory
  */
-public class AffinityAppStateRouter<T> extends AffinityListenableStateRouter<T> {
-    public static final String NAME = "AFFINITY_APP_ROUTER";
+@Activate(order = 135)
+public class AffinityProviderAppStateRouterFactory extends CacheableStateRouterFactory {
 
-    public AffinityAppStateRouter(URL url) {
-        super(url, url.getApplication());
+    public static final String NAME = "affinity-provider-app";
+
+    @Override
+    protected <T> StateRouter<T> createRouter(Class<T> interfaceClass, URL url) {
+        return new AffinityProviderAppStateRouter<>(url);
     }
 }
