@@ -43,6 +43,8 @@
     <dubbo:service delay="5000" version="1.0.0" timeout="5000" interface="org.apache.dubbo.demo.RestDemoService"
                    ref="restDemoService" protocol="rest"/>
     <dubbo:service delay="5000" version="1.0.0" timeout="5000" interface="org.apache.dubbo.demo.TripleService"
-                   ref="tripleService" protocol="tri"/>
+                   ref="tripleService" protocol="tri">
+        <dubbo:parameter key="aaa" value="bbb"/>
+    </dubbo:service>
 
 </beans>

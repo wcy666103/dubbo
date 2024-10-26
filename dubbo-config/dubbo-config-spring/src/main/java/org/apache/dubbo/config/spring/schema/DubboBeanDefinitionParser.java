@@ -529,6 +529,25 @@ public class DubboBeanDefinitionParser implements BeanDefinitionParser {
                 continue;
             }
             Element element = (Element) nodeList.item(i);
+//            这个地方的解析意味着xml中对于service的配置：
+            /*<dubbo:service delay="5000" version="1.0.0" timeout="5000" interface="org.apache.dubbo.demo.TripleService"
+            ref="tripleService" protocol="tri">
+<!--        <property name="parameters">-->
+<!--            <map>-->
+<!--                <entry key="test" value="test00000"/>-->
+<!--            </map>-->
+<!--        </property>-->
+
+            并不是这么用的，因为解析都没解析出来，解析方式都不对
+
+            正确用法为：  这个用法是跟 Application的parameters配置方式一样，因为他们走的解析流程都一样
+
+                <dubbo:service delay="5000" version="1.0.0" timeout="5000" interface="org.apache.dubbo.demo.TripleService"
+                   ref="tripleService" protocol="tri">
+        <dubbo:parameter key="aaa" value="bbb"/>
+    </dubbo:service>
+
+*/
             if ("parameter".equals(element.getNodeName()) || "parameter".equals(element.getLocalName())) {
                 if (parameters == null) {
                     parameters = new ManagedMap();

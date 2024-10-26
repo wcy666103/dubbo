@@ -122,6 +122,10 @@ import static org.apache.dubbo.rpc.Constants.TOKEN_KEY;
 import static org.apache.dubbo.rpc.cluster.Constants.EXPORT_KEY;
 import static org.apache.dubbo.rpc.support.ProtocolUtils.isGeneric;
 
+/**
+ * 与 spring整合也是创建的这个类 dubbo-config/dubbo-config-spring/src/main/resources/META-INF/dubbo.xsd中有定义
+ * @param <T>
+ */
 public class ServiceConfig<T> extends ServiceConfigBase<T> {
 
     private static final long serialVersionUID = 7868244018230856253L;

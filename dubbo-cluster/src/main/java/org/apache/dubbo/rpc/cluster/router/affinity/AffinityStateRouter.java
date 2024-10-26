@@ -86,8 +86,8 @@ public class AffinityStateRouter<T> extends AbstractStateRouter<T> {
         this.enabled = url.getParameter(ENABLED_KEY, true);
         this.affinityKey = url.getParameter(AFFINITY_KEY, "");
         this.ratio = url.getParameter(RATIO_KEY, DefaultAffinityRatio);
-        this.matcherFactories = moduleModel.getExtensionLoader(ConditionMatcherFactory.class)
-                .getActivateExtensions();
+        this.matcherFactories =
+                moduleModel.getExtensionLoader(ConditionMatcherFactory.class).getActivateExtensions();
         if (this.enabled) {
             this.init(affinityKey);
         }
@@ -98,8 +98,8 @@ public class AffinityStateRouter<T> extends AbstractStateRouter<T> {
         this.enabled = enabled;
         this.affinityKey = affinityKey;
         this.ratio = ratio;
-        matcherFactories = moduleModel.getExtensionLoader(ConditionMatcherFactory.class)
-                .getActivateExtensions();
+        matcherFactories =
+                moduleModel.getExtensionLoader(ConditionMatcherFactory.class).getActivateExtensions();
         // 是否启用 亲和性
         if (this.enabled) {
             this.init(affinityKey);
@@ -108,8 +108,7 @@ public class AffinityStateRouter<T> extends AbstractStateRouter<T> {
 
     public void init(String rule) {
         try {
-            if (rule == null || rule.trim()
-                    .isEmpty()) {
+            if (rule == null || rule.trim().isEmpty()) {
                 throw new IllegalArgumentException("Illegal affinity rule!");
             }
             this.matchMatcher = parseRule(affinityKey);
@@ -135,7 +134,8 @@ public class AffinityStateRouter<T> extends AbstractStateRouter<T> {
             // RpcInvocation [methodName=sayHello, parameterTypes=[class java.lang.String]]
             boolean needToPrintMessage,
             Holder<RouterSnapshotNode<T>> nodeHolder,
-            Holder<String> messageHolder) throws RpcException {
+            Holder<String> messageHolder)
+            throws RpcException {
         if (!enabled) {
             if (needToPrintMessage) {
                 messageHolder.set("Directly return. Reason: AffinityRouter disabled.");
@@ -152,7 +152,7 @@ public class AffinityStateRouter<T> extends AbstractStateRouter<T> {
         }
         try {
             BitList<Invoker<T>> result = invokers.clone();
-            result.removeIf(invoker -> !matchInvoker(invoker.getUrl(),url));
+            result.removeIf(invoker -> !matchInvoker(invoker.getUrl(), url));
 
             if (result.size() / (double) invokers.size() >= ratio / (double) 100) {
                 if (needToPrintMessage) {
@@ -161,8 +161,10 @@ public class AffinityStateRouter<T> extends AbstractStateRouter<T> {
                 return result;
                 //                如果开启了 force 需要打印 + 携带一些信息
             } else {
-                logger.warn(CLUSTER_CONDITIONAL_ROUTE_LIST_EMPTY,
-                        "execute affinity state router result is less than defined" + this.ratio, "",
+                logger.warn(
+                        CLUSTER_CONDITIONAL_ROUTE_LIST_EMPTY,
+                        "execute affinity state router result is less than defined" + this.ratio,
+                        "",
                         "The affinity result is ignored. consumer: " + NetUtils.getLocalHost()
                                 + ", service: " + url.getServiceKey() + ", router: "
                                 + url.getParameterAndDecoded(RULE_KEY));
@@ -172,9 +174,13 @@ public class AffinityStateRouter<T> extends AbstractStateRouter<T> {
                 return invokers;
             }
         } catch (Throwable t) {
-            logger.error(CLUSTER_FAILED_EXEC_CONDITION_ROUTER, "execute affinity state router exception", "",
+            logger.error(
+                    CLUSTER_FAILED_EXEC_CONDITION_ROUTER,
+                    "execute affinity state router exception",
+                    "",
                     "Failed to execute affinity router rule: " + getUrl() + ", invokers: " + invokers + ", cause: "
-                            + t.getMessage(), t);
+                            + t.getMessage(),
+                    t);
         }
         if (needToPrintMessage) {
             messageHolder.set("Directly return. Reason: Error occurred ( or result is empty ).");
@@ -187,8 +193,7 @@ public class AffinityStateRouter<T> extends AbstractStateRouter<T> {
         //        对于以前定义的路由器，我们总是返回true，也就是说，旧的路由器不再支持缓存了。
         // We always return true for previously defined Router, that is, old Router doesn't support cache anymore.
         //        return true;
-        return this.getUrl()
-                .getParameter(RUNTIME_KEY, false);
+        return this.getUrl().getParameter(RUNTIME_KEY, false);
     }
 
     /**
@@ -199,7 +204,8 @@ public class AffinityStateRouter<T> extends AbstractStateRouter<T> {
      */
     private ConditionMatcher getMatcher(String key) {
         //        如果 没有就默认使用 para
-        return moduleModel.getExtensionLoader(ConditionMatcherFactory.class)
+        return moduleModel
+                .getExtensionLoader(ConditionMatcherFactory.class)
                 .getExtension("param")
                 .createMatcher(key, moduleModel);
     }

@@ -134,8 +134,9 @@ public abstract class AffinityListenableStateRouter<T> extends AbstractStateRout
         if (rule == null || !rule.isValid()) {
             return;
         }
-        AffinityRouterRule affinityRule = (AffinityRouterRule)rule;
-        affinityRouter = new AffinityStateRouter<>(getUrl(), affinityRule.getAffinityKey(),affinityRule.getRatio(),affinityRule.isEnabled());
+        AffinityRouterRule affinityRule = (AffinityRouterRule) rule;
+        affinityRouter = new AffinityStateRouter<>(
+                getUrl(), affinityRule.getAffinityKey(), affinityRule.getRatio(), affinityRule.isEnabled());
         affinityRouter.setNextRouter(TailStateRouter.getInstance());
     }
 

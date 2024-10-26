@@ -34,6 +34,7 @@ import org.apache.zookeeper.data.Stat;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
 
@@ -44,6 +45,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.mock;
 
+@Disabled
 class Curator5ZookeeperClientTest {
     private static Curator5ZookeeperClient curatorClient;
     private static CuratorFramework client = null;

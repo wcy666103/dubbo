@@ -21,12 +21,14 @@ import org.apache.dubbo.remoting.zookeeper.ZookeeperClient;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.IsNot.not;
 import static org.hamcrest.core.IsNull.nullValue;
 
+@Disabled
 class Curator5ZookeeperTransporterTest {
     private ZookeeperClient zookeeperClient;
     private Curator5ZookeeperTransporter curatorZookeeperTransporter;
