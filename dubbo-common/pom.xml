@@ -31,6 +31,7 @@
     <skip_maven_deploy>false</skip_maven_deploy>
   </properties>
   <dependencies>
+<!--    provided就是打包之后没有lib  在main和test都可用 -->
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>

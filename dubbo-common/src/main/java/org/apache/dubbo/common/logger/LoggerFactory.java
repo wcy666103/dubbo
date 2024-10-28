@@ -80,7 +80,7 @@ public class LoggerFactory {
                 // try to use the first available adapter
                 for (Class<? extends LoggerAdapter> clazz : candidates) {
                     try {
-                        //                        尝试逐个初始化，如果可以就直接用了
+                        //                        尝试逐个初始化，如果可以就直接用了   失败的话异常也是直接被忽略了
                         LoggerAdapter loggerAdapter =
                                 clazz.getDeclaredConstructor().newInstance();
                         loggerAdapter.getLogger(LoggerFactory.class);
