@@ -26,12 +26,15 @@ import com.google.protobuf.Duration;
 import io.grpc.Status;
 import io.grpc.Status.Code;
 
+/**
+ * 配置和管理重试策略
+ */
 public class RetryPolicy {
 
     private final int maxAttempts;
-
+// grpc的code枚举类型
     private final List<Code> retryableStatusCodes;
-
+//protobuf的Duration类型
     private final Duration initialBackoff;
 
     private final Duration maxBackoff;

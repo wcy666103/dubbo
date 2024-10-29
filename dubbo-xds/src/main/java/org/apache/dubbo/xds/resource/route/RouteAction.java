@@ -24,6 +24,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+/**
+ * 程序开始执行。
+ * 根据不同的集群选择方式（单一集群、权重集群、插件集群）选择不同的方法。
+ */
 public class RouteAction {
 
     private final List<HashPolicy> hashPolicies;
