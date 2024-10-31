@@ -16,6 +16,7 @@
  */
 package org.apache.dubbo.xds.resource.route.plugin;
 
+// 插件 -> 对应的名字，这种需要新建一个类来完成吗？
 public class NamedPluginConfig {
 
     private final String name;

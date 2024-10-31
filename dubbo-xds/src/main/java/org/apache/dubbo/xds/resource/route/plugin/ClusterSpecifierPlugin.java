@@ -23,11 +23,13 @@ import com.google.protobuf.Message;
 /**
  * Defines the parsing functionality of a ClusterSpecifierPlugin as defined in the Enovy proto
  * api/envoy/config/route/v3/route.proto.
+ * 定义 Enovy proto api/envoy/config/route/v3/route.proto 中定义的 ClusterSpecifierPlugin 的解析功能。
  */
 public interface ClusterSpecifierPlugin {
     /**
      * The proto message types supported by this plugin. A plugin will be registered by each of its supported message
      * types.
+     * 此插件支持的 proto 消息类型。插件将按其每个支持的消息类型进行注册
      */
     String[] typeUrls();
 

@@ -18,6 +18,7 @@ package org.apache.dubbo.xds.resource.route.plugin;
 
 /**
  * Represents an opaque data structure holding configuration for a ClusterSpecifierPlugin.
+ * 示保存 ClusterSpecifierPlugin 配置的不透明数据结构。
  */
 public interface PluginConfig {
     String typeUrl();

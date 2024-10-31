@@ -28,6 +28,7 @@ import com.google.protobuf.Message;
 
 /**
  * The ClusterSpecifierPlugin for RouteLookup policy.
+ * 用于 RouteLookup 策略的 ClusterSpecifierPlugin。
  */
 final class RouteLookupServiceClusterSpecifierPlugin implements ClusterSpecifierPlugin {
 
@@ -44,6 +45,11 @@ final class RouteLookupServiceClusterSpecifierPlugin implements ClusterSpecifier
         };
     }
 
+    /**
+     * 从 Any 消息中解析出 RouteLookupClusterSpecifier 配置，并将其转换为 RlsPluginConfig 对象。
+     * @param rawProtoMessage
+     * @return
+     */
     @Override
     @SuppressWarnings("unchecked")
     public ConfigOrError<RlsPluginConfig> parsePlugin(Message rawProtoMessage) {

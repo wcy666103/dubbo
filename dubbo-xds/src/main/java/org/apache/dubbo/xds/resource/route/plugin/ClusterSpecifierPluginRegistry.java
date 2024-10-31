@@ -21,6 +21,9 @@ import org.apache.dubbo.common.lang.Nullable;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * registry类，主要是注册插件和查询插件
+ */
 public final class ClusterSpecifierPluginRegistry {
     private static ClusterSpecifierPluginRegistry instance;
 
