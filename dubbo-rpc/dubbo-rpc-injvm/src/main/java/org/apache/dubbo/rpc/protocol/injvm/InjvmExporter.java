@@ -23,7 +23,9 @@ import org.apache.dubbo.rpc.protocol.AbstractExporter;
 import java.util.Map;
 
 /**
- * InjvmExporter
+ * InjvmExporter  直接map中记录就OK，相当于暴露过了
+ * 似乎所有本地服务，在其他暴露的同时也通过这个暴露了
+ * 然后本地服务调用本地服务走的就是这个方式
  */
 public class InjvmExporter<T> extends AbstractExporter<T> {
 

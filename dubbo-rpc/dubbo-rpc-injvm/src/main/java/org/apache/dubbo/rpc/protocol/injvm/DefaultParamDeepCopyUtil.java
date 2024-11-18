@@ -32,6 +32,7 @@ import java.lang.reflect.Type;
 
 import static org.apache.dubbo.common.constants.LoggerCodeConstants.PROTOCOL_ERROR_DESERIALIZE;
 
+// 工具类的默认实现类
 public class DefaultParamDeepCopyUtil implements ParamDeepCopyUtil {
     private static final ErrorTypeAwareLogger logger =
             LoggerFactory.getErrorTypeAwareLogger(DefaultParamDeepCopyUtil.class);

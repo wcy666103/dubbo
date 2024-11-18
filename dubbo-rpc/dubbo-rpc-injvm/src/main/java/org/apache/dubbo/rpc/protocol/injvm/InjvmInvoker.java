@@ -56,7 +56,7 @@ import static org.apache.dubbo.config.Constants.SERVER_THREAD_POOL_NAME;
 import static org.apache.dubbo.rpc.Constants.ASYNC_KEY;
 
 /**
- * InjvmInvoker
+ * InjvmInvoker todo 注意，同一个Application中的两个service相互调用，走的就是 injvm
  */
 public class InjvmInvoker<T> extends AbstractInvoker<T> {
 
@@ -64,6 +64,7 @@ public class InjvmInvoker<T> extends AbstractInvoker<T> {
 
     private final Map<String, Exporter<?>> exporterMap;
 
+//    注意修饰 词
     private volatile Exporter<?> exporter = null;
     private volatile URL consumerUrl = null;
 
@@ -89,6 +90,7 @@ public class InjvmInvoker<T> extends AbstractInvoker<T> {
 
     @Override
     public boolean isAvailable() {
+//        通过拿到当前服务名去判断，为啥不直接通过属性去判断呢？
         InjvmExporter<?> exporter = (InjvmExporter<?>) exporterMap.get(key);
         if (exporter == null) {
             return false;
