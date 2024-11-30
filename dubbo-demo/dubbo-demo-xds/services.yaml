@@ -14,9 +14,11 @@ spec:
     - port: 31000
       targetPort: 31000
       name: debug
+#      标签选择器，将其路由到对应的 pod上  先是 service -> deployment -> pods
   selector:
       app: dubbo-demo-xds-consumer
 ---
+
 apiVersion: v1
 kind: Service
 metadata:
@@ -35,7 +37,6 @@ spec:
       name: debug
   selector:
     app: dubbo-demo-xds-provider
-
 ---
 apiVersion: apps/v1
 kind: Deployment

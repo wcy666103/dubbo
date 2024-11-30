@@ -11,8 +11,10 @@ PID1=$!
 kubectl port-forward deployment/dubbo-demo-xds-consumer $CONSUMER_DEBUG_PORT:$CONSUMER_DEBUG_PORT $CONSUMER_PORT:$CONSUMER_PORT &
 PID2=$!
 kubectl port-forward deployment/dubbo-demo-xds-provider $PROVIDER_DEBUG_PORT:$PROVIDER_DEBUG_PORT $PROVIDER_PORT:$PROVIDER_PORT &
-PID3=$!
+PID3=$! #PID#是一个变量
 
 wait $PID1
 wait $PID2
 wait $PID3
+
+# 因为将其放在了后台执行 并且 将进程ID保存在 PID# 中，所以wait命令要等其执行完毕

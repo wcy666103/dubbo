@@ -20,7 +20,7 @@ JAR_NAME=$(basename $( find $(pwd)/target -type f -name "dubbo-demo-xds*.jar") )
 echo JarName: $JAR_NAME
 docker build --build-arg ARTIFACT=${JAR_NAME} -t dubbo-demo-xds-consumer:latest .
 docker tag dubbo-demo-xds-consumer:latest localhost:5000/dubbo-demo-xds-consumer:latest
-docker push localhost:5000/dubbo-demo-xds-consumer
+docker push localhost:5000/dubbo-demo-xds-consumer # 推送到本地仓库
 
 cd $BASE_DIR/dubbo-demo-xds-provider
 package
@@ -36,7 +36,7 @@ cd $BASE_DIR
 kubectl apply -f ./services.yaml
 kubectl rollout restart deployment dubbo-demo-xds-provider dubbo-demo-xds-consumer
 
-sleep 5
+sleep 10
 sh ./port_forward.sh
 
 
