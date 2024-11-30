@@ -385,6 +385,12 @@ public class CuratorZookeeperClient
         this.addTargetDataListener(path, nodeCacheListener, null);
     }
 
+    /**
+     * 加入 监听器，对应的path和数据监听器
+     * @param path
+     * @param nodeCacheListener
+     * @param executor
+     */
     @Override
     protected void addTargetDataListener(
             String path, CuratorZookeeperClient.NodeCacheListenerImpl nodeCacheListener, Executor executor) {
@@ -398,18 +404,24 @@ public class CuratorZookeeperClient
             } else {
                 nodeCache.getListenable().addListener(nodeCacheListener, executor);
             }
-
+//启动 NodeCache，开始监听指定路径的数据变化。
             nodeCache.start();
         } catch (Exception e) {
             throw new IllegalStateException("Add nodeCache listener for path:" + path, e);
         }
     }
 
+    /**
+     * 目标数据的监听器
+     * @param path
+     * @param nodeCacheListener
+     */
     @Override
     protected void removeTargetDataListener(
             String path, CuratorZookeeperClient.NodeCacheListenerImpl nodeCacheListener) {
         NodeCache nodeCache = nodeCacheMap.get(path);
         if (nodeCache != null) {
+//            类中的结构
             nodeCache.getListenable().removeListener(nodeCacheListener);
         }
         nodeCacheListener.dataListener = null;

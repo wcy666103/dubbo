@@ -449,6 +449,7 @@
 
   <profiles>
     <profile>
+<!--      CI 环境中的快照版本部署-->
       <id>snapshot-ci-deploy</id>
       <build>
         <plugins>
@@ -478,6 +479,7 @@
       </build>
     </profile>
     <profile>
+<!--      禁用 JavaDoc 检查中的 doclint 工具，适用于 JDK 1.8 及以上版本。-->
       <id>javadoc-lint</id>
       <activation>
         <jdk>[1.8,)</jdk>
@@ -744,6 +746,7 @@
       </build>
     </profile>
     <profile>
+<!--      当使用 JDK 15 及以上版本时，添加模块开放配置。-->
       <id>jdk15ge-add-open</id>
       <activation>
         <jdk>[15,</jdk>
@@ -817,6 +820,7 @@
     </profile>
 
     <profile>
+<!--      当使用 JDK 11 及以上版本时，配置 Spotless 格式化工具。-->
       <id>java11+</id>
       <activation>
         <jdk>[11,)</jdk>

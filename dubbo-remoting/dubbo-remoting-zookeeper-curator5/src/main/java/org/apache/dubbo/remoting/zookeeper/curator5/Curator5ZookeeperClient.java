@@ -76,15 +76,22 @@ public class Curator5ZookeeperClient
             int sessionExpireMs = url.getParameter(SESSION_KEY, DEFAULT_SESSION_TIMEOUT_MS);
             CuratorFrameworkFactory.Builder builder = CuratorFrameworkFactory.builder()
                     .connectString(url.getBackupAddress())
+//                    重试策略
                     .retryPolicy(new RetryNTimes(1, 1000))
+//                    连接超时设置
                     .connectionTimeoutMs(timeout)
                     .sessionTimeoutMs(sessionExpireMs);
             String userInformation = url.getUserInformation();
             if (userInformation != null && userInformation.length() > 0) {
+//                digest认证方式是基于 用户名和密码的认证机制
                 builder = builder.authorization("digest", userInformation.getBytes());
+//                ACL（Access Control List）提供者用于定义ZooKeeper节点的访问控制列表。
+//                在ZooKeeper中，ACL是由一系列Id和权限组成的。
+//                Id可以是world、auth、digest等，权限包括CREATE、READ、WRITE、DELETE和ADMIN。
                 builder.aclProvider(new ACLProvider() {
                     @Override
                     public List<ACL> getDefaultAcl() {
+//                        表示创建者拥有所有权限（CREATE、READ、WRITE、DELETE和ADMIN）
                         return ZooDefs.Ids.CREATOR_ALL_ACL;
                     }
 
@@ -95,8 +102,10 @@ public class Curator5ZookeeperClient
                 });
             }
             client = builder.build();
+//            添加一个连接状态监听器，当连接状态发生变化时，会触发其相应的方法
             client.getConnectionStateListenable().addListener(new CuratorConnectionStateListener(url));
             client.start();
+//            阻塞当前线程，直到客户端成功连接到ZooKeeper服务器或超时。返回值 connected 表示是否成功连接。
             boolean connected = client.blockUntilConnected(timeout, TimeUnit.MILLISECONDS);
 
             if (!connected) {
@@ -136,8 +145,10 @@ public class Curator5ZookeeperClient
     @Override
     public void createEphemeral(String path, boolean faultTolerant) {
         try {
+//            创建临时节点
             client.create().withMode(CreateMode.EPHEMERAL).forPath(path);
         } catch (NodeExistsException e) {
+//            根据节点存在情况来创建
             if (faultTolerant) {
                 logger.info("ZNode " + path
                         + " already exists, since we will only try to recreate a node on a session expiration"
@@ -341,8 +352,50 @@ public class Curator5ZookeeperClient
     @Override
     public void doClose() {
         super.doClose();
+//        nodeCacheMap.forEach((path, nodeCache) -> CloseableUtils.closeQuietly(nodeCache));
+//        如果加上这一行，会报错：  dubbo-samples-version案例报错
         client.close();
     }
+    /*org.apache.zookeeper.KeeperException$NodeExistsException: KeeperErrorCode = NodeExists for /dubbo/mapping/org.apache.dubbo.samples.version.api.VersionService
+2024-11-28T03:40:12.2058898Z 	at org.apache.zookeeper.KeeperException.create(KeeperException.java:126) ~[zookeeper-3.7.2.jar:3.7.2]
+2024-11-28T03:40:12.2060153Z 	at org.apache.zookeeper.KeeperException.create(KeeperException.java:54) ~[zookeeper-3.7.2.jar:3.7.2]
+2024-11-28T03:40:12.2061329Z 	at org.apache.zookeeper.ZooKeeper.create(ZooKeeper.java:1450) ~[zookeeper-3.7.2.jar:3.7.2]
+2024-11-28T03:40:12.2062643Z 	at org.apache.curator.framework.imps.CreateBuilderImpl$18.call(CreateBuilderImpl.java:1154) ~[curator-framework-5.7.1.jar:5.7.1]
+2024-11-28T03:40:12.2064398Z 	at org.apache.curator.framework.imps.CreateBuilderImpl$18.call(CreateBuilderImpl.java:1136) ~[curator-framework-5.7.1.jar:5.7.1]
+2024-11-28T03:40:12.2065786Z 	at org.apache.curator.RetryLoop.callWithRetry(RetryLoop.java:88) ~[curator-client-5.7.1.jar:5.7.1]
+2024-11-28T03:40:12.2067287Z 	at org.apache.curator.framework.imps.CreateBuilderImpl.pathInForeground(CreateBuilderImpl.java:1136) ~[curator-framework-5.7.1.jar:5.7.1]
+2024-11-28T03:40:12.2069193Z 	at org.apache.curator.framework.imps.CreateBuilderImpl.protectedPathInForeground(CreateBuilderImpl.java:559) ~[curator-framework-5.7.1.jar:5.7.1]
+2024-11-28T03:40:12.2070991Z 	at org.apache.curator.framework.imps.CreateBuilderImpl.forPath(CreateBuilderImpl.java:551) ~[curator-framework-5.7.1.jar:5.7.1]
+2024-11-28T03:40:12.2072965Z 	at org.apache.curator.framework.imps.CreateBuilderImpl.forPath(CreateBuilderImpl.java:67) ~[curator-framework-5.7.1.jar:5.7.1]
+2024-11-28T03:40:12.2074972Z 	at org.apache.dubbo.remoting.zookeeper.curator5.Curator5ZookeeperClient.createPersistent(Curator5ZookeeperClient.java:161) ~[dubbo-3.3.3-SNAPSHOT.jar:3.3.3-SNAPSHOT]
+2024-11-28T03:40:12.2077345Z 	at org.apache.dubbo.remoting.zookeeper.curator5.Curator5ZookeeperClient.createOrUpdatePersistent(Curator5ZookeeperClient.java:254) ~[dubbo-3.3.3-SNAPSHOT.jar:3.3.3-SNAPSHOT]
+2024-11-28T03:40:12.2079662Z 	at org.apache.dubbo.remoting.zookeeper.curator5.AbstractZookeeperClient.createOrUpdate(AbstractZookeeperClient.java:198) ~[dubbo-3.3.3-SNAPSHOT.jar:3.3.3-SNAPSHOT]
+2024-11-28T03:40:12.2081993Z 	at org.apache.dubbo.metadata.store.zookeeper.ZookeeperMetadataReport.registerServiceAppMapping(ZookeeperMetadataReport.java:203) ~[dubbo-3.3.3-SNAPSHOT.jar:3.3.3-SNAPSHOT]
+2024-11-28T03:40:12.2084293Z 	at org.apache.dubbo.registry.client.metadata.MetadataServiceNameMapping.map(MetadataServiceNameMapping.java:123) ~[dubbo-3.3.3-SNAPSHOT.jar:3.3.3-SNAPSHOT]
+2024-11-28T03:40:12.2086112Z 	at org.apache.dubbo.config.ServiceConfig.mapServiceName(ServiceConfig.java:431) ~[dubbo-3.3.3-SNAPSHOT.jar:3.3.3-SNAPSHOT]
+2024-11-28T03:40:12.2087647Z 	at org.apache.dubbo.config.ServiceConfig.lambda$exported$1(ServiceConfig.java:404) ~[dubbo-3.3.3-SNAPSHOT.jar:3.3.3-SNAPSHOT]
+2024-11-28T03:40:12.2088765Z 	at java.util.ArrayList.forEach(ArrayList.java:1259) [?:1.8.0_342]
+2024-11-28T03:40:12.2089836Z 	at org.apache.dubbo.config.ServiceConfig.exported(ServiceConfig.java:397) [dubbo-3.3.3-SNAPSHOT.jar:3.3.3-SNAPSHOT]
+2024-11-28T03:40:12.2091594Z 	at org.apache.dubbo.config.spring.ServiceBean.exported(ServiceBean.java:139) [dubbo-3.3.3-SNAPSHOT.jar:3.3.3-SNAPSHOT]
+2024-11-28T03:40:12.2093121Z 	at org.apache.dubbo.config.ServiceConfig.doExport(ServiceConfig.java:556) [dubbo-3.3.3-SNAPSHOT.jar:3.3.3-SNAPSHOT]
+2024-11-28T03:40:12.2094487Z 	at org.apache.dubbo.config.ServiceConfig.export(ServiceConfig.java:343) [dubbo-3.3.3-SNAPSHOT.jar:3.3.3-SNAPSHOT]
+2024-11-28T03:40:12.2096179Z 	at org.apache.dubbo.config.deploy.DefaultModuleDeployer.exportServiceInternal(DefaultModuleDeployer.java:495) [dubbo-3.3.3-SNAPSHOT.jar:3.3.3-SNAPSHOT]
+2024-11-28T03:40:12.2098163Z 	at org.apache.dubbo.config.deploy.DefaultModuleDeployer.exportServices(DefaultModuleDeployer.java:442) [dubbo-3.3.3-SNAPSHOT.jar:3.3.3-SNAPSHOT]
+2024-11-28T03:40:12.2100000Z 	at org.apache.dubbo.config.deploy.DefaultModuleDeployer.startSync(DefaultModuleDeployer.java:177) [dubbo-3.3.3-SNAPSHOT.jar:3.3.3-SNAPSHOT]
+2024-11-28T03:40:12.2101769Z 	at org.apache.dubbo.config.deploy.DefaultModuleDeployer.start(DefaultModuleDeployer.java:159) [dubbo-3.3.3-SNAPSHOT.jar:3.3.3-SNAPSHOT]
+2024-11-28T03:40:12.2103912Z 	at org.apache.dubbo.config.spring.context.DubboDeployApplicationListener.onContextRefreshedEvent(DubboDeployApplicationListener.java:167) [dubbo-3.3.3-SNAPSHOT.jar:3.3.3-SNAPSHOT]
+2024-11-28T03:40:12.2106458Z 	at org.apache.dubbo.config.spring.context.DubboDeployApplicationListener.onApplicationEvent(DubboDeployApplicationListener.java:153) [dubbo-3.3.3-SNAPSHOT.jar:3.3.3-SNAPSHOT]
+2024-11-28T03:40:12.2108939Z 	at org.apache.dubbo.config.spring.context.DubboDeployApplicationListener.onApplicationEvent(DubboDeployApplicationListener.java:52) [dubbo-3.3.3-SNAPSHOT.jar:3.3.3-SNAPSHOT]
+2024-11-28T03:40:12.2111604Z 	at org.springframework.context.event.SimpleApplicationEventMulticaster.doInvokeListener(SimpleApplicationEventMulticaster.java:176) [spring-context-5.3.24.jar:5.3.24]
+2024-11-28T03:40:12.2114018Z 	at org.springframework.context.event.SimpleApplicationEventMulticaster.invokeListener(SimpleApplicationEventMulticaster.java:169) [spring-context-5.3.24.jar:5.3.24]
+2024-11-28T03:40:12.2116354Z 	at org.springframework.context.event.SimpleApplicationEventMulticaster.multicastEvent(SimpleApplicationEventMulticaster.java:143) [spring-context-5.3.24.jar:5.3.24]
+2024-11-28T03:40:12.2118875Z 	at org.springframework.context.support.AbstractApplicationContext.publishEvent(AbstractApplicationContext.java:421) [spring-context-5.3.24.jar:5.3.24]
+2024-11-28T03:40:12.2121005Z 	at org.springframework.context.support.AbstractApplicationContext.publishEvent(AbstractApplicationContext.java:378) [spring-context-5.3.24.jar:5.3.24]
+2024-11-28T03:40:12.2123140Z 	at org.springframework.context.support.AbstractApplicationContext.finishRefresh(AbstractApplicationContext.java:938) [spring-context-5.3.24.jar:5.3.24]
+2024-11-28T03:40:12.2125232Z 	at org.springframework.context.support.AbstractApplicationContext.refresh(AbstractApplicationContext.java:586) [spring-context-5.3.24.jar:5.3.24]
+2024-11-28T03:40:12.2127260Z 	at org.springframework.context.support.ClassPathXmlApplicationContext.<init>(ClassPathXmlApplicationContext.java:144) [spring-context-5.3.24.jar:5.3.24]
+2024-11-28T03:40:12.2129296Z 	at org.springframework.context.support.ClassPathXmlApplicationContext.<init>(ClassPathXmlApplicationContext.java:85) [spring-context-5.3.24.jar:5.3.24]
+2024-11-28T03:40:12.2130900Z 	at org.apache.dubbo.samples.version.VersionProvider.main(VersionProvider.java:29) [classes/:?]*/
 
     @Override
     public Curator5ZookeeperClient.CuratorWatcherImpl createTargetChildListener(String path, ChildListener listener) {
@@ -440,6 +493,9 @@ public class Curator5ZookeeperClient
         }
     }
 
+    /**
+     * 所有的 watcher都是走的这个自定义
+     */
     static class CuratorWatcherImpl implements CuratorWatcher {
 
         private CuratorFramework client;
@@ -467,12 +523,16 @@ public class Curator5ZookeeperClient
             }
 
             if (childListener != null) {
+//                子节点监听器也需要变动
                 childListener.childChanged(
                         path, client.getChildren().usingWatcher(this).forPath(path));
             }
         }
     }
 
+    /**
+     * 给 Curator 当连接的Listener，收到状态变更信息之后还要转成自己的
+     */
     private class CuratorConnectionStateListener implements ConnectionStateListener {
         private final long UNKNOWN_SESSION_ID = -1L;
 
@@ -504,6 +564,7 @@ public class Curator5ZookeeperClient
                         "",
                         "",
                         "Curator zookeeper session " + Long.toHexString(lastSessionId) + " expired.");
+//                续上自定义的
                 Curator5ZookeeperClient.this.stateChanged(StateListener.SESSION_LOST);
             } else if (state == ConnectionState.SUSPENDED) {
                 logger.warn(

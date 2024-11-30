@@ -65,6 +65,7 @@ public final class Version {
     static {
         // get dubbo version and last commit id
         try {
+//            通过这种方式来查找 reversion赋值给变量
             tryLoadVersionFromResource();
             checkDuplicate();
         } catch (Throwable e) {
