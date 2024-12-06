@@ -57,6 +57,10 @@ public class DownstreamTlsConfigListener implements LdsListener {
         this.repo = applicationModel.getBeanFactory().getOrRegisterBean(XdsTlsConfigRepository.class);
     }
 
+    /**
+     * 处理监听器资源更新，提取并解析 Listener 配置，生成 DownstreamTlsConfig 对象，并根据配置支持的传输协议类型（TLS/Plaintext）设置 TlsType。
+     * @param listeners
+     */
     @Override
     public void onResourceUpdate(List<LdsUpdate> listeners) {
         if (CollectionUtils.isEmpty(listeners)) {
@@ -138,6 +142,9 @@ public class DownstreamTlsConfigListener implements LdsListener {
         }
     }
 
+    /**
+     *  TlsType 枚举，表示不同的TLS模式。
+     */
     public enum TlsType {
         STRICT(0, "Strict Mode"),
         PERMISSIVE(1, "Permissive Mode"),
