@@ -25,6 +25,9 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 
+/**
+ * 该类主要用于配置和获取与Kubernetes API服务器相关的环境变量。
+ */
 public class KubeEnv implements XdsEnv {
 
     private String apiServerPath;

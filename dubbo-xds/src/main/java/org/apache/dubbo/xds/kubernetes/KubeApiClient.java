@@ -34,6 +34,9 @@ import io.kubernetes.client.util.Watch;
 import io.kubernetes.client.util.Watch.Response;
 import io.kubernetes.client.util.credentials.AccessTokenAuthentication;
 
+/**
+ * 用于与Kubernetes API服务器进行交互
+ */
 public class KubeApiClient {
     private final ApiClient apiClient;
 
@@ -57,6 +60,7 @@ public class KubeApiClient {
         Configuration.setDefaultApiClient(apiClient);
     }
 
+//    获取指定资源并返回其内容作为Map对象。
     public Map<String, Object> getResourceAsMap(String apiGroup, String version, String namespace, String plural) {
         CustomObjectsApi apiInstance = new CustomObjectsApi();
         try {
@@ -68,6 +72,7 @@ public class KubeApiClient {
         }
     }
 
+//    监听指定资源的变化。
     public Watch<Object> listenResource(String apiGroup, String version, String namespace, String plural) {
         try {
             CustomObjectsApi api = new CustomObjectsApi();
