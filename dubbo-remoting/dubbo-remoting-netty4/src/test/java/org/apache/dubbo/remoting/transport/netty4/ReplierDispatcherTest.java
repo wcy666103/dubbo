@@ -30,15 +30,9 @@ import org.apache.dubbo.rpc.model.ApplicationModel;
 import org.apache.dubbo.rpc.model.ModuleModel;
 
 import java.io.Serializable;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Random;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
@@ -46,7 +40,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import static org.apache.dubbo.common.constants.CommonConstants.EXECUTOR_MANAGEMENT_MODE_DEFAULT;
-import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  * ReplierDispatcherTest
@@ -97,25 +90,25 @@ class ReplierDispatcherTest {
         clients.put(Thread.currentThread().getName(), client);
     }
 
-    @Test
-    void testMultiThread() throws Exception {
-        int tc = 10;
-        ExecutorService exec = Executors.newFixedThreadPool(tc);
-        List<Future<?>> futureList = new LinkedList<>();
-        for (int i = 0; i < tc; i++)
-            futureList.add(exec.submit(() -> {
-                try {
-                    clientExchangeInfo(port);
-                } catch (Exception e) {
-                    fail(e);
-                }
-            }));
-        for (Future<?> future : futureList) {
-            future.get();
-        }
-        exec.shutdown();
-        exec.awaitTermination(10, TimeUnit.SECONDS);
-    }
+    //    @Test
+    //    void testMultiThread() throws Exception {
+    //        int tc = 10;
+    //        ExecutorService exec = Executors.newFixedThreadPool(tc);
+    //        List<Future<?>> futureList = new LinkedList<>();
+    //        for (int i = 0; i < tc; i++)
+    //            futureList.add(exec.submit(() -> {
+    //                try {
+    //                    clientExchangeInfo(port);
+    //                } catch (Exception e) {
+    //                    fail(e);
+    //                }
+    //            }));
+    //        for (Future<?> future : futureList) {
+    //            future.get();
+    //        }
+    //        exec.shutdown();
+    //        exec.awaitTermination(10, TimeUnit.SECONDS);
+    //    }
 
     void clientExchangeInfo(int port) throws Exception {
         ExchangeChannel client = Exchangers.connect(

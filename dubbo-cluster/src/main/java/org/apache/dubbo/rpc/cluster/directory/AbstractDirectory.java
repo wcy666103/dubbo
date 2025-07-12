@@ -202,6 +202,12 @@ public abstract class AbstractDirectory<T> implements Directory<T> {
         setRouterChain(routerChain);
     }
 
+    /**
+     * todo 关键方法，在 cluster之前会通过Directory.list() 方法执行时候会进行 router的route，将路由结果再给cluster
+     * @param invocation
+     * @return
+     * @throws RpcException
+     */
     @Override
     public List<Invoker<T>> list(Invocation invocation) throws RpcException {
         if (destroyed) {

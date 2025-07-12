@@ -38,6 +38,7 @@ public class Curator5ZookeeperReflectionTypeDescriberRegistrar implements Reflec
         return typeDescribers;
     }
 
+//    根据给定的类名创建一个类型描述器，包含声明的方法、构造函数和字段。
     private TypeDescriber buildTypeDescriberWithDeclared(String className) {
         Set<MemberCategory> memberCategories = new HashSet<>();
         memberCategories.add(MemberCategory.INVOKE_DECLARED_METHODS);
@@ -46,6 +47,7 @@ public class Curator5ZookeeperReflectionTypeDescriberRegistrar implements Reflec
         return new TypeDescriber(className, null, new HashSet<>(), new HashSet<>(), new HashSet<>(), memberCategories);
     }
 
+//    根据给定的类创建一个类型描述器，仅包含声明的构造函数。
     private TypeDescriber buildTypeDescriberWithDeclaredConstructors(Class<?> c) {
         Set<MemberCategory> memberCategories = new HashSet<>();
         memberCategories.add(MemberCategory.INVOKE_DECLARED_CONSTRUCTORS);

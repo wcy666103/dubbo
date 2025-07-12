@@ -39,7 +39,7 @@ import static org.apache.dubbo.common.constants.CommonConstants.RETRIES_KEY;
 import static org.apache.dubbo.common.constants.LoggerCodeConstants.CLUSTER_FAILED_MULTIPLE_RETRIES;
 
 /**
- * When invoke fails, log the initial error and retry other invokers (retry n times, which means at most n different invokers will be invoked)
+ * When invoke fails, log the initial error and retry other invokers 尝试重试其他的 (retry n times, which means at most n different invokers will be invoked)
  * Note that retry causes latency.
  * <p>
  * <a href="http://en.wikipedia.org/wiki/Failover">Failover</a>

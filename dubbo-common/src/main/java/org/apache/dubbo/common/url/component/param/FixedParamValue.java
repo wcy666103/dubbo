@@ -24,6 +24,7 @@ import java.util.Map;
 
 /**
  * In lower case
+ * 不支持add，在初始化时就确定好
  */
 public class FixedParamValue implements ParamValue {
     private final String[] values;

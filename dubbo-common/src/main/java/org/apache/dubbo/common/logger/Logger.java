@@ -20,7 +20,7 @@ package org.apache.dubbo.common.logger;
  * Logger interface
  * <p>
  * This interface is referred from commons-logging
- * 此接口是从 commons-logging 引用的
+ * 此接口是从 commons-logging 引用的  就是直接复制的
  */
 public interface Logger {
 

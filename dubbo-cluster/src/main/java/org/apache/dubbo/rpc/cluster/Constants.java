@@ -148,5 +148,5 @@ public interface Constants {
     public static final int DefaultRouteRatio = 0;
     public static final int DefaultRouteConditionSubSetWeight = 100;
     public static final int DefaultRoutePriority = 0;
-    public static final int DefaultAffinityRatio = 0;
+    public static final double DefaultAffinityRatio = 0;
 }

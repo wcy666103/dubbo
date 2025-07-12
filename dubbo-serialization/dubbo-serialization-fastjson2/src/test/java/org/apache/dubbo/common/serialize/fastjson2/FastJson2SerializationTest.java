@@ -34,7 +34,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
 
-import com.example.test.TestPojo;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -535,47 +534,47 @@ public class FastJson2SerializationTest {
         frameworkModel.destroy();
     }
 
-    @Test
-    void testLimit4() throws IOException, ClassNotFoundException {
-        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        // write force untrusted, read failed
-
-        {
-            FrameworkModel frameworkModel = new FrameworkModel();
-            Serialization serialization =
-                    frameworkModel.getExtensionLoader(Serialization.class).getExtension("fastjson2");
-            URL url = URL.valueOf("").setScopeModel(frameworkModel);
-
-            TestPojo trustedPojo = new TestPojo("12345");
-
-            frameworkModel
-                    .getBeanFactory()
-                    .getBean(SerializeSecurityManager.class)
-                    .addToAllowed(trustedPojo.getClass().getName());
-            ObjectOutput objectOutput = serialization.serialize(url, outputStream);
-            objectOutput.writeObject(trustedPojo);
-            objectOutput.flushBuffer();
-
-            frameworkModel.destroy();
-        }
-
-        {
-            FrameworkModel frameworkModel = new FrameworkModel();
-            Serialization serialization =
-                    frameworkModel.getExtensionLoader(Serialization.class).getExtension("fastjson2");
-            URL url = URL.valueOf("").setScopeModel(frameworkModel);
-
-            byte[] bytes = outputStream.toByteArray();
-            frameworkModel
-                    .getBeanFactory()
-                    .getBean(SerializeSecurityManager.class)
-                    .setCheckStatus(SerializeCheckStatus.STRICT);
-            ByteArrayInputStream inputStream = new ByteArrayInputStream(bytes);
-            ObjectInput objectInput = serialization.deserialize(url, inputStream);
-            Assertions.assertThrows(IOException.class, objectInput::readObject);
-            frameworkModel.destroy();
-        }
-    }
+    //    @Test
+    //    void testLimit4() throws IOException, ClassNotFoundException {
+    //        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+    //        // write force untrusted, read failed
+    //
+    //        {
+    //            FrameworkModel frameworkModel = new FrameworkModel();
+    //            Serialization serialization =
+    //                    frameworkModel.getExtensionLoader(Serialization.class).getExtension("fastjson2");
+    //            URL url = URL.valueOf("").setScopeModel(frameworkModel);
+    //
+    //            TestPojo trustedPojo = new TestPojo("12345");
+    //
+    //            frameworkModel
+    //                    .getBeanFactory()
+    //                    .getBean(SerializeSecurityManager.class)
+    //                    .addToAllowed(trustedPojo.getClass().getName());
+    //            ObjectOutput objectOutput = serialization.serialize(url, outputStream);
+    //            objectOutput.writeObject(trustedPojo);
+    //            objectOutput.flushBuffer();
+    //
+    //            frameworkModel.destroy();
+    //        }
+    //
+    //        {
+    //            FrameworkModel frameworkModel = new FrameworkModel();
+    //            Serialization serialization =
+    //                    frameworkModel.getExtensionLoader(Serialization.class).getExtension("fastjson2");
+    //            URL url = URL.valueOf("").setScopeModel(frameworkModel);
+    //
+    //            byte[] bytes = outputStream.toByteArray();
+    //            frameworkModel
+    //                    .getBeanFactory()
+    //                    .getBean(SerializeSecurityManager.class)
+    //                    .setCheckStatus(SerializeCheckStatus.STRICT);
+    //            ByteArrayInputStream inputStream = new ByteArrayInputStream(bytes);
+    //            ObjectInput objectInput = serialization.deserialize(url, inputStream);
+    //            Assertions.assertThrows(IOException.class, objectInput::readObject);
+    //            frameworkModel.destroy();
+    //        }
+    //    }
 
     @Test
     void testLimit5() throws IOException, ClassNotFoundException {

@@ -47,9 +47,9 @@ public class AffinityRouterRule extends AbstractRouterRule {
         Object conditions = map.get(AFFINITY_KEY);
 
         Map<String, String> conditionMap = (Map<String, String>) conditions;
-        affinityRouterRule.setKey(conditionMap.get("key"));
-        affinityRouterRule.setRatio(
-                Double.valueOf(conditionMap.getOrDefault("ratio", String.valueOf(DefaultAffinityRatio))));
+        affinityRouterRule.setAffinityKey(conditionMap.get("key"));
+        Object ratio = conditionMap.getOrDefault("ratio", String.valueOf(DefaultAffinityRatio));
+        affinityRouterRule.setRatio(Double.valueOf(String.valueOf(ratio)));
 
         if (affinityRouterRule.getRatio() > 100 || affinityRouterRule.getRatio() < 0) {
             logger.error(

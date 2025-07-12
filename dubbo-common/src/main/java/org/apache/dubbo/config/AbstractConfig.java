@@ -456,7 +456,7 @@ public abstract class AbstractConfig implements Serializable {
      *   }
      * }
      * </pre>
-     *
+     *  既然已经是abstract类了，为啥这个方法还要实现呢，直接定义abstract方法去求了
      * @param oldScopeModel
      * @param newScopeModel
      */

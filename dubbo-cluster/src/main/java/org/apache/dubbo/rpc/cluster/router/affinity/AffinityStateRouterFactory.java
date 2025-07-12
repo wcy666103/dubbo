@@ -25,7 +25,7 @@ import org.apache.dubbo.rpc.cluster.router.state.StateRouter;
  */
 public class AffinityStateRouterFactory extends CacheableStateRouterFactory {
 
-    public static final String NAME = "tag";
+    public static final String NAME = "affinity";
 
     @Override
     protected <T> StateRouter<T> createRouter(Class<T> interfaceClass, URL url) {

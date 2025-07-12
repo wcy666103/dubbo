@@ -20,8 +20,11 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class DynamicValues implements ParamValue {
+//    存储值的数组，索引对应值的索引
     private volatile String[] index2Value = new String[1];
+//    存储值到索引的映射
     private final Map<String, Integer> value2Index = new ConcurrentHashMap<>();
+//    当前值的索引序列号，用于生成新的索引
     private int indexSeq = 0;
 
     public DynamicValues(String defaultVal) {
