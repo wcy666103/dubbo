@@ -42,9 +42,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static org.apache.dubbo.common.constants.CommonConstants.ENABLED_KEY;
-import static org.apache.dubbo.common.constants.LoggerCodeConstants.CLUSTER_CONDITIONAL_ROUTE_LIST_EMPTY;
+import static org.apache.dubbo.common.constants.LoggerCodeConstants.CLUSTER_AFFINITY_ROUTE_INVALID;
 import static org.apache.dubbo.common.constants.LoggerCodeConstants.CLUSTER_FAILED_EXEC_CONDITION_ROUTER;
-import static org.apache.dubbo.rpc.cluster.Constants.FORCE_KEY;
 import static org.apache.dubbo.rpc.cluster.Constants.RULE_KEY;
 import static org.apache.dubbo.rpc.cluster.Constants.RUNTIME_KEY;
 
@@ -87,23 +86,37 @@ public class AffinityStateRouter<T> extends AbstractStateRouter<T> {
     private static final ErrorTypeAwareLogger logger = LoggerFactory.getErrorTypeAwareLogger(AbstractStateRouter.class);
 
     protected static final Pattern ROUTE_PATTERN = Pattern.compile("([&!=,]*)\\s*([^&!=,\\s]+)");
-    protected String  affinityKey;
+    protected String affinityKey;
     protected Double ratio;
     protected Map<String, ConditionMatcher> matchMatcher;
     protected List<ConditionMatcherFactory> matcherFactories;
 
     private final boolean enabled;
 
-    public AffinityStateRouter(URL url, String affinityKey,Double ratio, boolean enabled) {
+    public AffinityStateRouter(URL url, String affinityKey, Double ratio, boolean enabled) {
         super(url);
-//        父类属性
+        //        父类属性
         this.enabled = enabled;
         this.affinityKey = affinityKey;
         this.ratio = ratio;
         matcherFactories =
-//                看到了，根据class进行取的
+                //                看到了，根据class进行取的
                 moduleModel.getExtensionLoader(ConditionMatcherFactory.class).getActivateExtensions();
         if (this.enabled) {
+            this.init(affinityKey);
+        }
+    }
+
+    public AffinityStateRouter(URL url) {
+        super(url);
+        this.setUrl(url);
+        this.affinityKey = url.getParameter("affinityKey", "");
+        this.ratio = url.getParameter("ratio", Double.valueOf(0));
+        matcherFactories =
+                moduleModel.getExtensionLoader(ConditionMatcherFactory.class).getActivateExtensions();
+        //        默认启用
+        this.enabled = url.getParameter(ENABLED_KEY, true);
+        if (enabled) {
             this.init(affinityKey);
         }
     }
@@ -202,7 +215,7 @@ public class AffinityStateRouter<T> extends AbstractStateRouter<T> {
     @Override
     protected BitList<Invoker<T>> doRoute(
             BitList<Invoker<T>> invokers,
-            URL url,//本url
+            URL url, // 本url
             Invocation invocation, // RpcInvocation [methodName=sayHello, parameterTypes=[class java.lang.String]]
             boolean needToPrintMessage,
             Holder<RouterSnapshotNode<T>> nodeHolder,
@@ -217,7 +230,7 @@ public class AffinityStateRouter<T> extends AbstractStateRouter<T> {
 
         if (CollectionUtils.isEmpty(invokers)) {
             if (needToPrintMessage) {
-//                以前路由器的调用器为空
+                //                以前路由器的调用器为空
                 messageHolder.set("Directly return. Reason: Invokers from previous router is empty.");
             }
             return invokers;
@@ -231,10 +244,10 @@ public class AffinityStateRouter<T> extends AbstractStateRouter<T> {
                     messageHolder.set("Match return.");
                 }
                 return result;
-//                如果开启了 force 需要打印 + 携带一些信息
+                //                如果开启了 force 需要打印 + 携带一些信息
             } else {
                 logger.warn(
-                        CLUSTER_CONDITIONAL_ROUTE_LIST_EMPTY,
+                        CLUSTER_AFFINITY_ROUTE_INVALID,
                         "execute condition state router result list is empty. and force=true",
                         "",
                         "The route result is empty and force execute. consumer: " + NetUtils.getLocalHost()
@@ -248,21 +261,21 @@ public class AffinityStateRouter<T> extends AbstractStateRouter<T> {
         } catch (Throwable t) {
             logger.error(
                     CLUSTER_FAILED_EXEC_CONDITION_ROUTER,
-                    "execute condition state router exception",
+                    "execute affinity router exception",
                     "",
-                    "Failed to execute condition router rule: " + getUrl() + ", invokers: " + invokers + ", cause: "
+                    "Failed to execute affinity router rule: " + getUrl() + ", invokers: " + invokers + ", cause: "
                             + t.getMessage(),
                     t);
         }
         if (needToPrintMessage) {
-            messageHolder.set("Directly return. Reason: Error occurred ( or result is empty ).");
+            messageHolder.set("Directly return. Reason: Error occurred .");
         }
         return invokers;
     }
 
     @Override
     public boolean isRuntime() {
-//        对于以前定义的路由器，我们总是返回true，也就是说，旧的路由器不再支持缓存了。
+        //        对于以前定义的路由器，我们总是返回true，也就是说，旧的路由器不再支持缓存了。
         // We always return true for previously defined Router, that is, old Router doesn't support cache anymore.
         //        return true;
         return this.getUrl().getParameter(RUNTIME_KEY, false);
@@ -276,11 +289,11 @@ public class AffinityStateRouter<T> extends AbstractStateRouter<T> {
     private ConditionMatcher getMatcher(String key) {
         for (ConditionMatcherFactory factory : matcherFactories) {
             if (factory.shouldMatch(key)) {
-//                直接只用返回一个？？
+                //                直接只用返回一个？？
                 return factory.createMatcher(key, moduleModel);
             }
         }
-//        如果 没有就默认使用 para
+        //        如果 没有就默认使用 para
         return moduleModel
                 .getExtensionLoader(ConditionMatcherFactory.class)
                 .getExtension("param")
@@ -290,11 +303,8 @@ public class AffinityStateRouter<T> extends AbstractStateRouter<T> {
     private boolean matchInvoker(URL url, URL param) {
         return doMatch(url, param, null, matchMatcher);
     }
-    private boolean doMatch(
-            URL url,
-            URL param,
-            Invocation invocation,
-            Map<String, ConditionMatcher> conditions) {
+
+    private boolean doMatch(URL url, URL param, Invocation invocation, Map<String, ConditionMatcher> conditions) {
         Map<String, String> sample = url.toOriginalMap();
         for (Map.Entry<String, ConditionMatcher> entry : conditions.entrySet()) {
             ConditionMatcher matchPair = entry.getValue();

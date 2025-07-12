@@ -29,26 +29,15 @@ import org.apache.dubbo.common.utils.StringUtils;
 import org.apache.dubbo.rpc.Invocation;
 import org.apache.dubbo.rpc.Invoker;
 import org.apache.dubbo.rpc.RpcException;
-import org.apache.dubbo.rpc.cluster.router.AbstractRouterRule;
 import org.apache.dubbo.rpc.cluster.router.RouterSnapshotNode;
 import org.apache.dubbo.rpc.cluster.router.affinity.AffinityStateRouter;
 import org.apache.dubbo.rpc.cluster.router.affinity.config.model.AffinityRouterRule;
 import org.apache.dubbo.rpc.cluster.router.affinity.config.model.AffinityRuleParser;
-import org.apache.dubbo.rpc.cluster.router.condition.ConditionStateRouter;
-import org.apache.dubbo.rpc.cluster.router.condition.MultiDestConditionRouter;
-import org.apache.dubbo.rpc.cluster.router.condition.config.model.ConditionRouterRule;
-import org.apache.dubbo.rpc.cluster.router.condition.config.model.ConditionRuleParser;
-import org.apache.dubbo.rpc.cluster.router.condition.config.model.MultiDestConditionRouterRule;
 import org.apache.dubbo.rpc.cluster.router.state.AbstractStateRouter;
 import org.apache.dubbo.rpc.cluster.router.state.BitList;
 import org.apache.dubbo.rpc.cluster.router.state.TailStateRouter;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.stream.Collectors;
-
 import static org.apache.dubbo.common.constants.LoggerCodeConstants.CLUSTER_FAILED_RULE_PARSING;
-import static org.apache.dubbo.rpc.cluster.Constants.RULE_VERSION_V31;
 
 /**
  * Abstract router which listens to dynamic configuration
@@ -60,12 +49,11 @@ public abstract class AffinityListenableStateRouter<T> extends AbstractStateRout
     private static final ErrorTypeAwareLogger logger =
             LoggerFactory.getErrorTypeAwareLogger(AffinityListenableStateRouter.class);
     private volatile AffinityRouterRule affinityRouterRule;
-    private volatile List<AffinityStateRouter<T>> affinityRouters = Collections.emptyList();
+    private volatile AffinityStateRouter<T> affinityRouter;
     private final String ruleKey;
 
     public AffinityListenableStateRouter(URL url, String ruleKey) {
         super(url);
-        this.setForce(false);
         this.init(ruleKey);
         this.ruleKey = ruleKey;
     }
@@ -79,10 +67,11 @@ public abstract class AffinityListenableStateRouter<T> extends AbstractStateRout
 
         if (event.getChangeType().equals(ConfigChangeType.DELETED)) {
             affinityRouterRule = null;
-            affinityRouters = Collections.emptyList();
+            affinityRouter = null;
         } else {
             try {
                 affinityRouterRule = AffinityRuleParser.parse(event.getContent());
+                generateConditions(affinityRouterRule);
             } catch (Exception e) {
                 logger.error(
                         CLUSTER_FAILED_RULE_PARSING,
@@ -96,6 +85,17 @@ public abstract class AffinityListenableStateRouter<T> extends AbstractStateRout
         }
     }
 
+    private void generateConditions(AffinityRouterRule rule) {
+        if (rule == null || !rule.isValid()) {
+            return;
+        }
+
+        this.affinityRouter =
+                new AffinityStateRouter<>(getUrl(), rule.getAffinityKey(), rule.getRatio(), rule.isEnabled());
+
+        affinityRouter.setNextRouter(TailStateRouter.getInstance());
+    }
+
     @Override
     public BitList<Invoker<T>> doRoute(
             BitList<Invoker<T>> invokers,
@@ -103,11 +103,12 @@ public abstract class AffinityListenableStateRouter<T> extends AbstractStateRout
             Invocation invocation,
             boolean needToPrintMessage,
             Holder<RouterSnapshotNode<T>> nodeHolder,
-            Holder<String> messageHolder) throws RpcException {
-        if (CollectionUtils.isEmpty(invokers) || (affinityRouters.size() == 0)) {
+            Holder<String> messageHolder)
+            throws RpcException {
+        if (CollectionUtils.isEmpty(invokers) || affinityRouter == null) {
             if (needToPrintMessage) {
-                messageHolder.set(
-                        "Directly return. Reason: Invokers from previous router is empty or affinityRouters is empty.");
+                messageHolder.set("Directly return. Reason: Invokers from previous router is empty or affinityRouters"
+                        + " is empty.");
             }
             return invokers;
         }
@@ -117,11 +118,9 @@ public abstract class AffinityListenableStateRouter<T> extends AbstractStateRout
         if (needToPrintMessage) {
             resultMessage = new StringBuilder();
         }
-        for (AbstractStateRouter<T> router : affinityRouters) {
-            invokers = router.route(invokers, url, invocation, needToPrintMessage, nodeHolder);
-            if (needToPrintMessage) {
-                resultMessage.append(messageHolder.get());
-            }
+        invokers = affinityRouter.route(invokers, url, invocation, needToPrintMessage, nodeHolder);
+        if (needToPrintMessage) {
+            resultMessage.append(messageHolder.get());
         }
 
         if (needToPrintMessage) {
@@ -138,7 +137,7 @@ public abstract class AffinityListenableStateRouter<T> extends AbstractStateRout
         String routerKey = ruleKey + RULE_SUFFIX;
         this.getRuleRepository().addListener(routerKey, this);
         String rule = this.getRuleRepository().getRule(routerKey, DynamicConfiguration.DEFAULT_GROUP);
-//        如果当前的 serviceStateRouter的rule属性是null的话，则往下进行，否则的话是没有？？
+        //        如果当前的 serviceStateRouter的rule属性是null的话，则往下进行，否则的话是没有？？
         if (StringUtils.isNotEmpty(rule)) {
             this.process(new ConfigChangedEvent(routerKey, DynamicConfiguration.DEFAULT_GROUP, rule));
         }

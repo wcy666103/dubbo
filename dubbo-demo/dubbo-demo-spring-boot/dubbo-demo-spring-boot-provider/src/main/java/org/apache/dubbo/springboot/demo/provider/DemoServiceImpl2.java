@@ -18,7 +18,6 @@ package org.apache.dubbo.springboot.demo.provider;
 
 import org.apache.dubbo.config.annotation.DubboService;
 import org.apache.dubbo.rpc.RpcContext;
-import org.apache.dubbo.springboot.demo.DemoService;
 import org.apache.dubbo.springboot.demo.DemoService2;
 
 import org.slf4j.Logger;

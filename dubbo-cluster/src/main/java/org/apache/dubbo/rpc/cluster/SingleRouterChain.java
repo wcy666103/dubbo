@@ -146,9 +146,9 @@ public class SingleRouterChain<T> {
         return headStateRouter;
     }
 
-//    实际的进行过滤的route
+    //    实际的进行过滤的route
     public List<Invoker<T>> route(URL url, BitList<Invoker<T>> availableInvokers, Invocation invocation) {
-//        因为变换了，报错
+        //        因为变换了，报错
         if (invokers.getOriginList() != availableInvokers.getOriginList()) {
             logger.error(
                     INTERNAL_ERROR,
@@ -158,7 +158,7 @@ public class SingleRouterChain<T> {
                     "Reject to route, because the invokers has changed.");
             throw new IllegalStateException("reject to route, because the invokers has changed.");
         }
-//        打印快照 QOS是需要用的
+        //        打印快照 QOS是需要用的
         if (RpcContext.getServiceContext().isNeedPrintRouterSnapshot()) {
             return routeAndPrint(url, availableInvokers, invocation);
         } else {
@@ -173,7 +173,8 @@ public class SingleRouterChain<T> {
     }
 
     public List<Invoker<T>> simpleRoute(URL url, BitList<Invoker<T>> availableInvokers, Invocation invocation) {
-//        consumer://10.12.37.62/org.apache.dubbo.springboot.demo.DemoService?application=dubbo-springboot-demo-consumer&background=false&dubbo=2.0.2&executor-management-mode=isolation&file-cache=true&interface=org.apache.dubbo.springboot.demo.DemoService&methods=sayHello,sayHelloAsync&pid=29860&register.ip=10.12.37.62&release=3.2.13-SNAPSHOT&side=consumer&sticky=false&timestamp=1718421515586&unloadClusterRelated=false
+        //
+        // consumer://10.12.37.62/org.apache.dubbo.springboot.demo.DemoService?application=dubbo-springboot-demo-consumer&background=false&dubbo=2.0.2&executor-management-mode=isolation&file-cache=true&interface=org.apache.dubbo.springboot.demo.DemoService&methods=sayHello,sayHelloAsync&pid=29860&register.ip=10.12.37.62&release=3.2.13-SNAPSHOT&side=consumer&sticky=false&timestamp=1718421515586&unloadClusterRelated=false
         System.out.println("simpleRoute.url = " + url);
         BitList<Invoker<T>> resultInvokers = availableInvokers.clone();
 

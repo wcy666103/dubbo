@@ -201,11 +201,11 @@ public class ServiceDiscoveryRegistryDirectory<T> extends DynamicDirectory<T> {
         // Set the context of the address notification thread.
         RpcServiceContext.getServiceContext().setConsumerUrl(getConsumerUrl());
 
-//        3.x新加入的
+        //        3.x新加入的
         //  3.x added for extend URL address
         ExtensionLoader<AddressListener> addressListenerExtensionLoader =
                 getUrl().getOrDefaultModuleModel().getExtensionLoader(AddressListener.class);
-//        拿到具体实现
+        //        拿到具体实现
         List<AddressListener> supportedListeners =
                 addressListenerExtensionLoader.getActivateExtension(getUrl(), (String[]) null);
         if (supportedListeners != null && !supportedListeners.isEmpty()) {

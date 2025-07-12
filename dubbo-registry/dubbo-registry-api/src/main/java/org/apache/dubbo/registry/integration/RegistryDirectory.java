@@ -255,8 +255,9 @@ public class RegistryDirectory<T> extends DynamicDirectory<T> {
     }
 
     // RefreshOverrideAndInvoker will be executed by registryCenter and configCenter, so it should be synchronized.
-//    .DemoService?application=dubbo-springboot-demo-provider&background=false&category=providers,configurators,routers&check=false&deprecated=false&dubbo=2.0.2&dynamic=true&executor-management-mode=isolation&file-cache=true&generic=false&interface=org.apache.dubbo.springboot.demo.DemoService&ipv6=2001:250:480c:2717:67c:16ff:feb8:fb58&methods=sayHello,sayHelloAsync&pid=8524&prefer.serialization=fastjson2,hessian2&release=3.2.13-SNAPSHOT&service-name-mapping=true&side=provider&sticky=false&unloadClusterRelated=false
-//    是provider端的url
+    //
+    // .DemoService?application=dubbo-springboot-demo-provider&background=false&category=providers,configurators,routers&check=false&deprecated=false&dubbo=2.0.2&dynamic=true&executor-management-mode=isolation&file-cache=true&generic=false&interface=org.apache.dubbo.springboot.demo.DemoService&ipv6=2001:250:480c:2717:67c:16ff:feb8:fb58&methods=sayHello,sayHelloAsync&pid=8524&prefer.serialization=fastjson2,hessian2&release=3.2.13-SNAPSHOT&service-name-mapping=true&side=provider&sticky=false&unloadClusterRelated=false
+    //    是provider端的url
     @Override
     protected synchronized void refreshOverrideAndInvoker(List<URL> urls) {
         // mock zookeeper://xxx?mock=return null

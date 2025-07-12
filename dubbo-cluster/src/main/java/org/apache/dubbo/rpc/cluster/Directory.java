@@ -72,7 +72,7 @@ public interface Directory<T> extends Node {
 
     void discordAddresses();
 
-//    在这里绑定了 路由器链
+    //    在这里绑定了 路由器链
     RouterChain<T> getRouterChain();
 
     /**

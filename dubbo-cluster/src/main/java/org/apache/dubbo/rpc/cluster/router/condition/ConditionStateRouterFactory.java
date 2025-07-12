@@ -26,14 +26,15 @@ import org.apache.dubbo.rpc.cluster.router.state.StateRouter;
  */
 public class ConditionStateRouterFactory extends CacheableStateRouterFactory {
 
-//    这个name就是spi中标注的什么name会使用这个factory
+    //    这个name就是spi中标注的什么name会使用这个factory
     public static final String NAME = "condition";
 
     @Override
     protected <T> StateRouter<T> createRouter(Class<T> interfaceClass, URL url) {
         System.err.println("url = " + url);
-//        url = condition://0.0.0.0/com.foo.BarService?rule=host+%3D+2.2.2.2%2C1.1.1.*%2C3.3.3.3+%26+host+%21%3D+1.1.1.2+%3D%3E+host+%3D+1.2.3.4
-//        应该是通过该url新建一个新的stateRouter
+        //        url =
+        // condition://0.0.0.0/com.foo.BarService?rule=host+%3D+2.2.2.2%2C1.1.1.*%2C3.3.3.3+%26+host+%21%3D+1.1.1.2+%3D%3E+host+%3D+1.2.3.4
+        //        应该是通过该url新建一个新的stateRouter
         return new ConditionStateRouter<T>(url);
     }
 }

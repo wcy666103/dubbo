@@ -56,7 +56,7 @@ public class ConfigParser {
         String scope = configuratorConfig.getScope();
         List<ConfigItem> items = configuratorConfig.getConfigs();
 
-//        判断过是app范围还是service范围
+        //        判断过是app范围还是service范围
         if (ConfiguratorConfig.SCOPE_APPLICATION.equals(scope)) {
             items.forEach(item -> urls.addAll(appItemToUrls(item, configuratorConfig)));
         } else {
@@ -95,7 +95,7 @@ public class ConfigParser {
         List<URL> urls = new ArrayList<>();
         List<String> addresses = parseAddresses(item);
 
-//        拼接成url，最后所有的配置都成为了这样的url形式的？
+        //        拼接成url，最后所有的配置都成为了这样的url形式的？
         addresses.forEach(addr -> {
             StringBuilder urlBuilder = new StringBuilder();
             urlBuilder.append("override://").append(addr).append('/');

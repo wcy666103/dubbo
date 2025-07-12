@@ -34,7 +34,7 @@ public class OverrideConfigurator extends AbstractConfigurator {
     @Override
     public URL doConfigure(URL currentUrl, URL configUrl) {
         logger.info("Start overriding url " + currentUrl + " with override url " + configUrl);
-//        将当前的confUrl的属性覆盖（用一种new 对象的方式）就可以了
+        //        将当前的confUrl的属性覆盖（用一种new 对象的方式）就可以了
         return currentUrl.addParameters(configUrl.getParameters());
     }
 }

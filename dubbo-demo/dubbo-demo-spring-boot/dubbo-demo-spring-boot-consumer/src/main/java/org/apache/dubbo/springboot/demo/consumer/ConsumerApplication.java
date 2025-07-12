@@ -55,6 +55,7 @@ public class ConsumerApplication {
     public String doSayHello(String name) {
         return demoService.sayHello(name);
     }
+
     public String doSayHello2(String name) {
         return demoService2.sayHello(name);
     }

@@ -41,7 +41,6 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static org.apache.dubbo.common.constants.CommonConstants.DISABLED_KEY;
 import static org.apache.dubbo.common.constants.CommonConstants.ENABLED_KEY;
 import static org.apache.dubbo.common.constants.LoggerCodeConstants.CLUSTER_CONDITIONAL_ROUTE_LIST_EMPTY;
 import static org.apache.dubbo.common.constants.LoggerCodeConstants.CLUSTER_FAILED_EXEC_CONDITION_ROUTER;
@@ -86,7 +85,7 @@ public class ConditionStateRouter<T> extends AbstractStateRouter<T> {
     public static final String NAME = "condition";
 
     private static final ErrorTypeAwareLogger logger = LoggerFactory.getErrorTypeAwareLogger(AbstractStateRouter.class);
-//    综合起来，该正则表达式匹配的是以`&`、`!`、`=`或`,`作为分隔符的字符串，例如：`test&abc,def!123`。
+    //    综合起来，该正则表达式匹配的是以`&`、`!`、`=`或`,`作为分隔符的字符串，例如：`test&abc,def!123`。
     protected static final Pattern ROUTE_PATTERN = Pattern.compile("([&!=,]*)\\s*([^&!=,\\s]+)");
     protected Map<String, ConditionMatcher> whenCondition;
     protected Map<String, ConditionMatcher> thenCondition;
@@ -96,11 +95,11 @@ public class ConditionStateRouter<T> extends AbstractStateRouter<T> {
 
     public ConditionStateRouter(URL url, String rule, boolean force, boolean enabled) {
         super(url);
-//        父类属性
+        //        父类属性
         this.setForce(force);
         this.enabled = enabled;
         matcherFactories =
-//                看到了，根据class进行取的
+                //                看到了，根据class进行取的
                 moduleModel.getExtensionLoader(ConditionMatcherFactory.class).getActivateExtensions();
         if (enabled) {
             this.init(rule);
@@ -114,26 +113,26 @@ public class ConditionStateRouter<T> extends AbstractStateRouter<T> {
     public ConditionStateRouter(URL url) {
         super(url);
         this.setUrl(url);
-//        默认是false
+        //        默认是false
         this.setForce(url.getParameter(FORCE_KEY, false));
         matcherFactories =
                 moduleModel.getExtensionLoader(ConditionMatcherFactory.class).getActivateExtensions();
-//        默认启用
+        //        默认启用
         this.enabled = url.getParameter(ENABLED_KEY, true);
         if (enabled) {
-//            应该加个this.init
+            //            应该加个this.init
             init(url.getParameterAndDecoded(RULE_KEY));
         }
     }
 
-//    进来的是 method=getComment => region=Hangzhou & env=gray
+    //    进来的是 method=getComment => region=Hangzhou & env=gray
     public void init(String rule) {
         try {
             if (rule == null || rule.trim().length() == 0) {
                 throw new IllegalArgumentException("Illegal route rule!");
             }
             rule = rule.replace("consumer.", "").replace("provider.", "");
-//            根据 => 的索引位置来分 when和then
+            //            根据 => 的索引位置来分 when和then
             int i = rule.indexOf("=>");
             String whenRule = i < 0 ? null : rule.substring(0, i).trim();
             String thenRule = i < 0 ? rule.trim() : rule.substring(i + 2).trim();
@@ -167,16 +166,16 @@ public class ConditionStateRouter<T> extends AbstractStateRouter<T> {
         Set<String> values = null;
         final Matcher matcher = ROUTE_PATTERN.matcher(rule);
         while (matcher.find()) { // Try to match one by one
-//            分隔符
+            //            分隔符
             String separator = matcher.group(1);
-//            内容
+            //            内容
             String content = matcher.group(2);
             // Start part of the condition expression. // 如果分隔符为空，说明这是条件表达式的开始部分
             if (StringUtils.isEmpty(separator)) {
                 matcherPair = this.getMatcher(content);
                 condition.put(content, matcherPair);
             }
-//            下边就是根据不同的 分隔符，来确定不同的动作
+            //            下边就是根据不同的 分隔符，来确定不同的动作
             // The KV part of the condition expression
             else if ("&".equals(separator)) {
                 if (condition.get(content) == null) {
@@ -239,7 +238,7 @@ public class ConditionStateRouter<T> extends AbstractStateRouter<T> {
     @Override
     protected BitList<Invoker<T>> doRoute(
             BitList<Invoker<T>> invokers,
-            URL url,//本url
+            URL url, // 本url
             Invocation invocation, // RpcInvocation [methodName=sayHello, parameterTypes=[class java.lang.String]]
             boolean needToPrintMessage,
             Holder<RouterSnapshotNode<T>> nodeHolder,
@@ -254,7 +253,7 @@ public class ConditionStateRouter<T> extends AbstractStateRouter<T> {
 
         if (CollectionUtils.isEmpty(invokers)) {
             if (needToPrintMessage) {
-//                以前路由器的调用器为空
+                //                以前路由器的调用器为空
                 messageHolder.set("Directly return. Reason: Invokers from previous router is empty.");
             }
             return invokers;
@@ -262,12 +261,12 @@ public class ConditionStateRouter<T> extends AbstractStateRouter<T> {
         try {
             if (!matchWhen(url, invocation)) {
                 if (needToPrintMessage) {
-//                    when 条件不满足
+                    //                    when 条件不满足
                     messageHolder.set("Directly return. Reason: WhenCondition not match.");
                 }
                 return invokers;
             }
-//            when 匹配上了 但是 then是空
+            //            when 匹配上了 但是 then是空
             if (thenCondition == null) {
                 logger.warn(
                         CLUSTER_CONDITIONAL_ROUTE_LIST_EMPTY,
@@ -283,13 +282,13 @@ public class ConditionStateRouter<T> extends AbstractStateRouter<T> {
             BitList<Invoker<T>> result = invokers.clone();
             result.removeIf(invoker -> !matchThen(invoker.getUrl(), url));
 
-//            返回 符合匹配的结果
+            //            返回 符合匹配的结果
             if (!result.isEmpty()) {
                 if (needToPrintMessage) {
                     messageHolder.set("Match return.");
                 }
                 return result;
-//                如果开启了 force 需要打印 + 携带一些信息
+                //                如果开启了 force 需要打印 + 携带一些信息
             } else if (this.isForce()) {
                 logger.warn(
                         CLUSTER_CONDITIONAL_ROUTE_LIST_EMPTY,
@@ -320,7 +319,7 @@ public class ConditionStateRouter<T> extends AbstractStateRouter<T> {
 
     @Override
     public boolean isRuntime() {
-//        对于以前定义的路由器，我们总是返回true，也就是说，旧的路由器不再支持缓存了。
+        //        对于以前定义的路由器，我们总是返回true，也就是说，旧的路由器不再支持缓存了。
         // We always return true for previously defined Router, that is, old Router doesn't support cache anymore.
         //        return true;
         return this.getUrl().getParameter(RUNTIME_KEY, false);
@@ -334,11 +333,11 @@ public class ConditionStateRouter<T> extends AbstractStateRouter<T> {
     private ConditionMatcher getMatcher(String key) {
         for (ConditionMatcherFactory factory : matcherFactories) {
             if (factory.shouldMatch(key)) {
-//                直接只用返回一个？？
+                //                直接只用返回一个？？
                 return factory.createMatcher(key, moduleModel);
             }
         }
-//        如果 没有就默认使用 para
+        //        如果 没有就默认使用 para
         return moduleModel
                 .getExtensionLoader(ConditionMatcherFactory.class)
                 .getExtension("param")

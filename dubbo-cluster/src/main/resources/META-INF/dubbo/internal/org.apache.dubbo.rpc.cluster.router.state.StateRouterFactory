@@ -7,3 +7,5 @@ standard-mesh-rule=org.apache.dubbo.rpc.cluster.router.mesh.route.StandardMeshRu
 script-app=org.apache.dubbo.rpc.cluster.router.script.config.AppScriptRouterFactory
 tag=org.apache.dubbo.rpc.cluster.router.tag.TagStateRouterFactory
 affinity=org.apache.dubbo.rpc.cluster.router.affinity.AffinityStateRouterFactory
+affinity_app=org.apache.dubbo.rpc.cluster.router.affinity.config.AffinityAppStateRouterFactory
+affinity_service=org.apache.dubbo.rpc.cluster.router.affinity.config.AffinityServiceStateRouterFactory

@@ -17,10 +17,8 @@
 package org.apache.dubbo.rpc.cluster.router.affinity;
 
 import org.apache.dubbo.common.URL;
-import org.apache.dubbo.common.extension.Activate;
 import org.apache.dubbo.rpc.cluster.router.state.CacheableStateRouterFactory;
 import org.apache.dubbo.rpc.cluster.router.state.StateRouter;
-import org.apache.dubbo.rpc.cluster.router.tag.TagStateRouter;
 
 /**
  * affinity router factory

@@ -94,7 +94,7 @@ public abstract class AbstractDirectory<T> implements Directory<T> {
 
     protected volatile URL consumerUrl;
 
-//    对应的 chain
+    //    对应的 chain
     protected RouterChain<T> routerChain;
 
     protected final Map<String, String> queryMap;
@@ -233,7 +233,7 @@ public abstract class AbstractDirectory<T> implements Directory<T> {
                     routerChain.getLock().readLock().unlock();
                 }
             }
-//  静态方法，留给子类实现的，比如说StaticDirectory 是会进行 route 过滤的
+            //  静态方法，留给子类实现的，比如说StaticDirectory 是会进行 route 过滤的
             List<Invoker<T>> routedResult = doList(singleChain, availableInvokers, invocation);
             if (routedResult.isEmpty()) {
                 // 2-2 - No provider available.

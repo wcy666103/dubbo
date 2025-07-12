@@ -1,91 +1,90 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.apache.dubbo.rpc.cluster.router.affinity;
 
-import org.junit.jupiter.api.Test;
-import java.util.ArrayList;
+import org.apache.dubbo.common.URL;
+import org.apache.dubbo.rpc.Invoker;
+import org.apache.dubbo.rpc.cluster.router.MockInvoker;
+import org.apache.dubbo.rpc.cluster.router.state.BitList;
+
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
+
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class AffinityRouteTest {
 
-    private static final String[] providerUrls = {
-            "dubbo://127.0.0.1/com.foo.BarService",
-            "dubbo://127.0.0.1/com.foo.BarService",
-            "dubbo://127.0.0.1/com.foo.BarService?env=normal",
-            "dubbo://127.0.0.1/com.foo.BarService?env=normal",
-            "dubbo://127.0.0.1/com.foo.BarService?env=normal",
-            "dubbo://127.0.0.1/com.foo.BarService?region=beijing",
-            "dubbo://127.0.0.1/com.foo.BarService?region=beijing",
-            "dubbo://127.0.0.1/com.foo.BarService?region=beijing",
-            "dubbo://127.0.0.1/com.foo.BarService?region=beijing&env=gray",
-            "dubbo://127.0.0.1/com.foo.BarService?region=beijing&env=gray",
-            "dubbo://127.0.0.1/com.foo.BarService?region=beijing&env=gray",
-            "dubbo://127.0.0.1/com.foo.BarService?region=beijing&env=gray",
-            "dubbo://127.0.0.1/com.foo.BarService?region=beijing&env=normal",
-            "dubbo://127.0.0.1/com.foo.BarService?region=hangzhou",
-            "dubbo://127.0.0.1/com.foo.BarService?region=hangzhou",
-            "dubbo://127.0.0.1/com.foo.BarService?region=hangzhou&env=gray",
-            "dubbo://127.0.0.1/com.foo.BarService?region=hangzhou&env=gray",
-            "dubbo://127.0.0.1/com.foo.BarService?region=hangzhou&env=normal",
-            "dubbo://127.0.0.1/com.foo.BarService?region=hangzhou&env=normal",
-            "dubbo://127.0.0.1/com.foo.BarService?region=hangzhou&env=normal",
-            "dubbo://dubbo.apache.org/com.foo.BarService",
-            "dubbo://dubbo.apache.org/com.foo.BarService",
-            "dubbo://dubbo.apache.org/com.foo.BarService?env=normal",
-            "dubbo://dubbo.apache.org/com.foo.BarService?env=normal",
-            "dubbo://dubbo.apache.org/com.foo.BarService?env=normal",
-            "dubbo://dubbo.apache.org/com.foo.BarService?region=beijing",
-            "dubbo://dubbo.apache.org/com.foo.BarService?region=beijing",
-            "dubbo://dubbo.apache.org/com.foo.BarService?region=beijing",
-            "dubbo://dubbo.apache.org/com.foo.BarService?region=beijing&env=gray",
-            "dubbo://dubbo.apache.org/com.foo.BarService?region=beijing&env=gray",
-            "dubbo://dubbo.apache.org/com.foo.BarService?region=beijing&env=gray",
-            "dubbo://dubbo.apache.org/com.foo.BarService?region=beijing&env=gray",
-            "dubbo://dubbo.apache.org/com.foo.BarService?region=beijing&env=normal",
-            "dubbo://dubbo.apache.org/com.foo.BarService?region=hangzhou",
-            "dubbo://dubbo.apache.org/com.foo.BarService?region=hangzhou",
-            "dubbo://dubbo.apache.org/com.foo.BarService?region=hangzhou&env=gray",
-            "dubbo://dubbo.apache.org/com.foo.BarService?region=hangzhou&env=gray",
-            "dubbo://dubbo.apache.org/com.foo.BarService?region=hangzhou&env=normal",
-            "dubbo://dubbo.apache.org/com.foo.BarService?region=hangzhou&env=normal",
-            "dubbo://dubbo.apache.org/com.foo.BarService?region=hangzhou&env=normal"
-    };
+    private static BitList<Invoker<String>> invokers;
 
-    private List<Invoker> buildInvokers() {
-        List<Invoker> res = new ArrayList<>();
-        for (String url : providerUrls) {
-            URL u = new URL(url);
-            res.add(new BaseInvoker(u));
-        }
-        return res;
-    }
+    @BeforeAll
+    public static void setUp() {
 
-    private URL newUrl(String s) {
-        return new URL(s);
-    }
+        List<String> providerUrls = Arrays.asList(
+                "dubbo://127.0.0.1/com.foo.BarService",
+                "dubbo://127.0.0.1/com.foo.BarService",
+                "dubbo://127.0.0.1/com.foo.BarService?env=normal",
+                "dubbo://127.0.0.1/com.foo.BarService?env=normal",
+                "dubbo://127.0.0.1/com.foo.BarService?env=normal",
+                "dubbo://127.0.0.1/com.foo.BarService?region=beijing",
+                "dubbo://127.0.0.1/com.foo.BarService?region=beijing",
+                "dubbo://127.0.0.1/com.foo.BarService?region=beijing",
+                "dubbo://127.0.0.1/com.foo.BarService?region=beijing&env=gray",
+                "dubbo://127.0.0.1/com.foo.BarService?region=beijing&env=gray",
+                "dubbo://127.0.0.1/com.foo.BarService?region=beijing&env=gray",
+                "dubbo://127.0.0.1/com.foo.BarService?region=beijing&env=gray",
+                "dubbo://127.0.0.1/com.foo.BarService?region=beijing&env=normal",
+                "dubbo://127.0.0.1/com.foo.BarService?region=hangzhou",
+                "dubbo://127.0.0.1/com.foo.BarService?region=hangzhou",
+                "dubbo://127.0.0.1/com.foo.BarService?region=hangzhou&env=gray",
+                "dubbo://127.0.0.1/com.foo.BarService?region=hangzhou&env=gray",
+                "dubbo://127.0.0.1/com.foo.BarService?region=hangzhou&env=normal",
+                "dubbo://127.0.0.1/com.foo.BarService?region=hangzhou&env=normal",
+                "dubbo://127.0.0.1/com.foo.BarService?region=hangzhou&env=normal",
+                "dubbo://dubbo.apache.org/com.foo.BarService",
+                "dubbo://dubbo.apache.org/com.foo.BarService",
+                "dubbo://dubbo.apache.org/com.foo.BarService?env=normal",
+                "dubbo://dubbo.apache.org/com.foo.BarService?env=normal",
+                "dubbo://dubbo.apache.org/com.foo.BarService?env=normal",
+                "dubbo://dubbo.apache.org/com.foo.BarService?region=beijing",
+                "dubbo://dubbo.apache.org/com.foo.BarService?region=beijing",
+                "dubbo://dubbo.apache.org/com.foo.BarService?region=beijing",
+                "dubbo://dubbo.apache.org/com.foo.BarService?region=beijing&env=gray",
+                "dubbo://dubbo.apache.org/com.foo.BarService?region=beijing&env=gray",
+                "dubbo://dubbo.apache.org/com.foo.BarService?region=beijing&env=gray",
+                "dubbo://dubbo.apache.org/com.foo.BarService?region=beijing&env=gray",
+                "dubbo://dubbo.apache.org/com.foo.BarService?region=beijing&env=normal",
+                "dubbo://dubbo.apache.org/com.foo.BarService?region=hangzhou",
+                "dubbo://dubbo.apache.org/com.foo.BarService?region=hangzhou",
+                "dubbo://dubbo.apache.org/com.foo.BarService?region=hangzhou&env=gray",
+                "dubbo://dubbo.apache.org/com.foo.BarService?region=hangzhou&env=gray",
+                "dubbo://dubbo.apache.org/com.foo.BarService?region=hangzhou&env=normal",
+                "dubbo://dubbo.apache.org/com.foo.BarService?region=hangzhou&env=normal",
+                "dubbo://dubbo.apache.org/com.foo.BarService?region=hangzhou&env=normal");
 
-    private FieldMatcher genMatcher(String key) {
-        return new FieldMatcher(key);
-    }
+        List<Invoker<String>> invokerList = providerUrls.stream()
+                .map(url -> new MockInvoker<String>(URL.valueOf(url)))
+                .collect(Collectors.toList());
 
-    class InvokersFilters extends ArrayList<FieldMatcher> {
-        public InvokersFilters addMatcher(String rule) {
-            this.add(genMatcher(rule));
-            return this;
-        }
-
-        public List<Invoker> filtrate(List<Invoker> invokers, URL url, Invocation invocation) {
-            for (FieldMatcher cond : this) {
-                List<Invoker> tmpInv = new ArrayList<>();
-                for (Invoker invoker : invokers) {
-                    if (cond.matchInvoker(url, invoker, invocation)) {
-                        tmpInv.add(invoker);
-                    }
-                }
-                invokers = tmpInv;
-            }
-            return invokers;
-        }
+        invokers = new BitList<>(invokerList);
     }
 
     @Test

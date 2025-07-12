@@ -30,45 +30,45 @@ public class ZKTools {
     }
 
     public static void initClient() {
-        client = CuratorFrameworkFactory.newClient(zookeeperHost + ":2181", 60 * 1000, 60 * 1000,
-                new ExponentialBackoffRetry(1000, 3));
+        client = CuratorFrameworkFactory.newClient(
+                zookeeperHost + ":2181", 60 * 1000, 60 * 1000, new ExponentialBackoffRetry(1000, 3));
         client.start();
     }
 
     public static void generateAppevelRouter() {
-        String str = "" +
-                "---\n" +
-                "configVersion: v3.1\n" +
-                "scope: service\n" +
-                "key: org.apache.dubbo.springboot.demo.DemoService\n" +
-                "force: false\n" +
-                "runtime: true\n" +
-                "enabled: true\n" +
-                "conditions:\n" +
-                "  - priority: 10\n" +
-                "    from:\n" +
-                "      match: region=$region&version=v1\n" +
-                "    trafficDisable: false\n" +
-                "    to:\n" +
-                "      - match: env=$env&region=shanghai\n" +
-                "        weight: 100\n" +
-                "      - match: env=$env&region=beijing\n" +
-                "        weight: 200\n" +
-                "      - match: env=$env&region=hangzhou\n" +
-                "        weight: 300\n" +
-                "    force: false\n" +
-                "    ratio: 20\n" +
-                "  - priority: 5\n" +
-                "    from:\n" +
-                "      match: version=v1\n" +
-                "    trafficDisable: true\n" +
-                "  - priority: 20\n" +
-                "    from:\n" + // 注意：这里假设没有具体的from匹配条件
-                "      match: \n" +
-                "    to:\n" +
-                "      - match: region=$region\n" +
-                "    ratio: 20\n" +
-                "...";
+        String str = "" + "---\n"
+                + "configVersion: v3.1\n"
+                + "scope: service\n"
+                + "key: org.apache.dubbo.springboot.demo.DemoService\n"
+                + "force: false\n"
+                + "runtime: true\n"
+                + "enabled: true\n"
+                + "conditions:\n"
+                + "  - priority: 10\n"
+                + "    from:\n"
+                + "      match: region=$region&version=v1\n"
+                + "    trafficDisable: false\n"
+                + "    to:\n"
+                + "      - match: env=$env&region=shanghai\n"
+                + "        weight: 100\n"
+                + "      - match: env=$env&region=beijing\n"
+                + "        weight: 200\n"
+                + "      - match: env=$env&region=hangzhou\n"
+                + "        weight: 300\n"
+                + "    force: false\n"
+                + "    ratio: 20\n"
+                + "  - priority: 5\n"
+                + "    from:\n"
+                + "      match: version=v1\n"
+                + "    trafficDisable: true\n"
+                + "  - priority: 20\n"
+                + "    from:\n"
+                + // 注意：这里假设没有具体的from匹配条件
+                "      match: \n"
+                + "    to:\n"
+                + "      - match: region=$region\n"
+                + "    ratio: 20\n"
+                + "...";
 
         System.out.println(str);
 
@@ -86,5 +86,4 @@ public class ZKTools {
     private static void setData(String path, String data) throws Exception {
         client.setData().forPath(path, data.getBytes());
     }
-
 }
